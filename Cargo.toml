@@ -5,3 +5,11 @@ edition = "2021"
 
 [dependencies]
 eframe = "0.29.1"
+
+[build-dependencies]
+winres = "0.1.12"
+
+[package.metadata.winres]
+FileDescription = "A chip 8 emulator written in rust."
+OriginalFilename = "chip_8_emulator.exe"
+ProductName = "Chip 8 Emulator"
