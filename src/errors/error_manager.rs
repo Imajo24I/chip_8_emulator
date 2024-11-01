@@ -1,8 +1,9 @@
 use eframe::egui;
-use eframe::egui::{Context, FontId, IconData, ImageData, RichText, Visuals};
+use eframe::egui::{Context, FontId, RichText};
 use eframe::Frame;
 
 use crate::errors::error_code::Error;
+use crate::utils::icon_data;
 
 pub struct ErrorManagerWindow {
     error: Error,
@@ -15,14 +16,22 @@ impl ErrorManagerWindow {
         }
     }
 
-    pub fn options() -> eframe::NativeOptions {
-        let icon_data = eframe::icon_data::from_png_bytes(
-            include_bytes!("../../assets/icon.png")
-        ).expect("Failed to load icon.");
+    pub fn run_window(error: Error) -> eframe::Result<()> {
+        eframe::run_native(
+            "Chip 8 Emulator - Error Manager",
+            ErrorManagerWindow::options(),
+            Box::new(|_cc| {
+                Ok(Box::<ErrorManagerWindow>::new(
+                    ErrorManagerWindow::new(error)
+                ))
+            }),
+        )
+    }
 
+    fn options() -> eframe::NativeOptions {
         eframe::NativeOptions {
             viewport: egui::ViewportBuilder::default().with_inner_size([840f32, 530f32])
-                .with_icon(icon_data),
+                .with_icon(icon_data()),
             ..Default::default()
         }
     }

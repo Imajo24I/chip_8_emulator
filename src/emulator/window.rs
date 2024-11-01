@@ -2,6 +2,7 @@ use eframe::{egui, Frame};
 use eframe::egui::Context;
 
 use crate::emulator::emulator::Chip8Emulator;
+use crate::utils::icon_data;
 
 pub struct EmulatorWindow {
     emulator: Chip8Emulator,
@@ -14,9 +15,22 @@ impl EmulatorWindow {
         }
     }
 
-    pub fn options() -> eframe::NativeOptions {
+    pub fn run_window(filepath: String) -> eframe::Result<()> {
+        eframe::run_native(
+            "Chip 8 Emulator",
+            EmulatorWindow::options(),
+            Box::new(|_cc| {
+                Ok(Box::<EmulatorWindow>::new(
+                    EmulatorWindow::new(filepath)
+                ))
+            }),
+        )
+    }
+
+    fn options() -> eframe::NativeOptions {
         eframe::NativeOptions {
-            viewport: egui::ViewportBuilder::default().with_inner_size([1280f32, 920f32]),
+            viewport: egui::ViewportBuilder::default().with_inner_size([1280f32, 920f32])
+                .with_icon(icon_data()),
             ..Default::default()
         }
     }

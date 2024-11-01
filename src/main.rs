@@ -3,8 +3,10 @@
 
 pub mod errors;
 pub mod emulator;
+pub mod utils;
 
 use std::env;
+
 use crate::emulator::window::EmulatorWindow;
 use crate::errors::error_manager::ErrorManagerWindow;
 use crate::errors::error_code::{Errors::MissingFilePathArg, Error};
@@ -15,29 +17,9 @@ fn main() {
 
 fn run_window(filepath_result: Result<String, Error>) -> eframe::Result<> {
     if let Ok(filepath) = filepath_result {
-        // Run normal Chip 8 Emulator
-        eframe::run_native(
-            "Chip 8 Emulator",
-            EmulatorWindow::options(),
-            Box::new(|_cc| {
-                Ok(Box::<EmulatorWindow>::new(
-                    EmulatorWindow::new(filepath)
-                ))
-            }),
-        )
+        EmulatorWindow::run_window(filepath)
     } else {
-        // Run Error Manager due to missing Filepath
-        let error = filepath_result.unwrap_err();
-
-        eframe::run_native(
-            "Chip 8 Emulator - Error Manager",
-            ErrorManagerWindow::options(),
-            Box::new(|_cc| {
-                Ok(Box::<ErrorManagerWindow>::new(
-                    ErrorManagerWindow::new(error)
-                ))
-            }),
-        )
+        ErrorManagerWindow::run_window(filepath_result.unwrap_err())
     }
 }
 
