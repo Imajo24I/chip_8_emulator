@@ -1,17 +1,21 @@
 use eframe::{egui, Frame};
-use eframe::egui::Context;
+use eframe::egui::{Context, ViewportCommand};
 
 use crate::emulator::emulator::Chip8Emulator;
+use crate::errors::error_code::{Error, Errors};
+use crate::errors::error_manager;
 use crate::utils::icon_data;
 
 pub struct EmulatorWindow {
     emulator: Chip8Emulator,
+    filepath: String
 }
 
 impl EmulatorWindow {
     pub fn new(filepath: String) -> Self {
         Self {
-            emulator: Chip8Emulator::new(filepath),
+            emulator: Chip8Emulator::new(filepath.clone()),
+            filepath,
         }
     }
 
@@ -34,6 +38,11 @@ impl EmulatorWindow {
             ..Default::default()
         }
     }
+
+    fn close_with_error_report(&self, ctx: &Context, error: Error) {
+        error_manager::set_error(error);
+        ctx.send_viewport_cmd(ViewportCommand::Close);
+    }
 }
 
 impl eframe::App for EmulatorWindow {
@@ -45,7 +54,7 @@ impl eframe::App for EmulatorWindow {
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.add(egui::Slider::new(&mut 5, 0..=10).text("Some Value"))
+            ui.label(format!("Given Path: {}", self.filepath));
         });
     }
 }

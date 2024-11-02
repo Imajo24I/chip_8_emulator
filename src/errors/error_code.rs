@@ -5,6 +5,15 @@ pub struct Error {
     pub error_message: RichText,
 }
 
+impl Clone for Error {
+    fn clone(&self) -> Self {
+        Self {
+            error_code: self.error_code,
+            error_message: self.error_message.clone(),
+        }
+    }
+}
+
 pub enum Errors {
     MissingFilePathArg,
 }

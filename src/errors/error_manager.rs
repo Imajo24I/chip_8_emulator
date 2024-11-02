@@ -1,9 +1,16 @@
+use std::sync::Mutex;
 use eframe::egui;
 use eframe::egui::{Context, FontId, RichText};
 use eframe::Frame;
 
 use crate::errors::error_code::Error;
 use crate::utils::icon_data;
+
+static ERROR: Mutex<Option<Error>> = Mutex::new(None);
+
+pub fn set_error(error: Error) {
+    ERROR.lock().unwrap().replace(error);
+}
 
 pub struct ErrorManagerWindow {
     error: Error,
@@ -26,6 +33,15 @@ impl ErrorManagerWindow {
                 ))
             }),
         )
+    }
+
+    pub fn run_if_error() -> eframe::Result<()> {
+        let error = ERROR.lock().unwrap();
+        if let Some(error) = error.as_ref() {
+            return ErrorManagerWindow::run_window(error.clone());
+        }
+
+        Ok(())
     }
 
     fn options() -> eframe::NativeOptions {
