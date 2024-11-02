@@ -1,8 +1,8 @@
-use eframe::{egui, Frame};
 use eframe::egui::{Context, ViewportCommand};
+use eframe::{egui, Frame};
 
 use crate::emulator::emulator::Chip8Emulator;
-use crate::errors::error_code::{Error, Errors};
+use crate::errors::error_code::Error;
 use crate::errors::error_manager;
 use crate::utils::icon_data;
 
