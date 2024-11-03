@@ -1,9 +1,9 @@
 use eframe::egui;
-use eframe::egui::{Context, FontId, RichText};
+use eframe::egui::{Context, FontId, RichText, ViewportCommand};
 use eframe::Frame;
 
 use crate::errors::errors::Error;
-use crate::utils::{icon_data, label_from_str, label_from_string};
+use crate::utils::{icon_data, label_from_str, label_from_string, richtext};
 
 pub struct ErrorReportWindow {
     error: Error,
@@ -46,14 +46,22 @@ impl eframe::App for ErrorReportWindow {
                 ui.heading(RichText::new("Error executing Chip 8 Emulator")
                     .font(FontId::proportional(40f32)));
 
+                ui.add_space(30f32);
                 ui.separator();
-                ui.add_space(60f32)
-            });
+                ui.add_space(60f32);
 
-            ui.vertical_centered(|ui| {
                 ui.label(self.error.error_message.clone());
 
                 label_from_string(format!("Error Code: {}", self.error.error_code), ui);
+
+                ui.end_row();
+                ui.add_space(60f32);
+                ui.separator();
+                ui.add_space(20f32);
+
+                if ui.button(richtext("Exit Program")).clicked() {
+                    ctx.send_viewport_cmd(ViewportCommand::Close);
+                }
             });
         });
     }
