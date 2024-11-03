@@ -6,7 +6,6 @@ pub mod errors;
 pub mod startup;
 pub mod utils;
 
-use std::process::exit;
 use crate::emulator::window::EmulatorWindow;
 use crate::errors::error_report_window::*;
 use crate::startup::get_filepath;

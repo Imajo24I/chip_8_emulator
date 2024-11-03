@@ -2,7 +2,7 @@ use eframe::egui::{Context, ViewportCommand};
 use eframe::{egui, Frame};
 
 use crate::emulator::emulator::Chip8Emulator;
-use crate::errors::error_code::{Error, Errors};
+use crate::errors::errors::{Error, Errors};
 use crate::utils::icon_data;
 
 pub struct EmulatorWindow<'a> {

@@ -2,7 +2,7 @@ use eframe::egui;
 use eframe::egui::{Context, FontId, RichText};
 use eframe::Frame;
 
-use crate::errors::error_code::Error;
+use crate::errors::errors::Error;
 use crate::utils::icon_data;
 
 pub struct ErrorReportWindow {
