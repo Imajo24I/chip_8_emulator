@@ -3,7 +3,7 @@ use eframe::egui::{Context, FontId, RichText, ViewportCommand};
 use eframe::Frame;
 
 use crate::errors::errors::Error;
-use crate::utils::{icon_data, label_from_str, label_from_string, richtext};
+use crate::utils::{icon_data, label_from_string, richtext};
 
 pub struct ErrorReportWindow {
     error: Error,
