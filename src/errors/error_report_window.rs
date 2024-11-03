@@ -1,4 +1,3 @@
-use std::sync::Mutex;
 use eframe::egui;
 use eframe::egui::{Context, FontId, RichText};
 use eframe::Frame;
@@ -6,17 +5,11 @@ use eframe::Frame;
 use crate::errors::error_code::Error;
 use crate::utils::icon_data;
 
-static ERROR: Mutex<Option<Error>> = Mutex::new(None);
-
-pub fn set_error(error: Error) {
-    ERROR.lock().unwrap().replace(error);
-}
-
-pub struct ErrorManagerWindow {
+pub struct ErrorReportWindow {
     error: Error,
 }
 
-impl ErrorManagerWindow {
+impl ErrorReportWindow {
     pub fn new(error: Error) -> Self {
         Self {
             error,
@@ -26,22 +19,13 @@ impl ErrorManagerWindow {
     pub fn run_window(error: Error) -> eframe::Result<()> {
         eframe::run_native(
             "Chip 8 Emulator - Error Manager",
-            ErrorManagerWindow::options(),
+            ErrorReportWindow::options(),
             Box::new(|_cc| {
-                Ok(Box::<ErrorManagerWindow>::new(
-                    ErrorManagerWindow::new(error)
+                Ok(Box::<ErrorReportWindow>::new(
+                    ErrorReportWindow::new(error)
                 ))
             }),
         )
-    }
-
-    pub fn run_if_error() -> eframe::Result<()> {
-        let error = ERROR.lock().unwrap();
-        if let Some(error) = error.as_ref() {
-            return ErrorManagerWindow::run_window(error.clone());
-        }
-
-        Ok(())
     }
 
     fn options() -> eframe::NativeOptions {
@@ -53,7 +37,7 @@ impl ErrorManagerWindow {
     }
 }
 
-impl eframe::App for ErrorManagerWindow {
+impl eframe::App for ErrorReportWindow {
     fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.vertical_centered(|ui| {
