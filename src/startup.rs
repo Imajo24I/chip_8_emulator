@@ -10,11 +10,11 @@ pub fn get_filepath() -> String {
         let args: Vec<String> = args.collect();
         args[1].to_owned()
     } else {
-        run_startup_window()
+        run_startup_window().filepath
     }
 }
 
-fn run_startup_window() -> String {
+fn run_startup_window() -> StartUpInfo {
     let mut startup_info = StartUpInfo::default();
 
     eframe::run_native(
@@ -27,7 +27,7 @@ fn run_startup_window() -> String {
         }),
     ).unwrap();
 
-    startup_info.filepath
+    startup_info
 }
 
 struct StartupWindow<'a> {
