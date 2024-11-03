@@ -7,5 +7,6 @@ fn main() -> io::Result<()> {
             .set_icon("assets/icon.ico")
             .compile()?;
     }
+
     Ok(())
 }
