@@ -1,9 +1,10 @@
+use std::fmt::format;
 use eframe::egui::{Context, ViewportCommand};
 use eframe::{egui, Frame};
 
 use crate::emulator::emulator::Chip8Emulator;
 use crate::errors::errors::{Error, Errors};
-use crate::utils::icon_data;
+use crate::utils::{icon_data, label_from_str, label_from_string, richtext};
 
 pub struct EmulatorWindow<'a> {
     emulator: Chip8Emulator,
@@ -44,7 +45,7 @@ impl<'a> EmulatorWindow<'a> {
         }
     }
 
-    fn exit_with_error(&mut self, ctx: &Context, error: Error) {
+    fn exit_with_error(&mut self, error: Error, ctx: &Context) {
         self.exit_information.error = Some(error);
         ctx.send_viewport_cmd(ViewportCommand::Close);
     }
@@ -59,8 +60,16 @@ impl eframe::App for EmulatorWindow<'_> {
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.label(format!("Given Path: {}", self.filepath));
+            label_from_string(format!("Given Path: {}", self.filepath), ui);
+            ui.end_row();
 
+            label_from_string(format!("Delta Time: {}", dt), ui);
+            ui.end_row();
+            ui.add_space(20f32);
+
+            if ui.button(richtext("Simulate MissingFilePathError")).clicked() {
+                self.exit_with_error(Errors::MissingFilePathArg.get_error(), ctx);
+            }
         });
     }
 }

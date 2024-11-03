@@ -3,7 +3,7 @@ use eframe::egui::{Context, FontId, RichText};
 use eframe::Frame;
 
 use crate::errors::errors::Error;
-use crate::utils::{icon_data, label};
+use crate::utils::{icon_data, label_from_str, label_from_string};
 
 pub struct ErrorReportWindow {
     error: Error,
@@ -53,7 +53,7 @@ impl eframe::App for ErrorReportWindow {
             ui.vertical_centered(|ui| {
                 ui.label(self.error.error_message.clone());
 
-                label(format!("Error Code: {}", self.error.error_code).as_str(), ui);
+                label_from_string(format!("Error Code: {}", self.error.error_code), ui);
             });
         });
     }

@@ -1,4 +1,4 @@
-use crate::utils::{icon_data, label, richtext};
+use crate::utils::{icon_data, label_from_str, richtext};
 use eframe::egui::{Context, FontId, RichText, Ui, ViewportCommand};
 use eframe::{egui, App, Frame};
 use std::env;
@@ -79,11 +79,11 @@ impl App for StartupWindow<'_> {
                 ui.separator();
                 ui.add_space(60f32);
 
-                label("Please specify the path to the chip 8 program to execute.", ui);
+                label_from_str("Please specify the path to the chip 8 program to execute.", ui);
 
                 ui.end_row();
 
-                label("Drag-and-drop the chip 8 program here, or specify the path using the file dialog.", ui);
+                label_from_str("Drag-and-drop the chip 8 program here, or specify the path using the file dialog.", ui);
 
                 ui.end_row();
                 ui.add_space(20f32);
@@ -93,11 +93,11 @@ impl App for StartupWindow<'_> {
                 ui.end_row();
                 ui.add_space(20f32);
 
-                label("Selected Path:", ui);
+                label_from_str("Selected Path:", ui);
 
                 ui.end_row();
 
-                label(self.startup_info.filepath.as_str(), ui);
+                label_from_str(self.startup_info.filepath.as_str(), ui);
 
                 ui.end_row();
                 ui.add_space(30f32);

@@ -13,6 +13,10 @@ pub fn richtext(text: &str) -> RichText {
 }
 
 /// Adds a label to the UI, with the font size of 20
-pub fn label(text: &str, ui: &mut Ui) {
+pub fn label_from_str(text: &str, ui: &mut Ui) {
     ui.label(richtext(text));
+}
+
+pub fn label_from_string(text: String, ui: &mut Ui) {
+    ui.label(richtext(&*text));
 }
