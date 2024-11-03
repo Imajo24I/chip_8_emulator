@@ -1,4 +1,4 @@
-use crate::utils::icon_data;
+use crate::utils::{icon_data, label, richtext};
 use eframe::egui::{Context, FontId, RichText, Ui, ViewportCommand};
 use eframe::{egui, App, Frame};
 use std::env;
@@ -49,14 +49,6 @@ impl<'a> StartupWindow<'a> {
         }
     }
 
-    fn default_text(text: &str) -> RichText {
-        RichText::new(text).font(FontId::proportional(20f32))
-    }
-
-    fn default_label(text: &str, ui: &mut Ui) {
-        ui.label(Self::default_text(text));
-    }
-
     fn collect_dropped_files(&mut self, ctx: &Context) {
         ctx.input(|input| {
             if !input.raw.dropped_files.is_empty() {
@@ -87,11 +79,11 @@ impl App for StartupWindow<'_> {
                 ui.separator();
                 ui.add_space(60f32);
 
-                Self::default_label("Please specify the path to the chip 8 program to execute.", ui);
+                label("Please specify the path to the chip 8 program to execute.", ui);
 
                 ui.end_row();
 
-                Self::default_label("Drag-and-drop the chip 8 program here, or specify the path using the file dialog.", ui);
+                label("Drag-and-drop the chip 8 program here, or specify the path using the file dialog.", ui);
 
                 ui.end_row();
                 ui.add_space(20f32);
@@ -101,16 +93,16 @@ impl App for StartupWindow<'_> {
                 ui.end_row();
                 ui.add_space(20f32);
 
-                Self::default_label("Selected Path:", ui);
+                label("Selected Path:", ui);
 
                 ui.end_row();
 
-                Self::default_label(self.startup_info.filepath.as_str(), ui);
+                label(self.startup_info.filepath.as_str(), ui);
 
                 ui.end_row();
                 ui.add_space(30f32);
 
-                if ui.button(Self::default_text("Use selected Path")).clicked() {
+                if ui.button(richtext("Use selected Path")).clicked() {
                     ctx.send_viewport_cmd(ViewportCommand::Close);
                 }
             });

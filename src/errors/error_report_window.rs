@@ -3,7 +3,7 @@ use eframe::egui::{Context, FontId, RichText};
 use eframe::Frame;
 
 use crate::errors::errors::Error;
-use crate::utils::icon_data;
+use crate::utils::{icon_data, label};
 
 pub struct ErrorReportWindow {
     error: Error,
@@ -43,7 +43,8 @@ impl eframe::App for ErrorReportWindow {
             ui.vertical_centered(|ui| {
                 ui.add_space(20f32);
 
-                ui.heading(RichText::new("Error executing Chip 8 Emulator").font(FontId::proportional(40f32)));
+                ui.heading(RichText::new("Error executing Chip 8 Emulator")
+                    .font(FontId::proportional(40f32)));
 
                 ui.separator();
                 ui.add_space(60f32)
@@ -52,10 +53,7 @@ impl eframe::App for ErrorReportWindow {
             ui.vertical_centered(|ui| {
                 ui.label(self.error.error_message.clone());
 
-                ui.label(RichText::new(
-                    format!("Error Code: {}", self.error.error_code))
-                    .font(FontId::proportional(20f32)
-                    ));
+                label(format!("Error Code: {}", self.error.error_code).as_str(), ui);
             });
         });
     }

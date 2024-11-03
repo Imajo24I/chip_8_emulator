@@ -60,6 +60,7 @@ impl eframe::App for EmulatorWindow<'_> {
 
         egui::CentralPanel::default().show(ctx, |ui| {
             ui.label(format!("Given Path: {}", self.filepath));
+
         });
     }
 }
