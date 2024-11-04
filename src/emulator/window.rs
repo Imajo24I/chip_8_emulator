@@ -3,7 +3,7 @@ use eframe::{egui, Frame};
 
 use crate::emulator::emulator::Chip8Emulator;
 use crate::errors::errors::{Error, Errors};
-use crate::utils::{icon_data, label_from_string, richtext};
+use crate::utils;
 
 pub struct EmulatorWindow<'a> {
     emulator: Chip8Emulator,
@@ -26,7 +26,8 @@ impl<'a> EmulatorWindow<'a> {
         eframe::run_native(
             "Chip 8 Emulator",
             EmulatorWindow::options(),
-            Box::new(|_cc| {
+            Box::new(|cc| {
+                utils::set_default_style(cc);
                 Ok(Box::<EmulatorWindow>::new(
                     EmulatorWindow::new(filepath, &mut exit_information)
                 ))
@@ -39,7 +40,7 @@ impl<'a> EmulatorWindow<'a> {
     fn options() -> eframe::NativeOptions {
         eframe::NativeOptions {
             viewport: egui::ViewportBuilder::default().with_inner_size([1280f32, 920f32])
-                .with_icon(icon_data()),
+                .with_icon(utils::icon_data()),
             ..Default::default()
         }
     }
@@ -59,14 +60,14 @@ impl eframe::App for EmulatorWindow<'_> {
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            label_from_string(format!("Given Path: {}", self.filepath), ui);
+            ui.label(format!("Given Path: {}", self.filepath));
             ui.end_row();
 
-            label_from_string(format!("Delta Time: {}", dt), ui);
+            ui.label(format!("Delta Time: {}", dt));
             ui.end_row();
             ui.add_space(20f32);
 
-            if ui.button(richtext("Simulate MissingFilePathError")).clicked() {
+            if ui.button("Simulate MissingFilePathError").clicked() {
                 self.exit_with_error(Errors::MissingFilePathArg.get_error(), ctx);
             }
         });

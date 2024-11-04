@@ -1,4 +1,4 @@
-use crate::utils::{icon_data, label_from_str, richtext};
+use crate::utils;
 use eframe::egui::{Context, FontId, RichText, Ui, ViewportCommand};
 use eframe::{egui, App, Frame};
 use std::env;
@@ -20,7 +20,9 @@ fn run_startup_window() -> StartUpInfo {
     eframe::run_native(
         "Chip 8 Emulator - Startup Manager",
         StartupWindow::options(),
-        Box::new(|_cc| {
+        Box::new(|cc| {
+            utils::set_default_style(cc);
+
             Ok(Box::<StartupWindow>::new(
                 StartupWindow::new(&mut startup_info)
             ))
@@ -44,7 +46,7 @@ impl<'a> StartupWindow<'a> {
     pub fn options() -> eframe::NativeOptions {
         eframe::NativeOptions {
             viewport: egui::ViewportBuilder::default().with_inner_size([840f32, 530f32])
-                .with_icon(icon_data()),
+                .with_icon(utils::icon_data()),
             ..Default::default()
         }
     }
@@ -59,9 +61,7 @@ impl<'a> StartupWindow<'a> {
     }
 
     fn file_dialog(&mut self, ui: &mut Ui) {
-        if ui.button(RichText::new("Open File...")
-            .font(FontId::proportional(20f32)))
-            .clicked() {
+        if utils::button("Open File...", ui).clicked() {
             if let Some(path) = rfd::FileDialog::new().pick_file() {
                 self.startup_info.filepath = path.into_os_string().into_string().unwrap();
             }
@@ -79,11 +79,11 @@ impl App for StartupWindow<'_> {
                 ui.separator();
                 ui.add_space(60f32);
 
-                label_from_str("Please specify the path to the chip 8 program to execute.", ui);
+                ui.label("Please specify the path to the chip 8 program to execute.");
 
                 ui.end_row();
 
-                label_from_str("Drag-and-drop the chip 8 program here, or specify the path using the file dialog.", ui);
+                ui.label("Drag-and-drop the chip 8 program here, or specify the path using the file dialog.");
 
                 ui.end_row();
                 ui.add_space(20f32);
@@ -93,16 +93,16 @@ impl App for StartupWindow<'_> {
                 ui.end_row();
                 ui.add_space(20f32);
 
-                label_from_str("Selected Path:", ui);
+                ui.label("Selected Path:");
 
                 ui.end_row();
 
-                label_from_str(self.startup_info.filepath.as_str(), ui);
+                ui.label(self.startup_info.filepath.as_str());
 
                 ui.end_row();
                 ui.add_space(30f32);
 
-                if ui.button(richtext("Use selected Path")).clicked() {
+                if utils::button("Use selected Path", ui).clicked() {
                     ctx.send_viewport_cmd(ViewportCommand::Close);
                 }
             });
