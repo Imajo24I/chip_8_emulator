@@ -10,6 +10,7 @@ pub fn icon_data() -> IconData {
     ).expect("Failed to load icon.")
 }
 
+/// Sets the default style for the windows
 pub fn set_default_style(cc: &CreationContext) {
     cc.egui_ctx.style_mut(|style| {
         style.override_font_id = Some(FontId::proportional(FONT_SIZE));
