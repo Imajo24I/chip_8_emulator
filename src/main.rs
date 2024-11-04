@@ -8,15 +8,19 @@ pub mod utils;
 
 use crate::emulator::window::EmulatorWindow;
 use crate::errors::error_report_window::*;
-use crate::startup::get_filepath;
+use crate::errors::errors::Errors;
 
 fn main() {
-    run_emulator(get_filepath());
+    run_emulator(startup::get_filepath());
 }
 
-fn run_emulator(filepath: String) {
-    let exit_information = EmulatorWindow::run_window(filepath);
-    if let Some(error) = exit_information.error {
-        ErrorReportWindow::run_window(error).unwrap();
+fn run_emulator(filepath: Option<String>) {
+    if let Some(filepath) = filepath {
+        let exit_information = EmulatorWindow::run_window(filepath);
+        if let Some(error) = exit_information.error {
+            ErrorReportWindow::run_window(error).unwrap();
+        }
+    } else {
+        ErrorReportWindow::run_window(Errors::MissingFilePathArg.get_error()).unwrap();
     }
 }

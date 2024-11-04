@@ -3,12 +3,12 @@ use eframe::egui::{Context, FontId, RichText, Ui, ViewportCommand};
 use eframe::{egui, App, Frame};
 use std::env;
 
-pub fn get_filepath() -> String {
+pub fn get_filepath() -> Option<String> {
     let args = env::args();
 
     if args.len() > 1 {
         let args: Vec<String> = args.collect();
-        args[1].to_owned()
+        Some(args[1].to_owned())
     } else {
         run_startup_window().filepath
     }
@@ -54,8 +54,8 @@ impl<'a> StartupWindow<'a> {
     fn collect_dropped_files(&mut self, ctx: &Context) {
         ctx.input(|input| {
             if !input.raw.dropped_files.is_empty() {
-                self.startup_info.filepath = input.raw.dropped_files[0]
-                    .path.clone().unwrap().into_os_string().into_string().unwrap();
+                self.startup_info.filepath = Some(input.raw.dropped_files[0]
+                    .path.clone().unwrap().into_os_string().into_string().unwrap());
             }
         });
     }
@@ -63,7 +63,7 @@ impl<'a> StartupWindow<'a> {
     fn file_dialog(&mut self, ui: &mut Ui) {
         if utils::button("Open File...", ui).clicked() {
             if let Some(path) = rfd::FileDialog::new().pick_file() {
-                self.startup_info.filepath = path.into_os_string().into_string().unwrap();
+                self.startup_info.filepath = Some(path.into_os_string().into_string().unwrap());
             }
         }
     }
@@ -97,7 +97,11 @@ impl App for StartupWindow<'_> {
 
                 ui.end_row();
 
-                ui.label(self.startup_info.filepath.as_str());
+                if let Some(filepath) = &self.startup_info.filepath {
+                    ui.label(filepath);
+                } else {
+                    ui.label("No Filepath Selected");
+                }
 
                 ui.end_row();
                 ui.add_space(30f32);
@@ -113,13 +117,13 @@ impl App for StartupWindow<'_> {
 }
 
 struct StartUpInfo {
-    filepath: String,
+    filepath: Option<String>,
 }
 
 impl Default for StartUpInfo {
     fn default() -> Self {
         Self {
-            filepath: "---".to_string(),
+            filepath: None,
         }
     }
 }
