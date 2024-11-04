@@ -20,6 +20,7 @@ fn run_startup_window() -> StartUpInfo {
     eframe::run_native(
         "Chip 8 Emulator - Startup Manager",
         StartupWindow::options(),
+
         Box::new(|cc| {
             utils::set_default_style(cc);
 

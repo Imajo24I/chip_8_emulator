@@ -28,6 +28,7 @@ impl<'a> EmulatorWindow<'a> {
             EmulatorWindow::options(),
             Box::new(|cc| {
                 utils::set_default_style(cc);
+
                 Ok(Box::<EmulatorWindow>::new(
                     EmulatorWindow::new(filepath, &mut exit_information)
                 ))
@@ -60,16 +61,6 @@ impl eframe::App for EmulatorWindow<'_> {
         });
 
         egui::CentralPanel::default().show(ctx, |ui| {
-            ui.label(format!("Given Path: {}", self.filepath));
-            ui.end_row();
-
-            ui.label(format!("Delta Time: {}", dt));
-            ui.end_row();
-            ui.add_space(20f32);
-
-            if ui.button("Simulate MissingFilePathError").clicked() {
-                self.exit_with_error(Errors::MissingFilePathArg.get_error(), ctx);
-            }
         });
     }
 }
