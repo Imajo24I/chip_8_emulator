@@ -2,13 +2,14 @@ use crate::utils;
 use eframe::egui::{Context, FontId, RichText, Ui, ViewportCommand};
 use eframe::{egui, App, Frame};
 use std::env;
+use std::path::PathBuf;
 
-pub fn get_filepath() -> Option<String> {
+pub fn get_filepath() -> Option<PathBuf> {
     let args = env::args();
 
     if args.len() > 1 {
         let args: Vec<String> = args.collect();
-        Some(args[1].to_owned())
+        Some(PathBuf::from(args[1].to_owned()))
     } else {
         run_startup_window().filepath
     }
@@ -55,8 +56,7 @@ impl<'a> StartupWindow<'a> {
     fn collect_dropped_files(&mut self, ctx: &Context) {
         ctx.input(|input| {
             if !input.raw.dropped_files.is_empty() {
-                self.startup_info.filepath = Some(input.raw.dropped_files[0]
-                    .path.clone().unwrap().into_os_string().into_string().unwrap());
+                self.startup_info.filepath = Some(input.raw.dropped_files[0].path.clone().unwrap());
             }
         });
     }
@@ -64,7 +64,7 @@ impl<'a> StartupWindow<'a> {
     fn file_dialog(&mut self, ui: &mut Ui) {
         if utils::button("Open File...", ui).clicked() {
             if let Some(path) = rfd::FileDialog::new().pick_file() {
-                self.startup_info.filepath = Some(path.into_os_string().into_string().unwrap());
+                self.startup_info.filepath = Some(path);
             }
         }
     }
@@ -99,7 +99,7 @@ impl App for StartupWindow<'_> {
                 ui.end_row();
 
                 if let Some(filepath) = &self.startup_info.filepath {
-                    ui.label(filepath);
+                    ui.label(filepath.to_str().unwrap());
                 } else {
                     ui.label("No Filepath Selected");
                 }
@@ -118,7 +118,7 @@ impl App for StartupWindow<'_> {
 }
 
 struct StartUpInfo {
-    filepath: Option<String>,
+    filepath: Option<PathBuf>,
 }
 
 impl Default for StartUpInfo {

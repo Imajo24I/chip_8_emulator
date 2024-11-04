@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use eframe::egui::{Context, ViewportCommand};
 use eframe::{egui, Frame};
 
@@ -7,20 +8,18 @@ use crate::utils;
 
 pub struct EmulatorWindow<'a> {
     emulator: Chip8Emulator,
-    filepath: String,
     exit_information: &'a mut ExitInformation,
 }
 
 impl<'a> EmulatorWindow<'a> {
-    pub fn new(filepath: String, exit_information: &'a mut ExitInformation) -> Self {
+    pub fn new(filepath: PathBuf, exit_information: &'a mut ExitInformation) -> Self {
         Self {
-            emulator: Chip8Emulator::new(filepath.clone()),
-            filepath,
+            emulator: Chip8Emulator::new(filepath),
             exit_information,
         }
     }
 
-    pub fn run_window(filepath: String) -> ExitInformation {
+    pub fn run_window(filepath: PathBuf) -> ExitInformation {
         let mut exit_information = ExitInformation::default();
 
         eframe::run_native(
