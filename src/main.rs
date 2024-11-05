@@ -9,7 +9,7 @@ pub mod utils;
 use std::path::PathBuf;
 use crate::emulator::window::EmulatorWindow;
 use crate::errors::error_report_window::*;
-use crate::errors::errors::Errors;
+use crate::errors::errors::MissingFilepathError;
 
 fn main() {
     run_emulator(startup::get_filepath());
@@ -22,6 +22,6 @@ fn run_emulator(filepath: Option<PathBuf>) {
             ErrorReportWindow::run_window(error).unwrap();
         }
     } else {
-        ErrorReportWindow::run_window(Errors::MissingFilePathArg.get_error()).unwrap();
+        ErrorReportWindow::run_window(Box::new(MissingFilepathError)).unwrap();
     }
 }

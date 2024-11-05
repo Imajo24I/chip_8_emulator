@@ -6,17 +6,17 @@ use crate::errors::errors::Error;
 use crate::utils;
 
 pub struct ErrorReportWindow {
-    error: Error,
+    error: Box<dyn Error>,
 }
 
 impl ErrorReportWindow {
-    pub fn new(error: Error) -> Self {
-        Self {
-            error,
-        }
+    pub fn new(error: Box<dyn Error>) -> Box<Self> {
+        Box::new(Self {
+            error: error,
+        })
     }
 
-    pub fn run_window(error: Error) -> eframe::Result<()> {
+    pub fn run_window(error: Box<dyn Error>) -> eframe::Result<()> {
         eframe::run_native(
             "Chip 8 Emulator - Error Manager",
             ErrorReportWindow::options(),
@@ -24,7 +24,7 @@ impl ErrorReportWindow {
                 utils::set_default_style(cc);
 
                 Ok(Box::<ErrorReportWindow>::new(
-                    ErrorReportWindow::new(error)
+                    *ErrorReportWindow::new(error)
                 ))
             }),
         )
@@ -52,9 +52,11 @@ impl eframe::App for ErrorReportWindow {
                 ui.separator();
                 ui.add_space(60f32);
 
-                ui.label(self.error.error_message.clone());
+                ui.label(self.error.name());
 
-                ui.label(format!("Error Code: {}", self.error.error_code));
+                ui.end_row();
+
+                ui.label(self.error.message());
 
                 ui.end_row();
                 ui.add_space(60f32);

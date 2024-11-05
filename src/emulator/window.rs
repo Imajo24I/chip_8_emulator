@@ -45,7 +45,7 @@ impl<'a> EmulatorWindow<'a> {
         }
     }
 
-    fn exit_with_error(&mut self, error: Error, ctx: &Context) {
+    fn exit_with_error(&mut self, error: Box<dyn Error>, ctx: &Context) {
         self.exit_information.error = Some(error);
         ctx.send_viewport_cmd(ViewportCommand::Close);
     }
@@ -65,7 +65,7 @@ impl eframe::App for EmulatorWindow<'_> {
 }
 
 pub struct ExitInformation {
-    pub error: Option<Error>,
+    pub error: Option<Box<dyn Error>>,
 }
 
 impl Default for ExitInformation {
