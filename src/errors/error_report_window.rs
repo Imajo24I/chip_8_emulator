@@ -23,9 +23,7 @@ impl ErrorReportWindow {
             Box::new(|cc| {
                 utils::set_default_style(cc);
 
-                Ok(Box::<ErrorReportWindow>::new(
-                    *ErrorReportWindow::new(error)
-                ))
+                Ok(ErrorReportWindow::new(error))
             }),
         )
     }
