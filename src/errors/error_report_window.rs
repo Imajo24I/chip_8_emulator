@@ -12,7 +12,7 @@ pub struct ErrorReportWindow {
 impl ErrorReportWindow {
     pub fn new(error: Box<dyn Error>) -> Box<Self> {
         Box::new(Self {
-            error: error,
+            error,
         })
     }
 
