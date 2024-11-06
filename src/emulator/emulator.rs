@@ -1,4 +1,3 @@
-use std::error::Error;
 use std::path::PathBuf;
 
 pub struct Chip8Emulator {
