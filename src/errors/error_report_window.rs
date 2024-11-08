@@ -1,29 +1,28 @@
 use eframe::egui;
 use eframe::egui::{Context, FontId, RichText, ViewportCommand};
 use eframe::Frame;
-
-use crate::errors::errors::Error;
+use crate::errors::error::Error;
 use crate::utils;
 
 pub struct ErrorReportWindow {
-    error: Box<dyn Error>,
+    error: Error,
 }
 
 impl ErrorReportWindow {
-    pub fn new(error: Box<dyn Error>) -> Box<Self> {
-        Box::new(Self {
+    pub fn new(error: Error) -> Self {
+        Self {
             error,
-        })
+        }
     }
 
-    pub fn run_window(error: Box<dyn Error>) -> eframe::Result<()> {
+    pub fn run_window(error: Error) -> eframe::Result<()> {
         eframe::run_native(
             "Chip 8 Emulator - Error Manager",
             ErrorReportWindow::options(),
             Box::new(|cc| {
                 utils::set_default_style(cc);
 
-                Ok(ErrorReportWindow::new(error))
+                Ok(Box::new(ErrorReportWindow::new(error)))
             }),
         )
     }
@@ -50,11 +49,9 @@ impl eframe::App for ErrorReportWindow {
                 ui.separator();
                 ui.add_space(60f32);
 
-                ui.label(self.error.name());
-
                 ui.end_row();
 
-                ui.label(self.error.message());
+                ui.label(self.error.to_string());
 
                 ui.end_row();
                 ui.add_space(60f32);

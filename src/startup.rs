@@ -117,14 +117,7 @@ impl App for StartupWindow<'_> {
     }
 }
 
+#[derive(Default)]
 struct StartUpInfo {
     filepath: Option<PathBuf>,
-}
-
-impl Default for StartUpInfo {
-    fn default() -> Self {
-        Self {
-            filepath: None,
-        }
-    }
 }

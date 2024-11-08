@@ -3,7 +3,7 @@ use eframe::egui::{Context, Pos2, Ui, ViewportCommand};
 use eframe::{egui, Frame};
 
 use crate::emulator::emulator::Chip8Emulator;
-use crate::errors::errors::Error;
+use crate::errors::error::Error;
 use crate::utils;
 
 const PIXEL_WIDTH: f32 = 20f32;
@@ -47,7 +47,7 @@ impl<'a> EmulatorWindow<'a> {
         }
     }
 
-    fn exit_with_error(&mut self, error: Box<dyn Error>, ctx: &Context) {
+    fn exit_with_error(&mut self, error: Error, ctx: &Context) {
         self.exit_information.error = Some(error);
         ctx.send_viewport_cmd(ViewportCommand::Close);
     }
@@ -88,14 +88,7 @@ impl eframe::App for EmulatorWindow<'_> {
     }
 }
 
+#[derive(Default)]
 pub struct ExitInformation {
-    pub error: Option<Box<dyn Error>>,
-}
-
-impl Default for ExitInformation {
-    fn default() -> Self {
-        Self {
-            error: None
-        }
-    }
+    pub error: Option<Error>,
 }
