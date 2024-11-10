@@ -40,7 +40,6 @@ impl Chip8Emulator {
     fn startup_window(&mut self, ctx: &Context) {
         egui::Window::new("Startup")
             .default_size([840f32, 6400f32])
-            .collapsible(false)
             .show(ctx, |ui| {
                 self.startup_window.update(ui);
             });
