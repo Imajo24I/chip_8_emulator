@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::Path;
 
 pub struct Chip8Emulator {
     pub display: [[bool; 64]; 32],
@@ -28,7 +28,7 @@ pub struct Chip8Emulator {
 }
 
 impl Chip8Emulator {
-    pub fn new(filepath: PathBuf) -> Self {
+    pub fn new(_filepath: &Path) -> Self {
         Self {
             display: [[false; 64]; 32],
             // Start at 0x200, since 0x000 - 0x1FF are reserved for interpreter

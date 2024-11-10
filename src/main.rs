@@ -5,25 +5,11 @@ pub mod emulator;
 pub mod errors;
 pub mod startup;
 pub mod utils;
+pub mod chip_8_emulator;
+pub mod events;
 
-use std::path::PathBuf;
-use crate::emulator::window::EmulatorWindow;
-use crate::errors::error::Error;
-use crate::errors::error_report_window::*;
+use crate::chip_8_emulator::Chip8Emulator;
 
 fn main() {
-    run_emulator(startup::get_filepath());
-}
-
-fn run_emulator(filepath: Option<PathBuf>) {
-    if let Some(filepath) = filepath {
-        let exit_information = EmulatorWindow::run_window(filepath);
-        if let Some(error) = exit_information.error {
-            ErrorReportWindow::run_window(error).unwrap();
-        }
-    } else {
-        ErrorReportWindow::run_window(Error::new(
-            "Missing filepath - Please specify the path to the chip 8 program to execute."
-        )).unwrap();
-    }
+    Chip8Emulator::run();
 }

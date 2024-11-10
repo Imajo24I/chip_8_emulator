@@ -1,58 +1,17 @@
 use crate::utils;
-use eframe::egui::{Context, FontId, RichText, Ui, ViewportCommand};
-use eframe::{egui, App, Frame};
+use eframe::egui::{Context, FontId, RichText, Ui};
 use std::env;
 use std::path::PathBuf;
 
-pub fn get_filepath() -> Option<PathBuf> {
-    let args = env::args();
 
-    if args.len() > 1 {
-        let args: Vec<String> = args.collect();
-        Some(PathBuf::from(args[1].to_owned()))
-    } else {
-        run_startup_window().filepath
-    }
+#[derive(Default)]
+pub struct StartupWindow {
+    pub startup_info: StartUpInfo,
+    pub use_selected_filepath: bool,
+    looked_in_args: bool,
 }
 
-fn run_startup_window() -> StartUpInfo {
-    let mut startup_info = StartUpInfo::default();
-
-    eframe::run_native(
-        "Chip 8 Emulator - Startup Manager",
-        StartupWindow::options(),
-
-        Box::new(|cc| {
-            utils::set_default_style(cc);
-
-            Ok(Box::<StartupWindow>::new(
-                StartupWindow::new(&mut startup_info)
-            ))
-        }),
-    ).unwrap();
-
-    startup_info
-}
-
-struct StartupWindow<'a> {
-    startup_info: &'a mut StartUpInfo,
-}
-
-impl<'a> StartupWindow<'a> {
-    fn new(startup_info: &'a mut StartUpInfo) -> Self {
-        Self {
-            startup_info,
-        }
-    }
-
-    pub fn options() -> eframe::NativeOptions {
-        eframe::NativeOptions {
-            viewport: egui::ViewportBuilder::default().with_inner_size([840f32, 530f32])
-                .with_icon(utils::icon_data()),
-            ..Default::default()
-        }
-    }
-
+impl StartupWindow {
     fn collect_dropped_files(&mut self, ctx: &Context) {
         ctx.input(|input| {
             if !input.raw.dropped_files.is_empty() {
@@ -68,56 +27,75 @@ impl<'a> StartupWindow<'a> {
             }
         }
     }
-}
 
-impl App for StartupWindow<'_> {
-    fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
-        egui::CentralPanel::default().show(ctx, |ui| {
-            ui.vertical_centered(|ui| {
-                ui.heading(RichText::new("Startup Manager")
-                    .font(FontId::proportional(40f32)));
+    pub fn update(&mut self, ui: &mut Ui) {
+        if !self.looked_in_args {
+            self.looked_in_args = true;
+            if let Some(filepath) = Self::get_filepath() {
+                self.startup_info.filepath = Some(filepath);
+                self.use_selected_filepath = true;
+            }
+        }
 
-                ui.separator();
-                ui.add_space(60f32);
+        ui.vertical_centered(|ui| {
+            ui.heading(RichText::new("Startup Manager")
+                .font(FontId::proportional(40f32)));
 
-                ui.label("Please specify the path to the chip 8 program to execute.");
+            ui.separator();
+            ui.add_space(30f32);
 
-                ui.end_row();
+            ui.label("Please specify the path to the chip 8 program to execute.");
 
-                ui.label("Drag-and-drop the chip 8 program here, or specify the path using the file dialog.");
+            ui.end_row();
 
-                ui.end_row();
-                ui.add_space(20f32);
+            ui.label("Drag-and-drop the chip 8 program here, or specify the path using the file dialog.");
 
-                self.file_dialog(ui);
+            ui.end_row();
+            ui.add_space(20f32);
 
-                ui.end_row();
-                ui.add_space(20f32);
+            self.file_dialog(ui);
 
-                ui.label("Selected Path:");
+            ui.end_row();
+            ui.add_space(20f32);
 
-                ui.end_row();
+            ui.label("Selected Path:");
 
-                if let Some(filepath) = &self.startup_info.filepath {
-                    ui.label(filepath.to_str().unwrap());
-                } else {
-                    ui.label("No Filepath Selected");
-                }
+            ui.end_row();
 
-                ui.end_row();
-                ui.add_space(30f32);
+            if let Some(filepath) = &self.startup_info.filepath {
+                ui.label(filepath.to_str().unwrap());
+            } else {
+                ui.label("No Filepath Selected");
+            }
 
-                if utils::button("Use selected Path", ui).clicked() {
-                    ctx.send_viewport_cmd(ViewportCommand::Close);
-                }
-            });
+            ui.end_row();
+            ui.add_space(30f32);
+
+            if utils::button("Use selected Path", ui).clicked() {
+                self.use_selected_filepath = true;
+            }
+
+            ui.end_row();
+            ui.add_space(20f32)
         });
 
-        self.collect_dropped_files(ctx);
+        self.collect_dropped_files(ui.ctx());
+    }
+
+    fn get_filepath() -> Option<PathBuf> {
+        let args = env::args();
+
+        if args.len() > 1 {
+            let args: Vec<String> = args.collect();
+            Some(PathBuf::from(args[1].to_owned()))
+        } else {
+            None
+        }
     }
 }
 
+
 #[derive(Default)]
-struct StartUpInfo {
-    filepath: Option<PathBuf>,
+pub struct StartUpInfo {
+    pub filepath: Option<PathBuf>,
 }
