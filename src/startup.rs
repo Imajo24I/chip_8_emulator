@@ -1,5 +1,5 @@
 use crate::utils;
-use eframe::egui::{Context, FontId, RichText, Ui};
+use eframe::egui::{Context, Ui};
 use std::env;
 use std::path::PathBuf;
 
@@ -38,11 +38,7 @@ impl StartupWindow {
         }
 
         ui.vertical_centered(|ui| {
-            ui.heading(RichText::new("Startup Manager")
-                .font(FontId::proportional(40f32)));
-
-            ui.separator();
-            ui.add_space(30f32);
+            ui.add_space(10f32);
 
             ui.label("Please specify the path to the chip 8 program to execute.");
 
