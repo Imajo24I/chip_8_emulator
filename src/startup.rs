@@ -21,7 +21,7 @@ impl StartupWindow {
     }
 
     fn file_dialog(&mut self, ui: &mut Ui) {
-        if utils::button("Open File...", ui).clicked() {
+        if utils::button("Select File...", ui).clicked() {
             if let Some(path) = rfd::FileDialog::new().pick_file() {
                 self.startup_info.filepath = Some(path);
             }
