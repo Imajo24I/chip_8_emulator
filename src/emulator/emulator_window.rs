@@ -2,7 +2,7 @@ use crate::emulator::emulator::Emulator;
 use crate::events::Event;
 use eframe::egui;
 use eframe::egui::{Pos2, Ui};
-use std::error::Error;
+use crate::errors::error::Error;
 use std::path::Path;
 
 const PIXEL_WIDTH: f32 = 20f32;
@@ -12,7 +12,7 @@ pub struct EmulatorWindow {
 }
 
 impl EmulatorWindow {
-    pub fn new(filepath: &Path) -> Result<Self, dyn Error> {
+    pub fn new(filepath: &Path) -> Result<Self, Error> {
         Ok(Self {
             emulator: Emulator::new(filepath)?,
         })

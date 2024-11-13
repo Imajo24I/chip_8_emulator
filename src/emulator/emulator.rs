@@ -69,8 +69,8 @@ impl Emulator {
     }
 
     fn memory_from_file(filepath: &Path) -> Result<[u8; 4096], Error> {
-        let memory = [0; 4096];
-        let mut file = File::open(filepath);
+        let mut memory = [0; 4096];
+        let file = File::open(filepath);
 
         match file {
             Ok(mut file) => {
@@ -80,7 +80,7 @@ impl Emulator {
                 if let Err(error) = result {
                     return Err(
                         Error::new_with_cause(
-                            format!("Error reading file at {}. Please ensure it is a valid file.", filepath).as_str(),
+                            format!("Error reading file at {}. Please ensure it is a valid file.", filepath.display()),
                             Box::new(error),
                         )
                     );
@@ -94,7 +94,7 @@ impl Emulator {
             Err(error) => {
                 return Err(
                     Error::new_with_cause(
-                        format!("Error opening file at {}. Please ensure the path points to a valid file", filepath).as_str(),
+                        format!("Error opening file at {}. Please ensure the path points to a valid file", filepath.display()),
                         Box::new(error),
                     )
                 )

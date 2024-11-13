@@ -2,19 +2,19 @@ use std::fmt::{Display, Formatter};
 
 #[derive(Debug)]
 pub struct Error {
-    message: &'static str,
+    message: String,
     cause: Option<Box<dyn std::error::Error>>,
 }
 
 impl Error {
-    pub fn new(message: &'static str) -> Self {
+    pub fn new(message: String) -> Self {
         Self {
             message,
             cause: None,
         }
     }
 
-    pub fn new_with_cause(message: &'static str, cause: Box<dyn std::error::Error>) -> Self {
+    pub fn new_with_cause(message: String, cause: Box<dyn std::error::Error>) -> Self {
         Self {
             message,
             cause: Some(cause),
@@ -22,7 +22,7 @@ impl Error {
     }
 
     pub fn message(&self) -> &str {
-        self.message
+        self.message.as_str()
     }
 }
 

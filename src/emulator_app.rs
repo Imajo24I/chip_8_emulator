@@ -1,10 +1,12 @@
 use std::path::Path;
+use eframe::egui::{Context, FontId};
+use eframe::{egui, Frame};
+
 use crate::emulator::emulator_window::EmulatorWindow;
 use crate::errors::error_report_window::ErrorReportWindow;
 use crate::startup::StartupWindow;
 use crate::utils;
-use eframe::egui::{Context, FontId};
-use eframe::{egui, Frame};
+use crate::events::Event;
 
 pub const FONT_SIZE: f32 = 20f32;
 
@@ -56,15 +58,16 @@ impl EmulatorApp {
         });
     }
 
-    fn create_emulator_window(&mut self, path: &Path) {
+    fn create_emulator_window(&mut self, path: &Path) -> Option<Event> {
         let emulator_window = EmulatorWindow::new(path);
 
         match emulator_window {
             Ok(emulator_window) => {
                 self.emulator_window = Some(emulator_window);
+                None
             }
             Err(error) => {
-                self.error_report_window = Some(ErrorReportWindow::new(error));
+                Some(Event::ReportErrorAndExit(error))
             }
         }
     }
@@ -91,8 +94,8 @@ impl eframe::App for EmulatorApp {
             self.emulator_window(ctx);
         } else if self.startup_window.use_selected_filepath {
             if let Some(filepath) = &self.startup_window.startup_info.filepath {
-                if let Ok(event) = self.create_emulator_window(filepath) {
-                    event
+                if let Some(event) = self.create_emulator_window(&filepath.clone()) {
+                    event.execute(ctx, self);
                 }
             } else {
                 self.startup_window.use_selected_filepath = false;
