@@ -5,11 +5,11 @@ pub mod emulator;
 pub mod errors;
 pub mod startup;
 pub mod utils;
-pub mod chip_8_emulator;
+pub mod emulator_app;
 pub mod events;
 
-use crate::chip_8_emulator::Chip8Emulator;
+use crate::emulator_app::EmulatorApp;
 
 fn main() {
-    Chip8Emulator::run();
+    EmulatorApp::run();
 }

@@ -29,6 +29,7 @@ impl ErrorReportWindow {
 
             ui.end_row();
 
+            //TODO: Add button to view error cause
             ui.label(self.error.to_string());
 
             ui.end_row();

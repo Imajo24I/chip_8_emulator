@@ -1,21 +1,21 @@
+use crate::emulator::emulator::Emulator;
+use crate::events::Event;
 use eframe::egui;
 use eframe::egui::{Pos2, Ui};
+use std::error::Error;
 use std::path::Path;
-
-use crate::emulator::emulator::Chip8Emulator;
-use crate::events::Event;
 
 const PIXEL_WIDTH: f32 = 20f32;
 
 pub struct EmulatorWindow {
-    emulator: Chip8Emulator,
+    emulator: Emulator,
 }
 
 impl EmulatorWindow {
-    pub fn new(filepath: &Path) -> Self {
-        Self {
-            emulator: Chip8Emulator::new(filepath),
-        }
+    pub fn new(filepath: &Path) -> Result<Self, dyn Error> {
+        Ok(Self {
+            emulator: Emulator::new(filepath)?,
+        })
     }
 
     pub fn update(&mut self, ui: &mut Ui) -> Option<Event> {

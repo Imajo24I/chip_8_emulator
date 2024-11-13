@@ -1,3 +1,4 @@
+use std::path::Path;
 use crate::emulator::emulator_window::EmulatorWindow;
 use crate::errors::error_report_window::ErrorReportWindow;
 use crate::startup::StartupWindow;
@@ -8,13 +9,13 @@ use eframe::{egui, Frame};
 pub const FONT_SIZE: f32 = 20f32;
 
 #[derive(Default)]
-pub struct Chip8Emulator {
+pub struct EmulatorApp {
     pub startup_window: StartupWindow,
     pub emulator_window: Option<EmulatorWindow>,
     pub error_report_window: Option<ErrorReportWindow>,
 }
 
-impl Chip8Emulator {
+impl EmulatorApp {
     pub fn run() {
         eframe::run_native(
             "Chip 8 Emulator",
@@ -55,6 +56,19 @@ impl Chip8Emulator {
         });
     }
 
+    fn create_emulator_window(&mut self, path: &Path) {
+        let emulator_window = EmulatorWindow::new(path);
+
+        match emulator_window {
+            Ok(emulator_window) => {
+                self.emulator_window = Some(emulator_window);
+            }
+            Err(error) => {
+                self.error_report_window = Some(ErrorReportWindow::new(error));
+            }
+        }
+    }
+
     fn error_report_window(&mut self, ctx: &Context) {
         egui::Window::new("Error")
             .default_size([840f32, 530f32])
@@ -69,7 +83,7 @@ impl Chip8Emulator {
     }
 }
 
-impl eframe::App for Chip8Emulator {
+impl eframe::App for EmulatorApp {
     fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
         if self.error_report_window.is_some() {
             self.error_report_window(ctx);
@@ -77,7 +91,9 @@ impl eframe::App for Chip8Emulator {
             self.emulator_window(ctx);
         } else if self.startup_window.use_selected_filepath {
             if let Some(filepath) = &self.startup_window.startup_info.filepath {
-                self.emulator_window = Some(EmulatorWindow::new(filepath));
+                if let Ok(event) = self.create_emulator_window(filepath) {
+                    event
+                }
             } else {
                 self.startup_window.use_selected_filepath = false;
                 self.startup_window(ctx);

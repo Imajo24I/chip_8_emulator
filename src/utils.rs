@@ -14,5 +14,5 @@ pub fn icon_data() -> IconData {
 // TODO: Remove this once the fix is released
 /// Create a button with font size of 20
 pub fn button(text: &str, ui: &mut Ui) -> Response {
-    ui.button(RichText::new(text).font(FontId::proportional(crate::chip_8_emulator::FONT_SIZE)))
+    ui.button(RichText::new(text).font(FontId::proportional(crate::emulator_app::FONT_SIZE)))
 }
