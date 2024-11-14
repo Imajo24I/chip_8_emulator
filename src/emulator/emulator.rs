@@ -93,7 +93,7 @@ impl Emulator {
 
                 if data.len() > MEMORY_SIZE - INSTRUCTIONS_START {
                     return Err(Error::new(format!(
-                            "Error reading file at {} - File exceeds maximum data size of {}",
+                            "Error reading file at {} - File exceeds maximum data size of {} bytes.",
                             filepath.display(), MEMORY_SIZE - INSTRUCTIONS_START
                     )));
                 }
