@@ -42,6 +42,7 @@ impl EmulatorApp {
 
     fn startup_window(&mut self, ctx: &Context) {
         egui::Window::new("Startup")
+            .collapsible(false)
             .default_size([840f32, 6400f32])
             .show(ctx, |ui| {
                 self.startup_window.update(ui);
