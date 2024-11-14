@@ -2,8 +2,8 @@ use std::fmt::{Display, Formatter};
 
 #[derive(Debug)]
 pub struct Error {
-    message: String,
-    cause: Option<Box<dyn std::error::Error>>,
+    pub message: String,
+    pub cause: Option<Box<dyn std::error::Error>>,
 }
 
 impl Error {
@@ -19,10 +19,6 @@ impl Error {
             message,
             cause: Some(cause),
         }
-    }
-
-    pub fn message(&self) -> &str {
-        self.message.as_str()
     }
 }
 

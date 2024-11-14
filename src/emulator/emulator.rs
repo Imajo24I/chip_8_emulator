@@ -85,7 +85,7 @@ impl Emulator {
                 if let Err(error) = result {
                     return Err(
                         Error::new_with_cause(
-                            format!("Error reading file at {}. Please ensure it is a valid file.", filepath.display()),
+                            format!("Error reading file at {} - Please ensure it is a valid file.", filepath.display()),
                             Box::new(error),
                         )
                     );
@@ -106,7 +106,7 @@ impl Emulator {
             Err(error) => {
                 return Err(
                     Error::new_with_cause(
-                        format!("Error opening file at {}. Please ensure the path points to a valid file", filepath.display()),
+                        format!("Error opening file at {} - Please ensure the path points to a valid file", filepath.display()),
                         Box::new(error),
                     )
                 )

@@ -73,8 +73,8 @@ impl EmulatorApp {
     }
 
     fn error_report_window(&mut self, ctx: &Context) {
-        egui::Window::new("Error")
-            .default_size([840f32, 530f32])
+        egui::Window::new("Error executing Chip 8 Emulator")
+            .default_size([830f32, 830f32])
             .collapsible(false)
             .show(ctx, |ui| {
                 let event = self.error_report_window.as_mut().unwrap().update(ui);
