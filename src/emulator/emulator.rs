@@ -22,12 +22,17 @@ const FONT_BYTES: [u8; 80] = [
     0xF0, 0x80, 0xF0, 0x80, 0x80, // F
 ];
 
+const MEMORY_SIZE: usize = 4096;
+const INSTRUCTIONS_START: usize = 0x200;
+const FONT_START: usize = 0x50;
+const FONT_END: usize = 0x0A0;
+
 pub struct Emulator {
     pub display: [[bool; 64]; 32],
 
     // Memory
     // 4096 bytes of memory
-    memory: [u8; 4096],
+    memory: [u8; MEMORY_SIZE],
 
     // Program Counter
     // Used to store location of the next instruction
@@ -58,7 +63,7 @@ impl Emulator {
         Ok(Self {
             display: [[false; 64]; 32],
             // Start at 0x200, since 0x000 - 0x1FF are reserved for interpreter
-            pc: 0x200,
+            pc: INSTRUCTIONS_START,
             i_register: 0,
             stack: Vec::new(),
             v_registers: [0; 16],
@@ -68,8 +73,8 @@ impl Emulator {
         })
     }
 
-    fn memory_from_file(filepath: &Path) -> Result<[u8; 4096], Error> {
-        let mut memory = [0; 4096];
+    fn memory_from_file(filepath: &Path) -> Result<[u8; MEMORY_SIZE], Error> {
+        let mut memory = [0; MEMORY_SIZE];
         let file = File::open(filepath);
 
         match file {
@@ -86,9 +91,16 @@ impl Emulator {
                     );
                 }
 
+                if data.len() > MEMORY_SIZE - INSTRUCTIONS_START {
+                    return Err(Error::new(format!(
+                            "Error reading file at {} - File exceeds maximum data size of {}",
+                            filepath.display(), MEMORY_SIZE - INSTRUCTIONS_START
+                    )));
+                }
+
                 // Add instructions and font to memory
-                memory[0x200..0x200 + data.len()].copy_from_slice(&data);
-                memory[0x050..0x0A0].copy_from_slice(&FONT_BYTES);
+                memory[INSTRUCTIONS_START..INSTRUCTIONS_START + data.len()].copy_from_slice(&data);
+                memory[FONT_START..FONT_END].copy_from_slice(&FONT_BYTES);
             }
 
             Err(error) => {
