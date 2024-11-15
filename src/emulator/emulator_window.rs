@@ -1,9 +1,10 @@
-use crate::emulator::emulator::Emulator;
-use crate::events::Event;
 use eframe::egui;
 use eframe::egui::{Pos2, Ui};
-use crate::errors::error::Error;
 use std::path::Path;
+
+use crate::emulator::emulator::Emulator;
+use crate::events::Event;
+use crate::errors::error::Error;
 
 pub struct EmulatorWindow {
     emulator: Emulator,
