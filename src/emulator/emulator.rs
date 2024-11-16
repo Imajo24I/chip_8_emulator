@@ -115,4 +115,7 @@ impl Emulator {
 
         Ok(memory)
     }
+
+    pub fn run_cycle(&mut self) {
+    }
 }

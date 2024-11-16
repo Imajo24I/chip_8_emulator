@@ -1,23 +1,32 @@
+use crate::emulator::emulator::Emulator;
+use crate::errors::error::Error;
+use crate::events::Event;
 use eframe::egui;
 use eframe::egui::{Pos2, Ui};
 use std::path::Path;
+use std::time::{Duration, Instant};
 
-use crate::emulator::emulator::Emulator;
-use crate::events::Event;
-use crate::errors::error::Error;
+const DURATION_PER_CYCLE: Duration = Duration::from_millis(1000 / 60);
 
 pub struct EmulatorWindow {
     emulator: Emulator,
+    last_cycle: Instant,
 }
 
 impl EmulatorWindow {
     pub fn new(filepath: &Path) -> Result<Self, Error> {
         Ok(Self {
             emulator: Emulator::new(filepath)?,
+            last_cycle: Instant::now(),
         })
     }
 
     pub fn update(&mut self, ui: &mut Ui) -> Option<Event> {
+        if self.last_cycle.elapsed() >= DURATION_PER_CYCLE {
+            self.emulator.run_cycle();
+            self.last_cycle = Instant::now();
+        }
+
         let window_size = ui.ctx().input(|i| i.viewport().inner_rect.unwrap().size());
         let pixel_width = window_size.x / 64f32;
         let pixel_height = window_size.y / 32f32;
