@@ -23,7 +23,7 @@ impl EmulatorWindow {
 
     pub fn update(&mut self, ui: &mut Ui) -> Option<Event> {
         if self.last_cycle.elapsed() >= DURATION_PER_CYCLE {
-            self.emulator.run_cycle();
+            self.emulator.run_cycle()?;
             self.last_cycle = Instant::now();
         }
 

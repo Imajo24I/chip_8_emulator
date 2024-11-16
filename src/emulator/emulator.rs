@@ -2,6 +2,8 @@ use crate::errors::error::Error;
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
+use crate::emulator::opcodes;
+use crate::events::Event;
 
 const FONT_BYTES: [u8; 80] = [
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -36,7 +38,7 @@ pub struct Emulator {
 
     // Program Counter
     // Used to store location of the next instruction
-    pc: usize,
+    pub(crate) pc: usize,
 
     // Index Register
     // Used to point at locations in memory
@@ -93,8 +95,8 @@ impl Emulator {
 
                 if data.len() > MEMORY_SIZE - INSTRUCTIONS_START {
                     return Err(Error::new(format!(
-                            "Error reading file at {} - File exceeds maximum data size of {} bytes.",
-                            filepath.display(), MEMORY_SIZE - INSTRUCTIONS_START
+                        "Error reading file at {} - File exceeds maximum data size of {} bytes.",
+                        filepath.display(), MEMORY_SIZE - INSTRUCTIONS_START
                     )));
                 }
 
@@ -116,6 +118,31 @@ impl Emulator {
         Ok(memory)
     }
 
-    pub fn run_cycle(&mut self) {
+    pub fn run_cycle(&mut self) -> Option<Event> {
+        // Exit if no more instructions left
+        if self.pc >= MEMORY_SIZE {
+            return Some(Event::Exit);
+        }
+
+        if self.delay_timer > 0 {
+            self.delay_timer -= 1;
+        }
+
+        if self.sound_timer > 0 {
+            self.sound_timer -= 1;
+            self.make_sound();
+        }
+
+        // fetch opcode
+        let opcode = (self.memory[self.pc] as u16) << 8 | (self.memory[self.pc + 1] as u16);
+        self.pc += 2;
+
+        opcodes::execute_opcode(self, opcode)?;
+
+        None
+    }
+
+    fn make_sound(&mut self) {
+        // TODO: Implement this
     }
 }
