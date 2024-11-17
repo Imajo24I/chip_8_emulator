@@ -1,3 +1,3 @@
 pub mod emulator_window;
 pub mod emulator;
-pub mod opcodes;
+pub mod instructions;

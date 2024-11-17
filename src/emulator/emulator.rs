@@ -3,7 +3,7 @@ use std::io::Read;
 use std::path::Path;
 
 use crate::events::Event;
-use crate::emulator::opcodes;
+use crate::emulator::instructions;
 use crate::errors::error::{Cause, Error};
 
 const FONT_BYTES: [u8; 80] = [
@@ -138,7 +138,7 @@ impl Emulator {
         let opcode = (self.memory[self.pc] as u16) << 8 | (self.memory[self.pc + 1] as u16);
         self.pc += 2;
 
-        opcodes::execute_opcode(self, opcode)
+        instructions::execute_instruction(self, opcode)
     }
 
     fn make_sound(&mut self) {

@@ -2,7 +2,7 @@ use crate::emulator::emulator::Emulator;
 use crate::errors::error::{Cause, Error};
 use crate::events::Event;
 
-pub fn execute_opcode(emulator: &mut Emulator, opcode: u16) -> Option<Event> {
+pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Option<Event> {
     match opcode & 0xF000 {
         0x0000 => {
             match opcode & 0x00FF {
