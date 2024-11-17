@@ -26,21 +26,83 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Option<Event
             // 6XNN - Set VX to NN
             let vx = ((opcode & 0x0F00) >> 8) as usize;
 
-            if vx > 15 {
-                return Some(Event::ReportErrorAndExit(Error::new(
-                    "Error executing program - Please ensure its a valid Chip 8 Program".to_string(),
-                    Cause::new(
-                        Some(format!("Invalid instruction parameters - No variable register with index {} exists - Instruction {:#06x} is located at memory location {}", vx, opcode, emulator.pc - 2)),
-                        None,
-                    ),
-                )));
-            }
+            let event = validate_v_reg_index(vx, opcode, emulator);
+            if event.is_some() { return event; }
 
             emulator.v_registers[vx] = (opcode & 0x00FF) as u8;
         }
 
+        0x7000 => {
+            // 7XNN - Add NN to VX
+            let vx = ((opcode & 0x0F00) >> 8) as usize;
+
+            let event = validate_v_reg_index(vx, opcode, emulator);
+            if event.is_some() { return event; }
+
+            let nn = opcode & 0x00FF;
+            if nn > 255 {
+                emulator.v_registers[vx] = 255;
+            } else {
+                emulator.v_registers[vx] += nn as u8;
+            }
+        }
+
+        0xA000 => {
+            // ANNN - Set index register to NNN
+            emulator.i_register = opcode & 0x0FFF;
+        }
+
+        0xD000 => {
+            return x_dxyn(emulator, opcode);
+        }
+
         _ => {
             return report_exit_unknown_instruction(emulator, opcode);
+        }
+    }
+
+    None
+}
+
+fn x_dxyn(emulator: &mut Emulator, opcode: u16) -> Option<Event> {
+    // DXYN - Draw sprite at coordinate VX, VY with N bytes of sprite data
+
+    // Get X and Y coordinates, which wrap around screen
+    let vx = ((opcode & 0x0F00) >> 8) as usize;
+    let vy = ((opcode & 0x00F0) >> 4) as usize;
+
+    for v in [vx, vy].iter() {
+        let event = validate_v_reg_index(*v, opcode, emulator );
+        if event.is_some() { return event; }
+    }
+
+    let x = (emulator.v_registers[vx] & 63) as usize;
+    let y = (emulator.v_registers[vy] & 31) as usize;
+
+    // Set VF to 0
+    emulator.v_registers[0xF] = 0;
+
+    let n = (opcode & 0x000F) as usize;
+
+    for row in 0..n {
+        let sprite_data = emulator.memory[emulator.i_register as usize + row];
+        let mut bit_x = x;
+        for bit in (0..8).rev() {
+            let current_bit = (sprite_data >> bit) & 1;
+            emulator.display[y + row][bit_x] = current_bit == 1;
+
+            if current_bit == 1 {
+                emulator.v_registers[0xF] = 1;
+            }
+
+            bit_x += 1;
+            if bit_x == 64 {
+                break;
+            }
+        }
+
+        if y + row == 32 {
+            break;
         }
     }
 
@@ -57,4 +119,18 @@ fn report_exit_unknown_instruction(emulator: &mut Emulator, opcode: u16) -> Opti
             ),
         ),
     ))
+}
+
+fn validate_v_reg_index(vx: usize, opcode: u16, emulator: &mut Emulator) -> Option<Event> {
+    if vx > 15 {
+        Some(Event::ReportErrorAndExit(Error::new(
+            "Error executing program - Please ensure its a valid Chip 8 Program".to_string(),
+            Cause::new(
+                Some(format!("Invalid instruction parameters - No variable register with index {} exists - Instruction {:#06x} is located at memory location {}", vx,opcode , emulator.pc - 2)),
+                None,
+            ),
+        )))
+    } else {
+        None
+    }
 }
