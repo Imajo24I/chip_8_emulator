@@ -22,8 +22,12 @@ impl EmulatorWindow {
     }
 
     pub fn update(&mut self, ui: &mut Ui) -> Option<Event> {
+        ui.ctx().request_repaint();
+
         if self.last_cycle.elapsed() >= DURATION_PER_CYCLE {
-            self.emulator.run_cycle()?;
+            let event = self.emulator.run_cycle();
+            if event.is_some() { return event }
+
             self.last_cycle = Instant::now();
         }
 
