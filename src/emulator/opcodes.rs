@@ -1,5 +1,5 @@
 use crate::emulator::emulator::Emulator;
-use crate::errors::error::Error;
+use crate::errors::error::{Cause, Error};
 use crate::events::Event;
 
 pub fn execute_opcode(emulator: &mut Emulator, opcode: u16) -> Option<Event> {
@@ -28,14 +28,18 @@ pub fn execute_opcode(emulator: &mut Emulator, opcode: u16) -> Option<Event> {
 
             if vx > 15 {
                 return Some(Event::ReportErrorAndExit(Error::new(
-                    format!("Invalid instruction parameters - No variable register with index {} - Instruction {:#06x} is located at memory location {}", vx, opcode, emulator.pc - 2)
+                    "Error executing program - Please ensure its a valid Chip 8 Program".to_string(),
+                    Cause::new(
+                        Some(format!("Invalid instruction parameters - No variable register with index {} exists - Instruction {:#06x} is located at memory location {}", vx, opcode, emulator.pc - 2)),
+                        None,
+                    ),
                 )));
             }
 
             emulator.v_registers[vx] = (opcode & 0x00FF) as u8;
         }
 
-            _ => {
+        _ => {
             return report_exit_unknown_instruction(emulator, opcode);
         }
     }
@@ -46,7 +50,11 @@ pub fn execute_opcode(emulator: &mut Emulator, opcode: u16) -> Option<Event> {
 fn report_exit_unknown_instruction(emulator: &mut Emulator, opcode: u16) -> Option<Event> {
     Some(Event::ReportErrorAndExit(
         Error::new(
-            format!("Unknown Instruction: {:#06x} - Instruction is located at memory location {}", opcode, emulator.pc - 2)
-        )
+            "Error executing program - Please ensure its a valid Chip 8 Program".to_string(),
+            Cause::new(
+                Some(format!("Unknown instruction: {:#06x} - Instruction is located at memory location {}", opcode, emulator.pc - 2)),
+                None,
+            ),
+        ),
     ))
 }

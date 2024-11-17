@@ -1,9 +1,10 @@
-use crate::errors::error::Error;
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
-use crate::emulator::opcodes;
+
 use crate::events::Event;
+use crate::emulator::opcodes;
+use crate::errors::error::{Cause, Error};
 
 const FONT_BYTES: [u8; 80] = [
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -86,18 +87,18 @@ impl Emulator {
 
                 if let Err(error) = result {
                     return Err(
-                        Error::new_with_cause(
+                        Error::new(
                             format!("Error reading file at {} - Please ensure it is a valid file.", filepath.display()),
-                            Box::new(error),
-                        )
+                            Cause::new(None, Some(Box::new(error))),
+                        ),
                     );
                 }
 
                 if data.len() > MEMORY_SIZE - INSTRUCTIONS_START {
-                    return Err(Error::new(format!(
-                        "Error reading file at {} - File exceeds maximum data size of {} bytes.",
-                        filepath.display(), MEMORY_SIZE - INSTRUCTIONS_START
-                    )));
+                    return Err(Error::new(
+                        format!("Error reading file at {} - File exceeds maximum data size of {} bytes.", filepath.display(), MEMORY_SIZE - INSTRUCTIONS_START),
+                        Cause::new(Some(format!("File with size of {} bytes exceeds maximum data size of {} bytes.", data.len(), MEMORY_SIZE - INSTRUCTIONS_START)), None),
+                    ));
                 }
 
                 // Add instructions and font to memory
@@ -107,10 +108,10 @@ impl Emulator {
 
             Err(error) => {
                 return Err(
-                    Error::new_with_cause(
+                    Error::new(
                         format!("Error opening file at {} - Please ensure the path points to a valid file", filepath.display()),
-                        Box::new(error),
-                    )
+                        Cause::new(None, Some(Box::new(error))),
+                    ),
                 )
             }
         }
