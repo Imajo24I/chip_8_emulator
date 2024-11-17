@@ -18,8 +18,21 @@ pub fn execute_opcode(emulator: &mut Emulator, opcode: u16) -> Option<Event> {
         }
 
         0x1000 => {
-            // 1NNN - Jump
+            // 1NNN - Jump to NNN
             emulator.pc = (opcode & 0x0FFF) as usize;
+        }
+
+        0x6000 => {
+            // 6XNN - Set VX to NN
+            let vx = ((opcode & 0x0F00) >> 8) as usize;
+
+            if vx > 15 {
+                return Some(Event::ReportErrorAndExit(Error::new(
+                    format!("Invalid instruction parameters - No variable register with index {} - Instruction {:#06x} is located at memory location {}", vx, opcode, emulator.pc - 2)
+                )));
+            }
+
+            emulator.v_registers[vx] = (opcode & 0x00FF) as u8;
         }
 
             _ => {
@@ -33,7 +46,7 @@ pub fn execute_opcode(emulator: &mut Emulator, opcode: u16) -> Option<Event> {
 fn report_exit_unknown_instruction(emulator: &mut Emulator, opcode: u16) -> Option<Event> {
     Some(Event::ReportErrorAndExit(
         Error::new(
-            format!("Unknown Instruction: {:#06x} - Located at memory location {}", opcode, emulator.pc - 2)
+            format!("Unknown Instruction: {:#06x} - Instruction is located at memory location {}", opcode, emulator.pc - 2)
         )
     ))
 }

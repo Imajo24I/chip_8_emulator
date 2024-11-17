@@ -34,30 +34,30 @@ pub struct Emulator {
 
     // Memory
     // 4096 bytes of memory
-    memory: [u8; MEMORY_SIZE],
+    pub memory: [u8; MEMORY_SIZE],
 
     // Program Counter
     // Used to store location of the next instruction
-    pub(crate) pc: usize,
+    pub pc: usize,
 
     // Index Register
     // Used to point at locations in memory
-    i_register: u16,
+    pub i_register: u16,
 
     // Stack
     // Used to call and return from subroutines (functions)
-    stack: Vec<u16>,
+    pub stack: Vec<u16>,
 
     // General-purpose variable registers
-    v_registers: [u8; 16],
+    pub v_registers: [u8; 16],
 
     // Delay Timer
     // Decrements 60 times per second
-    delay_timer: u8,
+    pub delay_timer: u8,
 
     // Sound Timer
     // Functions like the Delay Timer, however also gives of a beep sounds when not 0
-    sound_timer: u8,
+    pub sound_timer: u8,
 }
 
 impl Emulator {
