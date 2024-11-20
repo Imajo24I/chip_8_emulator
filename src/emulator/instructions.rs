@@ -4,21 +4,16 @@ use crate::events::Event;
 
 pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
     match opcode & 0xF000 {
-        0x0000 => {
-            match opcode & 0x00FF {
-                0x00E0 => {
-                    // 00E0 - Clear display
-                    emulator.display.fill_with(|| [false; 64]);
-                }
-
-                _ => {
-                    return unknown_instruction_err(emulator, opcode);
-                }
-            }
-        }
+        0x0000 => x_0000(emulator, opcode)?,
 
         0x1000 => {
             // 1NNN - Jump to NNN
+            emulator.pc = (opcode & 0x0FFF) as usize;
+        }
+
+        0x2000 => {
+            // 2NNN - Call subroutine at NNN
+            emulator.stack.push(emulator.pc);
             emulator.pc = (opcode & 0x0FFF) as usize;
         }
 
@@ -79,13 +74,9 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<(), E
             emulator.i_register = opcode & 0x0FFF;
         }
 
-        0xD000 => {
-            x_dxyn(emulator, opcode)?;
-        }
+        0xD000 => x_dxyn(emulator, opcode)?,
 
-        _ => {
-            unknown_instruction_err(emulator, opcode)?;
-        }
+        _ => unknown_instruction_err(emulator, opcode)?,
     }
 
     Ok(())
@@ -128,6 +119,37 @@ fn x_dxyn(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
 
         if y + row == 32 {
             break;
+        }
+    }
+
+    Ok(())
+}
+
+fn x_0000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
+    match opcode & 0x00FF {
+        0x00E0 => {
+            // 00E0 - Clear display
+            emulator.display.fill_with(|| [false; 64]);
+        }
+
+        0x00EE => {
+            // 00EE - Return from subroutine
+            match emulator.stack.pop() {
+                Some(pc) => emulator.pc = pc,
+                None => {
+                    return Err(Event::ReportErrorAndExit(Error::new(
+                        "Error executing program - Please ensure its a valid Chip 8 Program".to_string(),
+                        Cause::new(
+                            Some(format!("No subroutine to return from - Instruction {:#06x} is located at memory location {}", opcode, emulator.pc - 2)),
+                            None,
+                        )
+                    )));
+                }
+            }
+        }
+
+        _ => {
+            return unknown_instruction_err(emulator, opcode);
         }
     }
 

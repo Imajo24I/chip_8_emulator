@@ -47,7 +47,7 @@ pub struct Emulator {
 
     // Stack
     // Used to call and return from subroutines (functions)
-    pub stack: Vec<u16>,
+    pub stack: Vec<usize>,
 
     // General-purpose variable registers
     pub v_registers: [u8; 16],
