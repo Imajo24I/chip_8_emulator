@@ -22,6 +22,30 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<(), E
             emulator.pc = (opcode & 0x0FFF) as usize;
         }
 
+        0x3000 => {
+            // 3XNN - Skip next instruction if VX == NN
+            if get_v_reg_value(((opcode & 0x0F00) >> 8) as usize, opcode, emulator)?
+                == (opcode & 0x00FF) as u8 {
+                emulator.pc += 2;
+            }
+        }
+
+        0x4000 => {
+            // 4XNN - Skip next instruction if VX != NN
+            if get_v_reg_value(((opcode & 0x0F00) >> 8) as usize, opcode, emulator)?
+                != (opcode & 0x00FF) as u8 {
+                emulator.pc += 2;
+            }
+        }
+
+        0x5000 => {
+            // 5XY0 - Skip next instruction of VX == VY
+            if get_v_reg_value(((opcode & 0x0F00) >> 8) as usize, opcode, emulator)?
+                == get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)? {
+                emulator.pc += 2;
+            }
+        }
+
         0x6000 => {
             // 6XNN - Set VX to NN
             let vx = ((opcode & 0x0F00) >> 8) as usize;
@@ -42,17 +66,25 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<(), E
             }
         }
 
+        0x9000 => {
+            // 5XY0 - Skip next instruction of VX == VY
+            if get_v_reg_value(((opcode & 0x0F00) >> 8) as usize, opcode, emulator)?
+                != get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)? {
+                emulator.pc += 2;
+            }
+        }
+
         0xA000 => {
             // ANNN - Set index register to NNN
             emulator.i_register = opcode & 0x0FFF;
         }
 
         0xD000 => {
-            return x_dxyn(emulator, opcode);
+            x_dxyn(emulator, opcode)?;
         }
 
         _ => {
-            return unknown_instruction_err(emulator, opcode);
+            unknown_instruction_err(emulator, opcode)?;
         }
     }
 
@@ -114,12 +146,17 @@ fn unknown_instruction_err(emulator: &mut Emulator, opcode: u16) -> Result<(), E
     ))
 }
 
+fn get_v_reg_value(vx: usize, opcode: u16, emulator: &mut Emulator) -> Result<u8, Event> {
+    validate_v_reg_index(vx, opcode, emulator)?;
+    Ok(emulator.v_registers[vx])
+}
+
 fn validate_v_reg_index(vx: usize, opcode: u16, emulator: &mut Emulator) -> Result<(), Event> {
     if vx > 15 {
         Err(Event::ReportErrorAndExit(Error::new(
             "Error executing program - Please ensure its a valid Chip 8 Program".to_string(),
             Cause::new(
-                Some(format!("Invalid instruction parameters - No variable register with index {} exists - Instruction {:#06x} is located at memory location {}", vx,opcode , emulator.pc - 2)),
+                Some(format!("Invalid instruction parameters - No variable register with index {} exists - Instruction {:#06x} is located at memory location {}", vx, opcode, emulator.pc - 2)),
                 None,
             ),
         )))
