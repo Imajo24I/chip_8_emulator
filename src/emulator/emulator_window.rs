@@ -25,8 +25,9 @@ impl EmulatorWindow {
         ui.ctx().request_repaint();
 
         if self.last_cycle.elapsed() >= DURATION_PER_CYCLE {
-            let event = self.emulator.run_cycle();
-            if event.is_some() { return event }
+            if let Err(event) = self.emulator.run_cycle() {
+                return Some(event);
+            }
 
             self.last_cycle = Instant::now();
         }

@@ -2,7 +2,7 @@ use crate::emulator::emulator::Emulator;
 use crate::errors::error::{Cause, Error};
 use crate::events::Event;
 
-pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Option<Event> {
+pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
     match opcode & 0xF000 {
         0x0000 => {
             match opcode & 0x00FF {
@@ -12,7 +12,7 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Option<Event
                 }
 
                 _ => {
-                    return report_exit_unknown_instruction(emulator, opcode);
+                    return unknown_instruction_err(emulator, opcode);
                 }
             }
         }
@@ -25,19 +25,14 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Option<Event
         0x6000 => {
             // 6XNN - Set VX to NN
             let vx = ((opcode & 0x0F00) >> 8) as usize;
-
-            let event = validate_v_reg_index(vx, opcode, emulator);
-            if event.is_some() { return event; }
-
+            validate_v_reg_index(vx, opcode, emulator)?;
             emulator.v_registers[vx] = (opcode & 0x00FF) as u8;
         }
 
         0x7000 => {
             // 7XNN - Add NN to VX
             let vx = ((opcode & 0x0F00) >> 8) as usize;
-
-            let event = validate_v_reg_index(vx, opcode, emulator);
-            if event.is_some() { return event; }
+            validate_v_reg_index(vx, opcode, emulator)?;
 
             let nn = opcode & 0x00FF;
             if nn > 255 {
@@ -57,22 +52,21 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Option<Event
         }
 
         _ => {
-            return report_exit_unknown_instruction(emulator, opcode);
+            return unknown_instruction_err(emulator, opcode);
         }
     }
 
-    None
+    Ok(())
 }
 
-fn x_dxyn(emulator: &mut Emulator, opcode: u16) -> Option<Event> {
+fn x_dxyn(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
     // DXYN - Draw sprite at coordinate VX, VY with N bytes of sprite data
 
     let vx = ((opcode & 0x0F00) >> 8) as usize;
     let vy = ((opcode & 0x00F0) >> 4) as usize;
 
     for v in [vx, vy].iter() {
-        let event = validate_v_reg_index(*v, opcode, emulator );
-        if event.is_some() { return event; }
+        validate_v_reg_index(*v, opcode, emulator)?;
     }
 
     let x = (emulator.v_registers[vx] & 63) as usize;
@@ -105,11 +99,11 @@ fn x_dxyn(emulator: &mut Emulator, opcode: u16) -> Option<Event> {
         }
     }
 
-    None
+    Ok(())
 }
 
-fn report_exit_unknown_instruction(emulator: &mut Emulator, opcode: u16) -> Option<Event> {
-    Some(Event::ReportErrorAndExit(
+fn unknown_instruction_err(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
+    Err(Event::ReportErrorAndExit(
         Error::new(
             "Error executing program - Please ensure its a valid Chip 8 Program".to_string(),
             Cause::new(
@@ -120,9 +114,9 @@ fn report_exit_unknown_instruction(emulator: &mut Emulator, opcode: u16) -> Opti
     ))
 }
 
-fn validate_v_reg_index(vx: usize, opcode: u16, emulator: &mut Emulator) -> Option<Event> {
+fn validate_v_reg_index(vx: usize, opcode: u16, emulator: &mut Emulator) -> Result<(), Event> {
     if vx > 15 {
-        Some(Event::ReportErrorAndExit(Error::new(
+        Err(Event::ReportErrorAndExit(Error::new(
             "Error executing program - Please ensure its a valid Chip 8 Program".to_string(),
             Cause::new(
                 Some(format!("Invalid instruction parameters - No variable register with index {} exists - Instruction {:#06x} is located at memory location {}", vx,opcode , emulator.pc - 2)),
@@ -130,6 +124,6 @@ fn validate_v_reg_index(vx: usize, opcode: u16, emulator: &mut Emulator) -> Opti
             ),
         )))
     } else {
-        None
+        Ok(())
     }
 }

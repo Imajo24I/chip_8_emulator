@@ -119,10 +119,10 @@ impl Emulator {
         Ok(memory)
     }
 
-    pub fn run_cycle(&mut self) -> Option<Event> {
+    pub fn run_cycle(&mut self) -> Result<(), Event> {
         // Exit if no more instructions left
         if self.pc >= MEMORY_SIZE {
-            return Some(Event::Exit);
+            return Err(Event::Exit);
         }
 
         if self.delay_timer > 0 {
