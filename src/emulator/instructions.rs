@@ -67,7 +67,7 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<(), E
         }
 
         0x9000 => {
-            // 5XY0 - Skip next instruction of VX == VY
+            // 9XY0 - Skip next instruction of VX != VY
             if get_v_reg_value(((opcode & 0x0F00) >> 8) as usize, opcode, emulator)?
                 != get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)? {
                 emulator.pc += 2;
