@@ -57,10 +57,12 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<(), E
             validate_v_reg_index(vx, opcode, emulator)?;
 
             let nn = opcode & 0x00FF;
-            if emulator.v_registers[vx] as u16 + nn > 255 {
-                emulator.v_registers[vx] = 255;
+            let sum = emulator.v_registers[vx] as u16 + nn;
+
+            if sum > 255 {
+                emulator.v_registers[vx] = (sum - 256) as u8;
             } else {
-                emulator.v_registers[vx] += nn as u8;
+                emulator.v_registers[vx] = sum as u8;
             }
         }
 
