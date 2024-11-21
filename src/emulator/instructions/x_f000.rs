@@ -27,8 +27,15 @@ pub fn x_f000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
 
         0x001E => {
             // FX1E - Add value of VX to I
-            emulator.i_register +=
-                get_v_reg_value(((opcode & 0x0F00) >> 8) as usize, opcode, emulator)? as usize;
+            let x = get_v_reg_value(((opcode & 0x0F00) >> 8) as usize, opcode, emulator)?;
+
+            if (emulator.i_register + x as usize) > 0x0FFF {
+                emulator.v_registers[0xF] = 1;
+            } else {
+                emulator.v_registers[0xF] = 0;
+            }
+
+            emulator.i_register = (emulator.i_register + x as usize) & 0xFFF;
         }
 
         0x000A => {
@@ -64,7 +71,7 @@ pub fn x_f000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
             // FX55 - Store registers V0 to VX in memory starting at address I
             let x = get_v_reg_value(((opcode & 0x0F00) >> 8) as usize, opcode, emulator)?;
 
-            if x > 16 {
+            if x > 15 {
                 return Err(Event::ReportErrorAndExit(Error::new(
                     "Error executing program - Please ensure its a valid Chip 8 Program".to_string(),
                     Cause::new(
@@ -78,7 +85,7 @@ pub fn x_f000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
                 i_reg_out_of_bounds_err(x as usize, opcode, emulator)?;
             }
 
-            for vy in 0..x {
+            for vy in 0..=x {
                 emulator.memory[emulator.i_register + vy as usize] = emulator.v_registers[vy as usize];
             }
         }
@@ -87,7 +94,7 @@ pub fn x_f000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
             // FX65 - Read registers V0 to VX from memory starting at address I
             let x = get_v_reg_value(((opcode & 0x0F00) >> 8) as usize, opcode, emulator)?;
 
-            if x > 16 {
+            if x > 15 {
                 return Err(Event::ReportErrorAndExit(Error::new(
                     "Error executing program - Please ensure its a valid Chip 8 Program".to_string(),
                     Cause::new(
@@ -101,8 +108,8 @@ pub fn x_f000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
                 i_reg_out_of_bounds_err(x as usize, opcode, emulator)?;
             }
 
-            for vy in 0..x {
-                emulator.v_registers[vy as usize] = emulator.memory[emulator.i_register + vy as usize];
+            for vy in 0..=x {
+                emulator.v_registers[vy as usize] = emulator.memory[emulator.i_register + vy as usize] & 0xFF;
             }
         }
 
