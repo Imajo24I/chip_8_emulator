@@ -53,7 +53,7 @@ pub fn x_8000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
 
             if sum > 255 {
                 emulator.v_registers[0xF] = 1;
-                emulator.v_registers[vx] = 255;
+                emulator.v_registers[vx] = (sum - 256) as u8;
             } else {
                 emulator.v_registers[0xF] = 0;
                 emulator.v_registers[vx] = sum as u8;
