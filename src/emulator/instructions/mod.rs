@@ -1,7 +1,9 @@
 mod x_8000;
 mod x_0000;
+mod x_f000;
 
 use crate::emulator::emulator::Emulator;
+use crate::emulator::instructions::x_f000::x_f000;
 use crate::errors::error::{Cause, Error};
 use crate::events::Event;
 
@@ -78,10 +80,12 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<(), E
 
         0xA000 => {
             // ANNN - Set index register to NNN
-            emulator.i_register = opcode & 0x0FFF;
+            emulator.i_register = (opcode & 0x0FFF) as usize;
         }
 
         0xD000 => x_dxyn(emulator, opcode)?,
+
+        0xF000 => x_f000(emulator, opcode)?,
 
         _ => unknown_instruction_err(emulator, opcode)?,
     }
@@ -108,7 +112,7 @@ fn x_dxyn(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
     let n = (opcode & 0x000F) as usize;
 
     for row in 0..n {
-        let sprite_data = emulator.memory[emulator.i_register as usize + row];
+        let sprite_data = emulator.memory[emulator.i_register + row];
         let mut bit_x = x;
         for bit in (0..8).rev() {
             let current_bit = (sprite_data >> bit) & 1;

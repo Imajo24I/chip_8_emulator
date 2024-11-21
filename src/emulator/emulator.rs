@@ -6,7 +6,7 @@ use crate::events::Event;
 use crate::emulator::instructions;
 use crate::errors::error::{Cause, Error};
 
-const FONT_BYTES: [u8; 80] = [
+const FONT_SET: [u8; 80] = [
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
     0x20, 0x60, 0x20, 0x20, 0x70, // 1
     0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
@@ -27,8 +27,6 @@ const FONT_BYTES: [u8; 80] = [
 
 const MEMORY_SIZE: usize = 4096;
 const INSTRUCTIONS_START: usize = 0x200;
-const FONT_START: usize = 0x50;
-const FONT_END: usize = 0x0A0;
 
 pub struct Emulator {
     pub display: [[bool; 64]; 32],
@@ -43,7 +41,7 @@ pub struct Emulator {
 
     // Index Register
     // Used to point at locations in memory
-    pub i_register: u16,
+    pub i_register: usize,
 
     // Stack
     // Used to call and return from subroutines (functions)
@@ -103,7 +101,7 @@ impl Emulator {
 
                 // Add instructions and font to memory
                 memory[INSTRUCTIONS_START..INSTRUCTIONS_START + data.len()].copy_from_slice(&data);
-                memory[FONT_START..FONT_END].copy_from_slice(&FONT_BYTES);
+                memory[0..FONT_SET.len()].copy_from_slice(&FONT_SET);
             }
 
             Err(error) => {
