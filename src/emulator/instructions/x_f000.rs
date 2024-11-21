@@ -64,8 +64,6 @@ pub fn x_f000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
             // FX55 - Store registers V0 to VX in memory starting at address I
             let x = get_v_reg_value(((opcode & 0x0F00) >> 8) as usize, opcode, emulator)?;
 
-            println!("v reg {} has value of {}", (opcode & 0x0F00) >> 8, x);
-
             if x > 16 {
                 return Err(Event::ReportErrorAndExit(Error::new(
                     "Error executing program - Please ensure its a valid Chip 8 Program".to_string(),
