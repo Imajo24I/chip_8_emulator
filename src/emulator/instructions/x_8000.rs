@@ -52,11 +52,11 @@ pub fn x_8000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
                 get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)? as u16;
 
             if sum > 255 {
-                emulator.v_registers[0xF] = 1;
                 emulator.v_registers[vx] = (sum - 256) as u8;
+                emulator.v_registers[0xF] = 1;
             } else {
-                emulator.v_registers[0xF] = 0;
                 emulator.v_registers[vx] = sum as u8;
+                emulator.v_registers[0xF] = 0;
             }
         }
 
@@ -69,11 +69,11 @@ pub fn x_8000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
                 get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)? as i16;
 
             if diff < 0 {
-                emulator.v_registers[0xF] = 0;
                 emulator.v_registers[vx] = (diff + 256) as u8;
+                emulator.v_registers[0xF] = 0;
             } else {
-                emulator.v_registers[0xF] = 1;
                 emulator.v_registers[vx] = diff as u8;
+                emulator.v_registers[0xF] = 1;
             }
         }
 
@@ -83,11 +83,10 @@ pub fn x_8000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
             validate_v_reg_index(vx, opcode, emulator)?;
 
             let y = get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)?;
-
             let shifted_out_bit = y & 1;
-            emulator.v_registers[0xF] = shifted_out_bit;
 
             emulator.v_registers[vx] = y >> 1;
+            emulator.v_registers[0xF] = shifted_out_bit;
         }
 
         0x0007 => {
@@ -99,25 +98,24 @@ pub fn x_8000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
                 get_v_reg_value(vx, opcode, emulator)? as i16;
 
             if diff < 0 {
-                emulator.v_registers[0xF] = 0;
                 emulator.v_registers[vx] = (diff - 256) as u8;
+                emulator.v_registers[0xF] = 0;
             } else {
-                emulator.v_registers[0xF] = 1;
                 emulator.v_registers[vx] = diff as u8;
+                emulator.v_registers[0xF] = 1;
             }
         }
 
         0x000E => {
-            // 8XY6 - Set VX to VY shifted by 1 to the left. Set VF to the shifted out bit.
+            // 8XYE - Set VX to VY shifted by 1 to the left. Set VF to the shifted out bit.
             let vx = ((opcode & 0x0F00) >> 8) as usize;
             validate_v_reg_index(vx, opcode, emulator)?;
 
             let y = get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)?;
-
             let shifted_out_bit = y >> 7;
-            emulator.v_registers[0xF] = shifted_out_bit;
 
             emulator.v_registers[vx] = y << 1;
+            emulator.v_registers[0xF] = shifted_out_bit;
         }
 
         _ => unknown_instruction_err(emulator, opcode)?
