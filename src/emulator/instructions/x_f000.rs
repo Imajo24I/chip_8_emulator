@@ -109,7 +109,7 @@ pub fn x_f000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
             }
 
             for vy in 0..=x {
-                emulator.v_registers[vy as usize] = emulator.memory[emulator.i_register + vy as usize] & 0xFF;
+                emulator.v_registers[vy as usize] = emulator.memory[emulator.i_register + vy as usize];
             }
         }
 
