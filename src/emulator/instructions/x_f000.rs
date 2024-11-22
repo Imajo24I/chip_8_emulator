@@ -92,24 +92,15 @@ pub fn x_f000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
 
         0x0065 => {
             // FX65 - Read registers V0 to VX from memory starting at address I
-            let x = get_v_reg_value(((opcode & 0x0F00) >> 8) as usize, opcode, emulator)?;
+            let vx = ((opcode & 0x0F00) >> 8) as usize;
+            validate_v_reg_index(vx, opcode, emulator)?;
 
-            if x > 15 {
-                return Err(Event::ReportErrorAndExit(Error::new(
-                    "Error executing program - Please ensure its a valid Chip 8 Program".to_string(),
-                    Cause::new(
-                        Some(format!("Invalid instruction parameters - No variable register with index {} exists - Instruction {:#06x} is located at memory location {}", x, opcode, emulator.pc - 2)),
-                        None,
-                    ),
-                )));
+            if emulator.i_register + vx > 0x0FFF {
+                i_reg_out_of_bounds_err(vx, opcode, emulator)?;
             }
 
-            if emulator.i_register + x as usize > 0x0FFF {
-                i_reg_out_of_bounds_err(x as usize, opcode, emulator)?;
-            }
-
-            for vy in 0..=x {
-                emulator.v_registers[vy as usize] = emulator.memory[emulator.i_register + vy as usize];
+            for vy in 0..=vx {
+                emulator.v_registers[vy] = emulator.memory[emulator.i_register + vy];
             }
         }
 
