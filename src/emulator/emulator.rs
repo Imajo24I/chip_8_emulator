@@ -1,7 +1,8 @@
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
-
+use eframe::egui::{InputState, Key};
 use crate::events::Event;
 use crate::emulator::instructions;
 use crate::errors::error::{Cause, Error};
@@ -26,10 +27,13 @@ const FONT_SET: [u8; 80] = [
 ];
 
 const MEMORY_SIZE: usize = 4096;
+// Instructions start at 0x200, since 0x000 - 0x1FF are reserved for interpreter
 const INSTRUCTIONS_START: usize = 0x200;
 
 pub struct Emulator {
     pub display: [[bool; 64]; 32],
+
+    pub keypad: Keypad,
 
     // Memory
     // 4096 bytes of memory
@@ -62,8 +66,8 @@ pub struct Emulator {
 impl Emulator {
     pub fn new(filepath: &Path) -> Result<Self, Error> {
         Ok(Self {
+            keypad: Keypad::default(),
             display: [[false; 64]; 32],
-            // Start at 0x200, since 0x000 - 0x1FF are reserved for interpreter
             pc: INSTRUCTIONS_START,
             i_register: 0,
             stack: Vec::new(),
@@ -141,5 +145,33 @@ impl Emulator {
 
     fn make_sound(&mut self) {
         // TODO: Implement this
+    }
+}
+
+const HEX_KEY_TO_KEY: HashMap<u8, Key> = HashMap::from([
+    (1, Key::Num1), (2, Key::Num2), (3, Key::Num3), (0xC, Key::Num4),
+    (0x4, Key::Q), (0x5, Key::W), (0x6, Key::E), (0xD, Key::R),
+    (0x7, Key::A), (0x8, Key::S), (0x9, Key::D), (0xE, Key::F),
+    (0xA, Key::Y), (0x0, Key::X), (0xB, Key::C), (0xF, Key::V),
+]);
+
+#[derive(Default)]
+pub struct Keypad {
+    // Hexadecimal based keypad
+    pub keys: [bool; 16],
+}
+
+impl Keypad {
+    pub fn update_keys(&mut self, input_state: &InputState) {
+        for (hex_key, key) in HEX_KEY_TO_KEY.iter() {
+            if input_state.key_released(*key) {
+                self.keys[*hex_key] = true;
+            }
+        }
+
+        // German keyboards have Y and Z switched, so also check for Z
+        if input_state.key_released(Key::Z) {
+            self.keys[0xa] = true;
+        }
     }
 }

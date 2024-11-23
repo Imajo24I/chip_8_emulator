@@ -2,7 +2,7 @@ use crate::emulator::emulator::Emulator;
 use crate::errors::error::Error;
 use crate::events::Event;
 use eframe::egui;
-use eframe::egui::{Pos2, Ui};
+use eframe::egui::{InputState, Pos2, Ui};
 use std::path::Path;
 use std::time::{Duration, Instant};
 
