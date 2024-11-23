@@ -1,9 +1,12 @@
 use crate::emulator::emulator::Emulator;
-use crate::emulator::instructions::{get_v_reg_value, unknown_instruction_err, validate_v_reg_index};
+use crate::emulator::instructions::{
+    get_v_reg_value, unknown_instruction_err, validate_v_reg_index,
+};
 use crate::errors::error::{Cause, Error};
 use crate::events::Event;
+use eframe::egui::InputState;
 
-pub fn x_f000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
+pub fn x_f000(emulator: &mut Emulator, opcode: u16, input_state: &InputState) -> Result<(), Event> {
     match opcode & 0x00FF {
         0x0007 => {
             // FX07 - Set VX to value of delay timer
@@ -43,9 +46,11 @@ pub fn x_f000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
             let vx = ((opcode & 0x0F00) >> 8) as usize;
             validate_v_reg_index(vx, opcode, emulator)?;
 
-            // TODO: implement keypad and this
-
-            emulator.pc -= 2;
+            if let Some(key) = emulator.get_released_key(input_state) {
+                emulator.v_registers[vx] = key;
+            } else {
+                emulator.pc -= 2;
+            }
         }
 
         0x0029 => {
@@ -101,7 +106,11 @@ pub fn x_f000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
     Ok(())
 }
 
-fn i_reg_out_of_bounds_err(i_reg_shift: usize, opcode: u16, emulator: &mut Emulator) -> Result<(), Event> {
+fn i_reg_out_of_bounds_err(
+    i_reg_shift: usize,
+    opcode: u16,
+    emulator: &mut Emulator,
+) -> Result<(), Event> {
     Err(Event::ReportErrorAndExit(Error::new(
         "Error executing program - Please ensure its a valid Chip 8 Program".to_string(),
         Cause::new(

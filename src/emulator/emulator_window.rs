@@ -25,13 +25,13 @@ impl EmulatorWindow {
         ui.ctx().request_repaint();
 
         if self.last_cycle.elapsed() >= DURATION_PER_CYCLE {
-            ui.input(|input_state| {
-                self.emulator.keypad.update_keys(input_state);
-            });
+            let mut event = None;
 
-            if let Err(event) = self.emulator.run_cycle() {
-                return Some(event);
-            }
+            ui.input(|input_state| {
+                if let Err(returned_event) = self.emulator.run_cycle(input_state) {
+                    event = Some(returned_event);
+                }
+            });
 
             self.last_cycle = Instant::now();
         }
@@ -43,7 +43,10 @@ impl EmulatorWindow {
         // Draw Display
         for (row_index, row) in self.emulator.display.iter().enumerate() {
             for (pixel_index, pixel) in row.iter().enumerate() {
-                let pixel_pos = Pos2::new(pixel_index as f32 * pixel_width, row_index as f32 * pixel_height);
+                let pixel_pos = Pos2::new(
+                    pixel_index as f32 * pixel_width,
+                    row_index as f32 * pixel_height,
+                );
 
                 let rect = egui::Rect::from_two_pos(
                     pixel_pos,

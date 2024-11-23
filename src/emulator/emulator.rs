@@ -1,11 +1,12 @@
 use std::collections::HashMap;
+use crate::emulator::instructions;
+use crate::errors::error::{Cause, Error};
+use crate::events::Event;
+
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
 use eframe::egui::{InputState, Key};
-use crate::events::Event;
-use crate::emulator::instructions;
-use crate::errors::error::{Cause, Error};
 
 const FONT_SET: [u8; 80] = [
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -32,8 +33,6 @@ const INSTRUCTIONS_START: usize = 0x200;
 
 pub struct Emulator {
     pub display: [[bool; 64]; 32],
-
-    pub keypad: Keypad,
 
     // Memory
     // 4096 bytes of memory
@@ -66,7 +65,6 @@ pub struct Emulator {
 impl Emulator {
     pub fn new(filepath: &Path) -> Result<Self, Error> {
         Ok(Self {
-            keypad: Keypad::default(),
             display: [[false; 64]; 32],
             pc: INSTRUCTIONS_START,
             i_register: 0,
@@ -121,7 +119,7 @@ impl Emulator {
         Ok(memory)
     }
 
-    pub fn run_cycle(&mut self) -> Result<(), Event> {
+    pub fn run_cycle(&mut self, input_state: &InputState) -> Result<(), Event> {
         // Exit if no more instructions left
         if self.pc >= MEMORY_SIZE {
             return Err(Event::Exit);
@@ -140,40 +138,59 @@ impl Emulator {
         let opcode = (self.memory[self.pc] as u16) << 8 | (self.memory[self.pc + 1] as u16);
         self.pc += 2;
 
-        instructions::execute_instruction(self, opcode)
+        instructions::execute_instruction(self, opcode, input_state)
     }
 
     fn make_sound(&mut self) {
         // TODO: Implement this
     }
-}
 
-#[derive(Default)]
-pub struct Keypad {
-    // Hexadecimal based keypad
-    pub keys: [bool; 16],
-}
-
-impl Keypad {
-    pub fn update_keys(&mut self, input_state: &InputState) {
-        for (hex_key, key) in Self::hex_key_to_key_hashmap().iter() {
-            if input_state.key_released(*key) {
-                self.keys[*hex_key as usize] = true;
-            }
-        }
-
-        // German keyboards have Y and Z switched, so also check for Z
-        if input_state.key_released(Key::Z) {
-            self.keys[0xa] = true;
-        }
-    }
-
-    pub fn hex_key_to_key_hashmap() -> HashMap<u8, Key> {
+    pub fn hex_to_key_hashmap() -> HashMap<u8, Key> {
         HashMap::from([
             (1, Key::Num1), (2, Key::Num2), (3, Key::Num3), (0xC, Key::Num4),
             (0x4, Key::Q), (0x5, Key::W), (0x6, Key::E), (0xD, Key::R),
             (0x7, Key::A), (0x8, Key::S), (0x9, Key::D), (0xE, Key::F),
             (0xA, Key::Y), (0x0, Key::X), (0xB, Key::C), (0xF, Key::V),
         ])
+    }
+
+    pub fn hex_to_key(&self, hex: u8, opcode: u16) -> Result<Key, Event> {
+        self.is_key_valid(hex, opcode)?;
+        Ok(Self::hex_to_key_hashmap().get(&hex).cloned().unwrap())
+    }
+
+    pub fn is_key_valid(&self, key: u8, opcode: u16) -> Result<(), Event> {
+        if key > 0xF {
+            Err(Event::ReportErrorAndExit(Error::new(
+                        "Error executing program - Please ensure its a valid Chip 8 Program".to_string(),
+                        Cause::new(
+                            Some(format!("Invalid instruction parameters - No key named {:#06x} exists - Instruction {:#06x} is located at memory location {}", key, opcode, self.pc - 2)),
+                            None,
+                        ),
+                    )))
+        } else {
+            Ok(())
+        }
+    }
+
+    pub fn is_key_pressed(&self, key: u8, input_state: &InputState, opcode: u16) -> Result<bool, Event> {
+        Ok(input_state.keys_down.contains(&self.hex_to_key(key, opcode)?)
+                    // Keyboards with german layout have Y and Z switched, so also check for Z
+                    || (key == 0xA && input_state.keys_down.contains(&Key::Z)))
+    }
+
+    pub fn get_released_key(&self, input_state: &InputState) -> Option<u8> {
+        for (hex, key) in Self::hex_to_key_hashmap().iter() {
+            if input_state.key_released(*key) {
+                return Some(*hex);
+            }
+        }
+
+        // Keyboards with german layout have Y and Z switched, so also check for Z
+        if input_state.key_released(Key::Z) {
+            return Some(0xA);
+        }
+
+        None
     }
 }
