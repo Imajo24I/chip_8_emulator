@@ -2,7 +2,7 @@ use crate::emulator::emulator::Emulator;
 use crate::errors::error::Error;
 use crate::events::Event;
 use eframe::egui;
-use eframe::egui::{InputState, Pos2, Ui};
+use eframe::egui::{Pos2, Ui};
 use std::path::Path;
 use std::time::{Duration, Instant};
 
@@ -25,6 +25,10 @@ impl EmulatorWindow {
         ui.ctx().request_repaint();
 
         if self.last_cycle.elapsed() >= DURATION_PER_CYCLE {
+            ui.input(|input_state| {
+                self.emulator.keypad.update_keys(input_state);
+            });
+
             if let Err(event) = self.emulator.run_cycle() {
                 return Some(event);
             }

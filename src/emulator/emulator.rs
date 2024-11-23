@@ -148,13 +148,6 @@ impl Emulator {
     }
 }
 
-const HEX_KEY_TO_KEY: HashMap<u8, Key> = HashMap::from([
-    (1, Key::Num1), (2, Key::Num2), (3, Key::Num3), (0xC, Key::Num4),
-    (0x4, Key::Q), (0x5, Key::W), (0x6, Key::E), (0xD, Key::R),
-    (0x7, Key::A), (0x8, Key::S), (0x9, Key::D), (0xE, Key::F),
-    (0xA, Key::Y), (0x0, Key::X), (0xB, Key::C), (0xF, Key::V),
-]);
-
 #[derive(Default)]
 pub struct Keypad {
     // Hexadecimal based keypad
@@ -163,9 +156,9 @@ pub struct Keypad {
 
 impl Keypad {
     pub fn update_keys(&mut self, input_state: &InputState) {
-        for (hex_key, key) in HEX_KEY_TO_KEY.iter() {
+        for (hex_key, key) in Self::hex_key_to_key_hashmap().iter() {
             if input_state.key_released(*key) {
-                self.keys[*hex_key] = true;
+                self.keys[*hex_key as usize] = true;
             }
         }
 
@@ -173,5 +166,14 @@ impl Keypad {
         if input_state.key_released(Key::Z) {
             self.keys[0xa] = true;
         }
+    }
+
+    pub fn hex_key_to_key_hashmap() -> HashMap<u8, Key> {
+        HashMap::from([
+            (1, Key::Num1), (2, Key::Num2), (3, Key::Num3), (0xC, Key::Num4),
+            (0x4, Key::Q), (0x5, Key::W), (0x6, Key::E), (0xD, Key::R),
+            (0x7, Key::A), (0x8, Key::S), (0x9, Key::D), (0xE, Key::F),
+            (0xA, Key::Y), (0x0, Key::X), (0xB, Key::C), (0xF, Key::V),
+        ])
     }
 }
