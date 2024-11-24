@@ -29,10 +29,8 @@ impl EmulatorWindow {
         });
 
         if self.last_cycle.elapsed() >= DURATION_PER_CYCLE {
-            //fixme: Event unused?
-            let mut event = None;
-            if let Err(returned_event) = self.emulator.run_cycle() {
-                event = Some(returned_event);
+            if let Err(event) = self.emulator.run_cycle() {
+                return Some(event);
             }
 
             self.emulator.keypad.reset_keys();
