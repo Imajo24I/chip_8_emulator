@@ -21,14 +21,11 @@ impl Default for Keypad {
 impl Keypad {
     pub fn update_keys(&mut self, input_state: &egui::InputState) {
         for key in self.keys.iter_mut() {
-            let pressed = input_state.key_pressed(key.egui_key_format);
-            let released = input_state.key_released(key.egui_key_format);
-
-            if pressed {
+            if key.state == KeyState::Unpressed && input_state.key_pressed(key.egui_key_format) {
                 key.state = KeyState::Pressed;
             }
 
-            if released {
+            if key.state != KeyState::Released && input_state.key_released(key.egui_key_format) {
                 key.state = KeyState::Released;
             }
         }
