@@ -24,15 +24,18 @@ impl EmulatorWindow {
     pub fn update(&mut self, ui: &mut Ui) -> Option<Event> {
         ui.ctx().request_repaint();
 
+        ui.input(|input_state| {
+            self.emulator.keypad.update_keys(input_state);
+        });
+
         if self.last_cycle.elapsed() >= DURATION_PER_CYCLE {
+            //fixme: Event unused?
             let mut event = None;
+            if let Err(returned_event) = self.emulator.run_cycle() {
+                event = Some(returned_event);
+            }
 
-            ui.input(|input_state| {
-                if let Err(returned_event) = self.emulator.run_cycle(input_state) {
-                    event = Some(returned_event);
-                }
-            });
-
+            self.emulator.keypad.reset_keys();
             self.last_cycle = Instant::now();
         }
 

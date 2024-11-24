@@ -4,9 +4,8 @@ use crate::emulator::instructions::{
 };
 use crate::errors::error::{Cause, Error};
 use crate::events::Event;
-use eframe::egui::InputState;
 
-pub fn x_f000(emulator: &mut Emulator, opcode: u16, input_state: &InputState) -> Result<(), Event> {
+pub fn x_f000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
     match opcode & 0x00FF {
         0x0007 => {
             // FX07 - Set VX to value of delay timer
@@ -46,7 +45,7 @@ pub fn x_f000(emulator: &mut Emulator, opcode: u16, input_state: &InputState) ->
             let vx = ((opcode & 0x0F00) >> 8) as usize;
             validate_v_reg_index(vx, opcode, emulator)?;
 
-            if let Some(key) = emulator.get_released_key(input_state) {
+            if let Some(key) = emulator.keypad.get_released_key() {
                 emulator.v_registers[vx] = key;
             } else {
                 emulator.pc -= 2;

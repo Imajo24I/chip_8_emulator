@@ -4,13 +4,12 @@ mod x_f000;
 mod x_dxyn;
 mod x_e000;
 
-use eframe::egui::InputState;
 use crate::emulator::emulator::Emulator;
 use crate::emulator::instructions::x_f000::x_f000;
 use crate::errors::error::{Cause, Error};
 use crate::events::Event;
 
-pub fn execute_instruction(emulator: &mut Emulator, opcode: u16, input_state: &InputState) -> Result<(), Event> {
+pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
     match opcode & 0xF000 {
         0x0000 => x_0000::x_0000(emulator, opcode)?,
 
@@ -93,9 +92,9 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16, input_state: &I
 
         0xD000 => x_dxyn::x_dxyn(emulator, opcode)?,
 
-        0xE000 => x_e000::x_e000(emulator, opcode, input_state)?,
+        0xE000 => x_e000::x_e000(emulator, opcode)?,
 
-        0xF000 => x_f000(emulator, opcode, input_state)?,
+        0xF000 => x_f000(emulator, opcode)?,
 
         _ => unknown_instruction_err(emulator, opcode)?,
     }
