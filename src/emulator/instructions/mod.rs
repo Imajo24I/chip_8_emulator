@@ -86,6 +86,11 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16, input_state: &I
             emulator.i_register = (opcode & 0x0FFF) as usize;
         }
 
+        0xB000 => {
+            // BNNN - Jump to NNN + V0
+            emulator.pc = ((opcode & 0x0FFF) + emulator.v_registers[0] as u16) as usize;
+        }
+
         0xD000 => x_dxyn::x_dxyn(emulator, opcode)?,
 
         0xE000 => x_e000::x_e000(emulator, opcode, input_state)?,
