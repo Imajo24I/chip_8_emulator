@@ -1,12 +1,12 @@
-use std::path::Path;
 use eframe::egui::{Context, FontId};
 use eframe::{egui, Frame};
+use std::path::Path;
 
 use crate::emulator::emulator_window::EmulatorWindow;
 use crate::errors::error_report_window::ErrorReportWindow;
+use crate::events::Event;
 use crate::startup::StartupWindow;
 use crate::utils;
-use crate::events::Event;
 
 pub const FONT_SIZE: f32 = 20f32;
 
@@ -29,12 +29,14 @@ impl EmulatorApp {
 
                 Ok(Box::new(Self::default()))
             }),
-        ).unwrap();
+        )
+        .unwrap();
     }
 
     fn options() -> eframe::NativeOptions {
         eframe::NativeOptions {
-            viewport: egui::ViewportBuilder::default().with_inner_size([1280f32, 640f32])
+            viewport: egui::ViewportBuilder::default()
+                .with_inner_size([1280f32, 640f32])
                 .with_icon(utils::icon_data()),
             ..Default::default()
         }
@@ -67,9 +69,7 @@ impl EmulatorApp {
                 self.emulator_window = Some(emulator_window);
                 None
             }
-            Err(error) => {
-                Some(Event::ReportErrorAndExit(error))
-            }
+            Err(error) => Some(Event::ReportErrorAndExit(error)),
         }
     }
 

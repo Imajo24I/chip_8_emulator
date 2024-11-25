@@ -6,36 +6,35 @@ use eframe::egui::{Pos2, Ui};
 use std::path::Path;
 use std::time::{Duration, Instant};
 
-const DURATION_PER_CYCLE: Duration = Duration::from_millis(1000 / 60);
-
 pub struct EmulatorWindow {
     emulator: Emulator,
-    last_cycle: Instant,
+    pub frame_time: Duration,
+    pub next_frame: Instant,
 }
 
 impl EmulatorWindow {
     pub fn new(filepath: &Path) -> Result<Self, Error> {
         Ok(Self {
             emulator: Emulator::new(filepath)?,
-            last_cycle: Instant::now(),
+            frame_time: Duration::from_secs_f32(1f32 / 60f32),
+            next_frame: Instant::now(),
         })
     }
 
     pub fn update(&mut self, ui: &mut Ui) -> Option<Event> {
         ui.ctx().request_repaint();
 
+        self.wait_for_next_frame();
+
         ui.input(|input_state| {
             self.emulator.keypad.update_keys(input_state);
         });
 
-        if self.last_cycle.elapsed() >= DURATION_PER_CYCLE {
-            if let Err(event) = self.emulator.run_cycle() {
-                return Some(event);
-            }
-
-            self.emulator.keypad.reset_keys();
-            self.last_cycle = Instant::now();
+        if let Err(event) = self.emulator.run_cycle() {
+            return Some(event);
         }
+
+        self.emulator.keypad.reset_keys();
 
         let window_size = ui.ctx().input(|i| i.viewport().inner_rect.unwrap().size());
         let pixel_width = window_size.x / 64f32;
@@ -65,5 +64,11 @@ impl EmulatorWindow {
         }
 
         None
+    }
+
+    fn wait_for_next_frame(&mut self) {
+        let now = Instant::now();
+        self.next_frame = now + self.frame_time;
+        std::thread::sleep(self.next_frame - now);
     }
 }
