@@ -90,6 +90,14 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<(), E
             emulator.pc = ((opcode & 0x0FFF) + emulator.v_registers[0] as u16) as usize;
         }
 
+        0xC000 => {
+            // CXNN - Binary AND a random number with NN and set VX to the number
+            let vx = ((opcode & 0x0F00) >> 8) as usize;
+            validate_v_reg_index(vx, opcode, emulator)?;
+
+            emulator.v_registers[vx] = rand::random::<u8>() & (opcode & 0x00FF) as u8;
+        }
+
         0xD000 => x_dxyn::x_dxyn(emulator, opcode)?,
 
         0xE000 => x_e000::x_e000(emulator, opcode)?,
