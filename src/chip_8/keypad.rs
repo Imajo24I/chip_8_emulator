@@ -4,7 +4,7 @@ use eframe::egui;
 use std::array::from_fn;
 use std::cmp::PartialEq;
 use std::collections::HashMap;
-use crate::emulator::emulator::Emulator;
+use crate::chip_8::emulator::Emulator;
 
 pub struct Keypad {
     pub keys: [Key; 16],

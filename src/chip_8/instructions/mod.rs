@@ -4,8 +4,8 @@ mod x_f000;
 mod x_dxyn;
 mod x_e000;
 
-use crate::emulator::emulator::Emulator;
-use crate::emulator::instructions::x_f000::x_f000;
+use crate::chip_8::emulator::Emulator;
+use crate::chip_8::instructions::x_f000::x_f000;
 use crate::errors::error::{Cause, Error};
 use crate::events::Event;
 

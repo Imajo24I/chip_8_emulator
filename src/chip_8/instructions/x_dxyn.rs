@@ -1,5 +1,5 @@
-use crate::emulator::emulator::Emulator;
-use crate::emulator::instructions::validate_v_reg_index;
+use crate::chip_8::emulator::Emulator;
+use crate::chip_8::instructions::validate_v_reg_index;
 use crate::events::Event;
 
 pub fn x_dxyn(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {

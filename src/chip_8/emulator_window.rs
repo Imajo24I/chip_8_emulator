@@ -1,4 +1,4 @@
-use crate::emulator::emulator::Emulator;
+use crate::chip_8::emulator::Emulator;
 use crate::errors::error::Error;
 use crate::events::Event;
 use eframe::egui;

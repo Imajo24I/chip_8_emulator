@@ -1,5 +1,5 @@
-use crate::emulator::emulator::Emulator;
-use crate::emulator::instructions::unknown_instruction_err;
+use crate::chip_8::emulator::Emulator;
+use crate::chip_8::instructions::unknown_instruction_err;
 use crate::errors::error::{Cause, Error};
 use crate::events::Event;
 

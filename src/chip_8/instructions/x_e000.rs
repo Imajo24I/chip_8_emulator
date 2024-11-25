@@ -1,6 +1,6 @@
-use crate::emulator::emulator::Emulator;
-use crate::emulator::instructions::{get_v_reg_value, unknown_instruction_err};
-use crate::emulator::keypad::Keypad;
+use crate::chip_8::emulator::Emulator;
+use crate::chip_8::instructions::{get_v_reg_value, unknown_instruction_err};
+use crate::chip_8::keypad::Keypad;
 use crate::events::Event;
 
 pub fn x_e000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {

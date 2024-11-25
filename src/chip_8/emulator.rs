@@ -1,8 +1,8 @@
-use crate::emulator::instructions;
+use crate::chip_8::instructions;
 use crate::errors::error::{Cause, Error};
 use crate::events::Event;
 
-use crate::emulator::keypad::Keypad;
+use crate::chip_8::keypad::Keypad;
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;

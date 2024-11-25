@@ -1,5 +1,5 @@
-use crate::emulator::emulator::Emulator;
-use crate::emulator::instructions::{
+use crate::chip_8::emulator::Emulator;
+use crate::chip_8::instructions::{
     get_v_reg_value, unknown_instruction_err, validate_v_reg_index,
 };
 use crate::errors::error::{Cause, Error};

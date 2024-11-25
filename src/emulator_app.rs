@@ -2,7 +2,7 @@ use eframe::egui::{Context, FontId};
 use eframe::{egui, Frame};
 use std::path::Path;
 
-use crate::emulator::emulator_window::EmulatorWindow;
+use crate::chip_8::emulator_window::EmulatorWindow;
 use crate::errors::error_report_window::ErrorReportWindow;
 use crate::events::Event;
 use crate::startup::StartupWindow;
