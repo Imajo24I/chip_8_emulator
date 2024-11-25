@@ -5,7 +5,7 @@ use crate::chip_8::instructions::{
 use crate::errors::error::{Cause, Error};
 use crate::events::Event;
 
-pub fn x_f000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
+pub fn op_f000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
     match opcode & 0x00FF {
         0x0007 => {
             // FX07 - Set VX to value of delay timer

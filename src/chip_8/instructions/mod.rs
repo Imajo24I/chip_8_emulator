@@ -1,17 +1,17 @@
-mod x_8000;
-mod x_0000;
-mod x_f000;
-mod x_dxyn;
-mod x_e000;
+mod op_8000;
+mod op_0000;
+mod op_f000;
+mod op_dxyn;
+mod op_e000;
 
 use crate::chip_8::emulator::Emulator;
-use crate::chip_8::instructions::x_f000::x_f000;
+use crate::chip_8::instructions::op_f000::op_f000;
 use crate::errors::error::{Cause, Error};
 use crate::events::Event;
 
 pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
     match opcode & 0xF000 {
-        0x0000 => x_0000::x_0000(emulator, opcode)?,
+        0x0000 => op_0000::op_0000(emulator, opcode)?,
 
         0x1000 => {
             // 1NNN - Jump to NNN
@@ -70,7 +70,7 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<(), E
             }
         }
 
-        0x8000 => x_8000::x_8000(emulator, opcode)?,
+        0x8000 => op_8000::op_8000(emulator, opcode)?,
 
         0x9000 => {
             // 9XY0 - Skip next instruction of VX != VY
@@ -98,11 +98,11 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<(), E
             emulator.v_registers[vx] = rand::random::<u8>() & (opcode & 0x00FF) as u8;
         }
 
-        0xD000 => x_dxyn::x_dxyn(emulator, opcode)?,
+        0xD000 => op_dxyn::op_dxyn(emulator, opcode)?,
 
-        0xE000 => x_e000::x_e000(emulator, opcode)?,
+        0xE000 => op_e000::op_e000(emulator, opcode)?,
 
-        0xF000 => x_f000(emulator, opcode)?,
+        0xF000 => op_f000(emulator, opcode)?,
 
         _ => unknown_instruction_err(emulator, opcode)?,
     }

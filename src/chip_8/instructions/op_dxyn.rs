@@ -2,7 +2,7 @@ use crate::chip_8::emulator::Emulator;
 use crate::chip_8::instructions::validate_v_reg_index;
 use crate::events::Event;
 
-pub fn x_dxyn(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
+pub fn op_dxyn(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
     // DXYN - Draw sprite at coordinate VX, VY with N bytes of sprite data
 
     let (x, y, height) = get_x_y_height(emulator, opcode)?;

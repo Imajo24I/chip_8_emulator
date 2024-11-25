@@ -3,7 +3,7 @@ use crate::chip_8::instructions::unknown_instruction_err;
 use crate::errors::error::{Cause, Error};
 use crate::events::Event;
 
-pub fn x_0000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
+pub fn op_0000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
     match opcode & 0x00FF {
         0x00E0 => {
             // 00E0 - Clear display

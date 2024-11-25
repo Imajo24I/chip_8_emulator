@@ -2,7 +2,7 @@ use crate::chip_8::emulator::Emulator;
 use crate::chip_8::instructions::{get_v_reg_value, unknown_instruction_err, validate_v_reg_index};
 use crate::events::Event;
 
-pub fn x_8000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
+pub fn op_8000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
     match opcode & 0x000F {
         0x0000 => {
             // 8XY0 - Set VX to value of VY
