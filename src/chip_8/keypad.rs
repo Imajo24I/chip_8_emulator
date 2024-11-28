@@ -10,22 +10,20 @@ pub struct Keypad {
     pub keys: [Key; 16],
 }
 
-impl Default for Keypad {
-    fn default() -> Self {
+impl Keypad {
+    pub fn new(use_german_keyboard_layout: bool) -> Self {
         Self {
-            keys: from_fn(|hex| Key::from_hex(hex as u8)),
+            keys: from_fn(|hex| Key::from_hex(hex as u8, use_german_keyboard_layout)),
         }
     }
-}
 
-impl Keypad {
     pub fn update_keys(&mut self, input_state: &egui::InputState) {
         for key in self.keys.iter_mut() {
-            if key.state == KeyState::Unpressed && input_state.key_pressed(key.egui_key_format) {
+            if key.state == KeyState::Unpressed && input_state.key_pressed(key.egui_key) {
                 key.state = KeyState::Pressed;
             }
 
-            if key.state != KeyState::Released && input_state.key_released(key.egui_key_format) {
+            if key.state != KeyState::Released && input_state.key_released(key.egui_key) {
                 key.state = KeyState::Released;
             }
         }
@@ -74,13 +72,13 @@ impl Keypad {
 
 pub struct Key {
     pub state: KeyState,
-    pub egui_key_format: egui::Key,
-    pub hex_key_format: u8,
+    pub egui_key: egui::Key,
+    pub hey_key: u8,
 }
 
 impl Key {
-    fn hex_to_key_hashmap() -> HashMap<u8, egui::Key> {
-        let a_key = if crate::USE_GERMAN_KEYBOARD_LAYOUT {
+    fn hex_to_key_hashmap(german_keyboard_layout: bool) -> HashMap<u8, egui::Key> {
+        let a_key = if german_keyboard_layout {
             (0xA, egui::Key::Y)
         } else {
             (0xA, egui::Key::Z)
@@ -106,14 +104,14 @@ impl Key {
         ])
     }
 
-    pub fn from_hex(hex_key_format: u8) -> Self {
+    pub fn from_hex(hex_key: u8, use_german_keyboard: bool) -> Self {
         Self {
             state: Default::default(),
-            egui_key_format: Self::hex_to_key_hashmap()
-                .get(&hex_key_format)
+            egui_key: Self::hex_to_key_hashmap(use_german_keyboard)
+                .get(&hex_key)
                 .cloned()
                 .unwrap(),
-            hex_key_format,
+            hey_key: hex_key,
         }
     }
 }

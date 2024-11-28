@@ -6,6 +6,7 @@ use crate::chip_8::keypad::Keypad;
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
+use std::time::Duration;
 
 const FONT_SET: [u8; 80] = [
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -31,6 +32,8 @@ const MEMORY_SIZE: usize = 4096;
 const INSTRUCTIONS_START: usize = 0x200;
 
 pub struct Emulator {
+    pub config: Config,
+
     pub display: [[bool; 64]; 32],
 
     pub keypad: Keypad,
@@ -64,10 +67,11 @@ pub struct Emulator {
 }
 
 impl Emulator {
-    pub fn new(filepath: &Path) -> Result<Self, Error> {
+    pub fn new(filepath: &Path, config: Config) -> Result<Self, Error> {
         Ok(Self {
+            config,
             display: [[false; 64]; 32],
-            keypad: Keypad::default(),
+            keypad: Keypad::new(config.use_german_keyboard_layout),
             pc: INSTRUCTIONS_START,
             i_register: 0,
             stack: Vec::new(),
@@ -145,5 +149,22 @@ impl Emulator {
 
     fn make_sound(&mut self) {
         // TODO: Implement this
+    }
+}
+
+#[derive(Copy, Clone)]
+pub struct Config {
+    pub cycle_time: Duration,
+    pub cycles_per_second: u16,
+    pub use_german_keyboard_layout: bool,
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            cycle_time: Duration::from_secs_f32(1f32 / 60f32),
+            cycles_per_second: 60,
+            use_german_keyboard_layout: true,
+        }
     }
 }

@@ -1,22 +1,22 @@
-use crate::chip_8::emulator::Emulator;
+use crate::chip_8::emulator::{Config, Emulator};
 use crate::errors::error::Error;
 use crate::events::Event;
 use eframe::egui;
 use eframe::egui::{Pos2, Ui};
 use std::path::Path;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
 pub struct EmulatorWindow {
     emulator: Emulator,
-    pub frame_time: Duration,
-    pub next_frame: Instant,
+    config: Config,
+    next_frame: Instant,
 }
 
 impl EmulatorWindow {
-    pub fn new(filepath: &Path) -> Result<Self, Error> {
+    pub fn new(filepath: &Path, config: Config) -> Result<Self, Error> {
         Ok(Self {
-            emulator: Emulator::new(filepath)?,
-            frame_time: Duration::from_secs_f32(1f32 / 60f32),
+            emulator: Emulator::new(filepath, config)?,
+            config,
             next_frame: Instant::now(),
         })
     }
@@ -68,7 +68,7 @@ impl EmulatorWindow {
 
     fn wait_for_next_frame(&mut self) {
         let now = Instant::now();
-        self.next_frame = now + self.frame_time;
+        self.next_frame = now + self.config.cycle_time;
         std::thread::sleep(self.next_frame - now);
     }
 }

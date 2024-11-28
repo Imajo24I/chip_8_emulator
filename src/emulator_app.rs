@@ -1,12 +1,10 @@
-use eframe::egui::{Context, FontId};
-use eframe::{egui, Frame};
-use std::path::Path;
-
 use crate::chip_8::emulator_window::EmulatorWindow;
 use crate::errors::error_report_window::ErrorReportWindow;
 use crate::events::Event;
 use crate::startup::StartupWindow;
 use crate::utils;
+use eframe::egui::{Context, FontId};
+use eframe::{egui, Frame};
 
 pub const FONT_SIZE: f32 = 20f32;
 
@@ -45,7 +43,7 @@ impl EmulatorApp {
     fn startup_window(&mut self, ctx: &Context) {
         egui::Window::new("Startup")
             .collapsible(false)
-            .default_size([840f32, 6400f32])
+            .default_size([840f32, 640f32])
             .show(ctx, |ui| {
                 self.startup_window.update(ui);
             });
@@ -61,8 +59,11 @@ impl EmulatorApp {
         });
     }
 
-    fn create_emulator_window(&mut self, path: &Path) -> Option<Event> {
-        let emulator_window = EmulatorWindow::new(path);
+    fn create_emulator_window(&mut self) -> Option<Event> {
+        let path = self.startup_window.startup_info.filepath.as_ref().unwrap();
+        let config = self.startup_window.startup_info.config;
+
+        let emulator_window = EmulatorWindow::new(path, config);
 
         match emulator_window {
             Ok(emulator_window) => {
@@ -93,13 +94,13 @@ impl eframe::App for EmulatorApp {
             self.error_report_window(ctx);
         } else if self.emulator_window.is_some() {
             self.emulator_window(ctx);
-        } else if self.startup_window.use_selected_filepath {
-            if let Some(filepath) = &self.startup_window.startup_info.filepath {
-                if let Some(event) = self.create_emulator_window(&filepath.clone()) {
+        } else if self.startup_window.start_emulation {
+            if self.startup_window.startup_info.filepath.is_some() {
+                if let Some(event) = self.create_emulator_window() {
                     event.execute(ctx, self);
                 }
             } else {
-                self.startup_window.use_selected_filepath = false;
+                self.startup_window.start_emulation = false;
                 self.startup_window(ctx);
             }
         } else {

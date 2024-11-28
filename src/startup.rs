@@ -1,13 +1,15 @@
+use crate::chip_8::emulator::Config;
+use crate::emulator_app::FONT_SIZE;
 use crate::utils;
-use eframe::egui::{Context, Ui};
+use eframe::egui::{Context, RichText, Slider, Ui};
 use std::env;
 use std::path::PathBuf;
-
+use std::time::Duration;
 
 #[derive(Default)]
 pub struct StartupWindow {
     pub startup_info: StartUpInfo,
-    pub use_selected_filepath: bool,
+    pub start_emulation: bool,
     looked_in_args: bool,
 }
 
@@ -29,56 +31,59 @@ impl StartupWindow {
     }
 
     pub fn update(&mut self, ui: &mut Ui) {
+        ui.vertical_centered(|ui| {
+            self.update_filepath(ui);
+
+            ui.end_row();
+            ui.add_space(20f32);
+
+            self.update_emulator_config(ui);
+
+            ui.end_row();
+            ui.add_space(20f32);
+
+            if utils::button("Start Emulation", ui).clicked() {
+                self.start_emulation = true;
+            }
+
+            ui.end_row();
+            ui.add_space(20f32);
+        });
+    }
+
+    fn update_filepath(&mut self, ui: &mut Ui) {
         if !self.looked_in_args {
             self.looked_in_args = true;
-            if let Some(filepath) = Self::get_filepath() {
+            if let Some(filepath) = Self::filepath_from_args() {
                 self.startup_info.filepath = Some(filepath);
-                self.use_selected_filepath = true;
+                self.start_emulation = true;
             }
         }
 
-        ui.vertical_centered(|ui| {
-            ui.add_space(10f32);
+        ui.add_space(10f32);
 
-            ui.label("Please specify the path to the chip 8 program to execute.");
+        ui.label("Selected File:");
 
-            ui.end_row();
+        ui.end_row();
 
-            ui.label("Drag-and-drop the chip 8 program here, or specify the path using the file dialog.");
+        if let Some(filepath) = &self.startup_info.filepath {
+            ui.label(filepath.to_str().unwrap());
+        } else {
+            ui.label("No file selected");
+        }
 
-            ui.end_row();
-            ui.add_space(20f32);
+        ui.end_row();
+        ui.add_space(10f32);
 
-            self.file_dialog(ui);
+        self.file_dialog(ui);
 
-            ui.end_row();
-            ui.add_space(20f32);
-
-            ui.label("Selected Path:");
-
-            ui.end_row();
-
-            if let Some(filepath) = &self.startup_info.filepath {
-                ui.label(filepath.to_str().unwrap());
-            } else {
-                ui.label("No Filepath Selected");
-            }
-
-            ui.end_row();
-            ui.add_space(30f32);
-
-            if utils::button("Use selected Path", ui).clicked() {
-                self.use_selected_filepath = true;
-            }
-
-            ui.end_row();
-            ui.add_space(20f32)
-        });
+        ui.end_row();
+        ui.add_space(20f32);
 
         self.collect_dropped_files(ui.ctx());
     }
 
-    fn get_filepath() -> Option<PathBuf> {
+    fn filepath_from_args() -> Option<PathBuf> {
         let args = env::args();
 
         if args.len() > 1 {
@@ -88,10 +93,36 @@ impl StartupWindow {
             None
         }
     }
-}
 
+    pub fn update_emulator_config(&mut self, ui: &mut Ui) {
+        ui.checkbox(
+            &mut self.startup_info.config.use_german_keyboard_layout,
+            RichText::new("Use german keyboard layout").size(FONT_SIZE),
+        );
+
+        ui.end_row();
+        ui.add_space(20f32);
+
+        ui.label(format!("Cycles per second: {}", self.startup_info.config.cycles_per_second));
+
+        let spacing = ui.spacing();
+        if ui
+            .add_sized(
+                [spacing.slider_width, spacing.slider_rail_height],
+                Slider::new(&mut self.startup_info.config.cycles_per_second, 1..=999)
+                    .show_value(false),
+            )
+            .changed()
+        {
+            let cycles_per_second = self.startup_info.config.cycles_per_second;
+            self.startup_info.config.cycle_time =
+                Duration::from_secs_f32(1f32 / cycles_per_second as f32)
+        }
+    }
+}
 
 #[derive(Default)]
 pub struct StartUpInfo {
     pub filepath: Option<PathBuf>,
+    pub config: Config,
 }

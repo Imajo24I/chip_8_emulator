@@ -10,9 +10,6 @@ pub mod events;
 
 use crate::emulator_app::EmulatorApp;
 
-// TODO: Make this configurable
-const USE_GERMAN_KEYBOARD_LAYOUT: bool = true;
-
 fn main() {
     EmulatorApp::run();
 }
