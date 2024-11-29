@@ -34,11 +34,11 @@ impl EmulatorWindow {
             return Some(event);
         }
 
+        // Draw Display
         let window_size = ui.ctx().input(|i| i.viewport().inner_rect.unwrap().size());
         let pixel_width = window_size.x / 64f32;
         let pixel_height = window_size.y / 32f32;
 
-        // Draw Display
         for (row_index, row) in self.emulator.display.iter().enumerate() {
             for (pixel_index, pixel) in row.iter().enumerate() {
                 let pixel_pos = Pos2::new(
