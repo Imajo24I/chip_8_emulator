@@ -66,7 +66,7 @@ impl EmulatorWindow {
 
     fn wait_for_next_frame(&mut self) {
         let now = Instant::now();
-        self.next_frame = now + self.config.cycle_time;
+        self.next_frame += self.config.cycle_time;
         std::thread::sleep(self.next_frame - now);
     }
 }
