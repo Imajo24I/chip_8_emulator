@@ -19,7 +19,7 @@ impl Keypad {
 
     pub fn update_keys(&mut self, input_state: &egui::InputState) {
         for key in self.keys.iter_mut() {
-            key.state = if input_state.key_down(key.egui_key) {
+            key.state = if input_state.key_down( key.egui_key) {
                 KeyState::Pressed
             } else if input_state.key_released(key.egui_key) {
                 KeyState::Released
@@ -32,9 +32,6 @@ impl Keypad {
     pub fn is_key_pressed(&self, key: usize) -> bool {
         // Also check for Released, since if it has been released, it also has been pressed
         let state = &self.keys[key].state;
-        if key == 0xF || key == 0xE {
-            println!("Key: {:?} ; State: {:?}", key, state)
-        }
         state == &KeyState::Pressed || state == &KeyState::Released
     }
 
@@ -114,7 +111,6 @@ impl Key {
 }
 
 #[derive(PartialEq)]
-#[derive(Debug)]
 pub enum KeyState {
     Unpressed,
     Pressed,
