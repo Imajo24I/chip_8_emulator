@@ -1,10 +1,10 @@
+use crate::chip_8::emulator::Emulator;
 use crate::errors::error::{Cause, Error};
 use crate::events::Event;
 use eframe::egui;
 use std::array::from_fn;
 use std::cmp::PartialEq;
 use std::collections::HashMap;
-use crate::chip_8::emulator::Emulator;
 
 pub struct Keypad {
     pub keys: [Key; 16],
@@ -19,25 +19,22 @@ impl Keypad {
 
     pub fn update_keys(&mut self, input_state: &egui::InputState) {
         for key in self.keys.iter_mut() {
-            if key.state == KeyState::Unpressed && input_state.key_pressed(key.egui_key) {
-                key.state = KeyState::Pressed;
+            key.state = if input_state.key_down(key.egui_key) {
+                KeyState::Pressed
+            } else if input_state.key_released(key.egui_key) {
+                KeyState::Released
+            } else {
+                KeyState::Unpressed
             }
-
-            if key.state != KeyState::Released && input_state.key_released(key.egui_key) {
-                key.state = KeyState::Released;
-            }
-        }
-    }
-
-    pub fn reset_keys(&mut self) {
-        for key in self.keys.iter_mut() {
-            key.state = KeyState::Unpressed;
         }
     }
 
     pub fn is_key_pressed(&self, key: usize) -> bool {
-        // Also check for Released, since if it has been released, it also had been pressed
+        // Also check for Released, since if it has been released, it also has been pressed
         let state = &self.keys[key].state;
+        if key == 0xF || key == 0xE {
+            println!("Key: {:?} ; State: {:?}", key, state)
+        }
         state == &KeyState::Pressed || state == &KeyState::Released
     }
 
@@ -58,12 +55,12 @@ impl Keypad {
     pub fn is_key_valid(key: u8, opcode: u16, emulator: &Emulator) -> Result<(), Event> {
         if key > 0xF {
             Err(Event::ReportErrorAndExit(Error::new(
-                        "Error executing program - Please ensure its a valid Chip 8 Program".to_string(),
-                        Cause::new(
-                            Some(format!("Invalid instruction parameters - No key named {:#06x} exists - Instruction {:#06x} is located at memory location {}", key, opcode, emulator.pc - 2)),
-                            None,
-                        ),
-                    )))
+                "Error executing program - Please ensure its a valid Chip 8 Program".to_string(),
+                Cause::new(
+                    Some(format!("Invalid instruction parameters - No key named {:#06x} exists - Instruction {:#06x} is located at memory location {}", key, opcode, emulator.pc - 2)),
+                    None,
+                ),
+            )))
         } else {
             Ok(())
         }
@@ -117,6 +114,7 @@ impl Key {
 }
 
 #[derive(PartialEq)]
+#[derive(Debug)]
 pub enum KeyState {
     Unpressed,
     Pressed,

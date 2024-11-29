@@ -34,8 +34,6 @@ impl EmulatorWindow {
             return Some(event);
         }
 
-        self.emulator.keypad.reset_keys();
-
         let window_size = ui.ctx().input(|i| i.viewport().inner_rect.unwrap().size());
         let pixel_width = window_size.x / 64f32;
         let pixel_height = window_size.y / 32f32;

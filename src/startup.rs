@@ -116,7 +116,7 @@ impl StartupWindow {
         {
             let cycles_per_second = self.startup_info.config.cycles_per_second;
             self.startup_info.config.cycle_time =
-                Duration::from_secs_f32(1f32 / cycles_per_second as f32)
+                Duration::from_millis(1000 / cycles_per_second as u64)
         }
     }
 }

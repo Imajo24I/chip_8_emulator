@@ -162,7 +162,7 @@ pub struct Config {
 impl Default for Config {
     fn default() -> Self {
         Self {
-            cycle_time: Duration::from_secs_f32(1f32 / 60f32),
+            cycle_time: Duration::from_millis(1000 / 60),
             cycles_per_second: 60,
             use_german_keyboard_layout: true,
         }
