@@ -17,7 +17,7 @@ pub fn op_dxyn(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
                 let x_coord = x + bit;
                 let y_coord = y + row;
 
-                if x_coord <= 64 || y_coord <= 32 {
+                if x_coord < 64 || y_coord < 32 {
                     flip_pixel(x_coord, y_coord, emulator);
                 }
             }
