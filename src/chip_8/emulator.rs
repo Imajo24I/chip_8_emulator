@@ -7,6 +7,7 @@ use std::fs::File;
 use std::io::Read;
 use std::path::Path;
 use std::time::Duration;
+use crate::chip_8::beep::Beeper;
 
 const FONT_SET: [u8; 80] = [
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -33,6 +34,8 @@ const INSTRUCTIONS_START: usize = 0x200;
 
 pub struct Emulator {
     pub config: Config,
+
+    pub beeper: Beeper,
 
     pub display: [[bool; 64]; 32],
 
@@ -70,6 +73,7 @@ impl Emulator {
     pub fn new(filepath: &Path, config: Config) -> Result<Self, Error> {
         Ok(Self {
             config,
+            beeper: Beeper::new(),
             display: [[false; 64]; 32],
             keypad: Keypad::new(config.use_german_keyboard_layout),
             pc: INSTRUCTIONS_START,
@@ -128,6 +132,7 @@ impl Emulator {
     pub fn run_cycle(&mut self) -> Result<(), Event> {
         // Exit if no more instructions left
         if self.pc >= MEMORY_SIZE {
+            self.beeper.stop();
             return Err(Event::Exit);
         }
 
@@ -137,7 +142,10 @@ impl Emulator {
 
         if self.sound_timer > 0 {
             self.sound_timer -= 1;
-            self.make_sound();
+
+            if self.sound_timer == 0 {
+                self.beeper.pause();
+            }
         }
 
         // fetch opcode
@@ -145,10 +153,6 @@ impl Emulator {
         self.pc += 2;
 
         instructions::execute_instruction(self, opcode)
-    }
-
-    fn make_sound(&mut self) {
-        // TODO: Implement this
     }
 }
 

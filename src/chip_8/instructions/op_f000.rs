@@ -1,7 +1,5 @@
 use crate::chip_8::emulator::Emulator;
-use crate::chip_8::instructions::{
-    get_v_reg_value, unknown_instruction_err, validate_v_reg_index,
-};
+use crate::chip_8::instructions::{get_v_reg_value, unknown_instruction_err, validate_v_reg_index};
 use crate::errors::error::{Cause, Error};
 use crate::events::Event;
 
@@ -23,8 +21,16 @@ pub fn op_f000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
 
         0x0018 => {
             // FX18 - Set sound timer to value of VX
+            let currently_playing = emulator.sound_timer > 0;
+
             emulator.sound_timer =
                 get_v_reg_value(((opcode & 0x0F00) >> 8) as usize, opcode, emulator)?;
+
+            if currently_playing && emulator.sound_timer == 0 {
+                emulator.beeper.pause();
+            } else if !currently_playing && emulator.sound_timer > 0 {
+                emulator.beeper.play();
+            }
         }
 
         0x001E => {
