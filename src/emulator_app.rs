@@ -1,5 +1,5 @@
 use crate::chip_8::emulator_window::EmulatorWindow;
-use crate::errors::error_report_window::ErrorReportWindow;
+use crate::error_report_window::ErrorReportWindow;
 use crate::events::Event;
 use crate::startup::StartupWindow;
 use crate::utils;
@@ -70,7 +70,7 @@ impl EmulatorApp {
                 self.emulator_window = Some(emulator_window);
                 None
             }
-            Err(error) => Some(Event::ReportErrorAndExit(error)),
+            Err(error) => Some(Event::ReportError(error)),
         }
     }
 

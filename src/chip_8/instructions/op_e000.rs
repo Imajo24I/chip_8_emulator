@@ -1,9 +1,9 @@
 use crate::chip_8::emulator::Emulator;
 use crate::chip_8::instructions::{get_v_reg_value, unknown_instruction_err};
 use crate::chip_8::keypad::Keypad;
-use crate::events::Event;
+use anyhow::Result;
 
-pub fn op_e000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
+pub fn op_e000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
     match opcode & 0x00FF {
         0x009E => {
             // EX9E - Skip next instruction if key with the value of VX is pressed

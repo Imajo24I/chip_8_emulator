@@ -1,13 +1,13 @@
 use crate::chip_8::instructions;
-use crate::errors::error::{Cause, Error};
 use crate::events::Event;
 
+use crate::chip_8::beep::Beeper;
 use crate::chip_8::keypad::Keypad;
+use anyhow::{anyhow, Error};
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
 use std::time::Duration;
-use crate::chip_8::beep::Beeper;
 
 const FONT_SET: [u8; 80] = [
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -96,18 +96,17 @@ impl Emulator {
                 let result = file.read_to_end(&mut data);
 
                 if let Err(error) = result {
-                    return Err(
-                        Error::new(
-                            format!("Error reading file at {} - Please ensure it is a valid file.", filepath.display()),
-                            Cause::new(None, Some(Box::new(error))),
-                        ),
-                    );
+                    return Err(anyhow!(error).context(format!(
+                        "Error reading file at {}\nPlease ensure it is a valid file.",
+                        filepath.display()
+                    )));
                 }
 
                 if data.len() > MEMORY_SIZE - INSTRUCTIONS_START {
-                    return Err(Error::new(
-                        format!("Error reading file at {} - File exceeds maximum data size of {} bytes.", filepath.display(), MEMORY_SIZE - INSTRUCTIONS_START),
-                        Cause::new(Some(format!("File with size of {} bytes exceeds maximum data size of {} bytes.", data.len(), MEMORY_SIZE - INSTRUCTIONS_START)), None),
+                    return Err(anyhow!(
+                        "File with size of {} bytes exceeds maximum data size of {} bytes.",
+                        data.len(),
+                        MEMORY_SIZE - INSTRUCTIONS_START
                     ));
                 }
 
@@ -117,12 +116,10 @@ impl Emulator {
             }
 
             Err(error) => {
-                return Err(
-                    Error::new(
-                        format!("Error opening file at {} - Please ensure the path points to a valid file", filepath.display()),
-                        Cause::new(None, Some(Box::new(error))),
-                    ),
-                )
+                return Err(anyhow!(error).context(format!(
+                    "Error opening file at {}\nPlease ensure the path points to a valid file",
+                    filepath.display()
+                )))
             }
         }
 
@@ -152,7 +149,11 @@ impl Emulator {
         let opcode = (self.memory[self.pc] as u16) << 8 | (self.memory[self.pc + 1] as u16);
         self.pc += 2;
 
-        instructions::execute_instruction(self, opcode)
+        if let Err(error) = instructions::execute_instruction(self, opcode) {
+            Err(Event::ReportError(error))
+        } else {
+            Ok(())
+        }
     }
 }
 

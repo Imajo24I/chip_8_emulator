@@ -1,9 +1,8 @@
 use crate::chip_8::emulator::Emulator;
 use crate::chip_8::instructions::unknown_instruction_err;
-use crate::errors::error::{Cause, Error};
-use crate::events::Event;
+use anyhow::{anyhow, Result};
 
-pub fn op_0000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
+pub fn op_0000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
     match opcode & 0x00FF {
         0x00E0 => {
             // 00E0 - Clear display
@@ -15,13 +14,7 @@ pub fn op_0000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
             match emulator.stack.pop() {
                 Some(pc) => emulator.pc = pc,
                 None => {
-                    return Err(Event::ReportErrorAndExit(Error::new(
-                        "Error executing program - Please ensure its a valid Chip 8 Program".to_string(),
-                        Cause::new(
-                            Some(format!("No subroutine to return from - Instruction {:#06x} is located at memory location {}", opcode, emulator.pc - 2)),
-                            None,
-                        ),
-                    )));
+                    return Err(anyhow!("No subroutine to return from\nInstruction {:#06x} is located at memory location {}", opcode, emulator.pc - 2));
                 }
             }
         }

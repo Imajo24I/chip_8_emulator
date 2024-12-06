@@ -1,6 +1,5 @@
 use crate::chip_8::emulator::Emulator;
-use crate::errors::error::{Cause, Error};
-use crate::events::Event;
+use anyhow::{anyhow, Result};
 use eframe::egui;
 use std::array::from_fn;
 use std::cmp::PartialEq;
@@ -19,7 +18,7 @@ impl Keypad {
 
     pub fn update_keys(&mut self, input_state: &egui::InputState) {
         for key in self.keys.iter_mut() {
-            key.state = if input_state.key_down( key.egui_key) {
+            key.state = if input_state.key_down(key.egui_key) {
                 KeyState::Pressed
             } else if input_state.key_released(key.egui_key) {
                 KeyState::Released
@@ -49,15 +48,11 @@ impl Keypad {
         None
     }
 
-    pub fn is_key_valid(key: u8, opcode: u16, emulator: &Emulator) -> Result<(), Event> {
+    pub fn is_key_valid(key: u8, opcode: u16, emulator: &Emulator) -> Result<()> {
         if key > 0xF {
-            Err(Event::ReportErrorAndExit(Error::new(
-                "Error executing program - Please ensure its a valid Chip 8 Program".to_string(),
-                Cause::new(
-                    Some(format!("Invalid instruction parameters - No key named {:#06x} exists - Instruction {:#06x} is located at memory location {}", key, opcode, emulator.pc - 2)),
-                    None,
-                ),
-            )))
+            Err(
+                anyhow!("Invalid instruction parameters - No key named {:#06x} exists - Instruction {:#06x} is located at memory location {}", key, opcode, emulator.pc - 2)
+            )
         } else {
             Ok(())
         }

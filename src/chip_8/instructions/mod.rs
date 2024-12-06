@@ -4,12 +4,11 @@ mod op_f000;
 mod op_dxyn;
 mod op_e000;
 
+use anyhow::{anyhow, Result};
 use crate::chip_8::emulator::Emulator;
 use crate::chip_8::instructions::op_f000::op_f000;
-use crate::errors::error::{Cause, Error};
-use crate::events::Event;
 
-pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
+pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<()> {
     match opcode & 0xF000 {
         0x0000 => op_0000::op_0000(emulator, opcode)?,
 
@@ -110,32 +109,20 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<(), E
     Ok(())
 }
 
-fn unknown_instruction_err(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
-    Err(Event::ReportErrorAndExit(
-        Error::new(
-            "Error executing program - Please ensure its a valid Chip 8 Program".to_string(),
-            Cause::new(
-                Some(format!("Unknown instruction: {:#06x} - Instruction is located at memory location {}", opcode, emulator.pc - 2)),
-                None,
-            ),
-        ),
-    ))
+fn unknown_instruction_err(emulator: &mut Emulator, opcode: u16) -> Result<()> {
+    Err(anyhow!("Unknown instruction: {:#06x}\nInstruction is located at memory location {}", opcode, emulator.pc - 2))
 }
 
-fn get_v_reg_value(vx: usize, opcode: u16, emulator: &mut Emulator) -> Result<u8, Event> {
+fn get_v_reg_value(vx: usize, opcode: u16, emulator: &mut Emulator) -> Result<u8> {
     validate_v_reg_index(vx, opcode, emulator)?;
     Ok(emulator.v_registers[vx])
 }
 
-fn validate_v_reg_index(vx: usize, opcode: u16, emulator: &mut Emulator) -> Result<(), Event> {
+fn validate_v_reg_index(vx: usize, opcode: u16, emulator: &mut Emulator) -> Result<()> {
     if vx > 15 {
-        Err(Event::ReportErrorAndExit(Error::new(
-            "Error executing program - Please ensure its a valid Chip 8 Program".to_string(),
-            Cause::new(
-                Some(format!("Invalid instruction parameters - No variable register with index {} exists - Instruction {:#06x} is located at memory location {}", vx, opcode, emulator.pc - 2)),
-                None,
-            ),
-        )))
+        Err(
+            anyhow!("Invalid instruction parameters - No variable register with index {} exists - Instruction {:#06x} is located at memory location {}", vx, opcode, emulator.pc - 2)
+        )
     } else {
         Ok(())
     }

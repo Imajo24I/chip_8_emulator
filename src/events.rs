@@ -1,11 +1,11 @@
 use eframe::egui::{Context, ViewportCommand};
 use crate::emulator_app::EmulatorApp;
-use crate::errors::error::Error;
-use crate::errors::error_report_window::ErrorReportWindow;
+use anyhow::Error;
+use crate::error_report_window::ErrorReportWindow;
 
 pub enum Event {
     Exit,
-    ReportErrorAndExit(Error)
+    ReportError(Error)
 }
 
 impl Event {
@@ -14,7 +14,7 @@ impl Event {
             Self::Exit => {
                 ctx.send_viewport_cmd(ViewportCommand::Close);
             }
-            Self::ReportErrorAndExit(error) => {
+            Self::ReportError(error) => {
                 chip_8_emulator.error_report_window = Some(ErrorReportWindow::new(error))
             }
         }

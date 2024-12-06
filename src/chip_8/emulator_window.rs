@@ -1,10 +1,10 @@
 use crate::chip_8::emulator::{Config, Emulator};
-use crate::errors::error::Error;
 use crate::events::Event;
 use eframe::egui;
 use eframe::egui::{Pos2, Ui};
 use std::path::Path;
 use std::time::Instant;
+use anyhow::Error;
 
 pub struct EmulatorWindow {
     emulator: Emulator,

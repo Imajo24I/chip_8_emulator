@@ -1,9 +1,8 @@
 use crate::chip_8::emulator::Emulator;
 use crate::chip_8::instructions::{get_v_reg_value, unknown_instruction_err, validate_v_reg_index};
-use crate::errors::error::{Cause, Error};
-use crate::events::Event;
+use anyhow::{anyhow, Result};
 
-pub fn op_f000(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
+pub fn op_f000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
     match opcode & 0x00FF {
         0x0007 => {
             // FX07 - Set VX to value of delay timer
@@ -115,12 +114,8 @@ fn i_reg_out_of_bounds_err(
     i_reg_shift: usize,
     opcode: u16,
     emulator: &mut Emulator,
-) -> Result<(), Event> {
-    Err(Event::ReportErrorAndExit(Error::new(
-        "Error executing program - Please ensure its a valid Chip 8 Program".to_string(),
-        Cause::new(
-            Some(format!("I register with value of {} is out of bounds - Instruction {:#06x} is located at memory location {}", emulator.i_register + i_reg_shift, opcode, emulator.pc - 2)),
-            None,
-        ),
-    )))
+) -> Result<()> {
+    Err(anyhow!(
+        "I register with value of {} is out of bounds - Instruction {:#06x} is located at memory location {}", emulator.i_register + i_reg_shift, opcode, emulator.pc - 2
+    ))
 }

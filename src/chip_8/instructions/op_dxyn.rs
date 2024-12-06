@@ -1,8 +1,8 @@
 use crate::chip_8::emulator::Emulator;
 use crate::chip_8::instructions::validate_v_reg_index;
-use crate::events::Event;
+use anyhow::Result;
 
-pub fn op_dxyn(emulator: &mut Emulator, opcode: u16) -> Result<(), Event> {
+pub fn op_dxyn(emulator: &mut Emulator, opcode: u16) -> Result<()> {
     // DXYN - Draw sprite at coordinate VX, VY with N bytes of sprite data
 
     let (x, y, height) = get_x_y_height(emulator, opcode)?;
@@ -36,7 +36,7 @@ fn flip_pixel(x_coord: usize, y_coord: usize, emulator: &mut Emulator) {
     }
 }
 
-fn get_x_y_height(emulator: &mut Emulator, opcode: u16) -> Result<(usize, usize, usize), Event> {
+fn get_x_y_height(emulator: &mut Emulator, opcode: u16) -> Result<(usize, usize, usize)> {
     let vx = ((opcode & 0x0F00) >> 8) as usize;
     validate_v_reg_index(vx, opcode, emulator)?;
 
