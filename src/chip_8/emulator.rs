@@ -1,3 +1,4 @@
+use crate::chip_8::config::Config;
 use crate::chip_8::instructions;
 use crate::events::Event;
 
@@ -7,7 +8,6 @@ use anyhow::{anyhow, Error};
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
-use std::time::Duration;
 
 const FONT_SET: [u8; 80] = [
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -133,6 +133,19 @@ impl Emulator {
             return Err(Event::Exit);
         }
 
+        // Fetch opcode
+        let opcode = (self.memory[self.pc] as u16) << 8 | (self.memory[self.pc + 1] as u16);
+        self.pc += 2;
+
+        // Execute instruction
+        if let Err(error) = instructions::execute_instruction(self, opcode) {
+            Err(Event::ReportError(error))
+        } else {
+            Ok(())
+        }
+    }
+
+    pub fn tick_timers(&mut self) {
         if self.delay_timer > 0 {
             self.delay_timer -= 1;
         }
@@ -143,33 +156,6 @@ impl Emulator {
             if self.sound_timer == 0 {
                 self.beeper.pause();
             }
-        }
-
-        // fetch opcode
-        let opcode = (self.memory[self.pc] as u16) << 8 | (self.memory[self.pc + 1] as u16);
-        self.pc += 2;
-
-        if let Err(error) = instructions::execute_instruction(self, opcode) {
-            Err(Event::ReportError(error))
-        } else {
-            Ok(())
-        }
-    }
-}
-
-#[derive(Copy, Clone)]
-pub struct Config {
-    pub cycle_time: Duration,
-    pub cycles_per_second: u16,
-    pub use_german_keyboard_layout: bool,
-}
-
-impl Default for Config {
-    fn default() -> Self {
-        Self {
-            cycle_time: Duration::from_millis(1000 / 60),
-            cycles_per_second: 60,
-            use_german_keyboard_layout: true,
         }
     }
 }

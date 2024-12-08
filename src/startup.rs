@@ -1,10 +1,9 @@
-use crate::chip_8::emulator::Config;
+use crate::chip_8::config::Config;
 use crate::emulator_app::FONT_SIZE;
 use crate::utils;
-use eframe::egui::{Context, RichText, Slider, Ui};
+use eframe::egui::{Align, Context, RichText, TextEdit, Ui};
 use std::env;
 use std::path::PathBuf;
-use std::time::Duration;
 
 #[derive(Default)]
 pub struct StartupWindow {
@@ -103,20 +102,30 @@ impl StartupWindow {
         ui.end_row();
         ui.add_space(20f32);
 
-        ui.label(format!("Cycles per second: {}", self.startup_info.config.cycles_per_second));
+        ui.label("Cycles per Frame:");
+        ui.add_space(5f32);
 
-        let spacing = ui.spacing();
+        let cycles_per_frame = &mut self.startup_info.config.cycles_per_frame;
+        let mut text = cycles_per_frame.to_string();
+
         if ui
             .add_sized(
-                [spacing.slider_width, spacing.slider_rail_height],
-                Slider::new(&mut self.startup_info.config.cycles_per_second, 1..=999)
-                    .show_value(false),
+                [100f32, 20f32],
+                TextEdit::singleline(&mut text).horizontal_align(Align::Center),
             )
             .changed()
         {
-            let cycles_per_second = self.startup_info.config.cycles_per_second;
-            self.startup_info.config.cycle_time =
-                Duration::from_millis(1000 / cycles_per_second as u64)
+            let mut value = text.parse::<u32>().unwrap_or(*cycles_per_frame);
+
+            if text.is_empty() {
+                value = 0;
+            }
+
+            *cycles_per_frame = if value > 9999 {
+                *cycles_per_frame
+            } else {
+                value
+            };
         }
     }
 }

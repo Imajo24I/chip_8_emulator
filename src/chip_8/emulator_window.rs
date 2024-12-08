@@ -1,9 +1,10 @@
-use crate::chip_8::emulator::{Config, Emulator};
+use crate::chip_8::emulator::Emulator;
+use crate::chip_8::config::Config;
 use crate::events::Event;
 use eframe::egui;
 use eframe::egui::{Pos2, Ui};
 use std::path::Path;
-use std::time::Instant;
+use std::time::{Duration, Instant};
 use anyhow::Error;
 
 pub struct EmulatorWindow {
@@ -30,8 +31,12 @@ impl EmulatorWindow {
             self.emulator.keypad.update_keys(input_state);
         });
 
-        if let Err(event) = self.emulator.run_cycle() {
-            return Some(event);
+        self.emulator.tick_timers();
+
+        for _ in 0..self.config.cycles_per_frame {
+            if let Err(event) = self.emulator.run_cycle() {
+                return Some(event);
+            }
         }
 
         // Draw Display
@@ -70,7 +75,7 @@ impl EmulatorWindow {
 
     fn wait_for_next_frame(&mut self) {
         let now = Instant::now();
-        self.next_frame += self.config.cycle_time;
+        self.next_frame += Duration::from_secs_f32(1f32 / 60f32);
         std::thread::sleep(self.next_frame - now);
     }
 }
