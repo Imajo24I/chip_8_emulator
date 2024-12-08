@@ -4,10 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-anyhow = "1.0.93"
+anyhow = "1.0.94"
 rand = "0.8.5"
 eframe = "0.29.1"
-rfd = "0.15.0"
+rfd = "0.15.1"
 cpal = "0.15.3"
 
 [build-dependencies]
