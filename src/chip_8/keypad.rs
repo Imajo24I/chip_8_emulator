@@ -29,9 +29,7 @@ impl Keypad {
     }
 
     pub fn is_key_pressed(&self, key: usize) -> bool {
-        // Also check for Released, since if it has been released, it also has been pressed
-        let state = &self.keys[key].state;
-        state == &KeyState::Pressed || state == &KeyState::Released
+        self.keys[key].state == KeyState::Pressed
     }
 
     pub fn is_key_released(&self, key: usize) -> bool {
