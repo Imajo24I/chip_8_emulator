@@ -1,15 +1,13 @@
 use crate::chip_8::config::Config;
 use crate::emulator_app::FONT_SIZE;
+use crate::events::Event;
 use crate::utils;
 use eframe::egui::{Align, Context, RichText, TextEdit, Ui};
-use std::env;
 use std::path::PathBuf;
 
 #[derive(Default)]
 pub struct StartupWindow {
     pub startup_info: StartUpInfo,
-    pub start_emulation: bool,
-    looked_in_args: bool,
 }
 
 impl StartupWindow {
@@ -29,7 +27,7 @@ impl StartupWindow {
         }
     }
 
-    pub fn update(&mut self, ui: &mut Ui) {
+    pub fn update(&mut self, ui: &mut Ui) -> Option<Event> {
         ui.vertical_centered(|ui| {
             self.update_filepath(ui);
 
@@ -41,24 +39,24 @@ impl StartupWindow {
             ui.end_row();
             ui.add_space(20f32);
 
-            if utils::button("Start Emulation", ui).clicked() {
-                self.start_emulation = true;
+            if utils::button("Start Emulation", ui).clicked()
+                && self.startup_info.filepath.is_some()
+            {
+                return Some(Event::StartEmulation(
+                    self.startup_info.filepath.clone().unwrap(),
+                    self.startup_info.config
+                ));
             }
 
             ui.end_row();
             ui.add_space(20f32);
-        });
+
+            None
+        })
+        .inner
     }
 
     fn update_filepath(&mut self, ui: &mut Ui) {
-        if !self.looked_in_args {
-            self.looked_in_args = true;
-            if let Some(filepath) = Self::filepath_from_args() {
-                self.startup_info.filepath = Some(filepath);
-                self.start_emulation = true;
-            }
-        }
-
         ui.add_space(10f32);
 
         ui.label("Selected File:");
@@ -80,17 +78,6 @@ impl StartupWindow {
         ui.add_space(20f32);
 
         self.collect_dropped_files(ui.ctx());
-    }
-
-    fn filepath_from_args() -> Option<PathBuf> {
-        let args = env::args();
-
-        if args.len() > 1 {
-            let args: Vec<String> = args.collect();
-            Some(PathBuf::from(args[1].to_owned()))
-        } else {
-            None
-        }
     }
 
     pub fn update_emulator_config(&mut self, ui: &mut Ui) {

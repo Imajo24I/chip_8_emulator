@@ -10,9 +10,7 @@ pub const FONT_SIZE: f32 = 20f32;
 
 #[derive(Default)]
 pub struct EmulatorApp {
-    pub startup_window: StartupWindow,
-    pub emulator_window: Option<EmulatorWindow>,
-    pub error_report_window: Option<ErrorReportWindow>,
+    pub state: AppState,
 }
 
 impl EmulatorApp {
@@ -40,71 +38,55 @@ impl EmulatorApp {
         }
     }
 
-    fn startup_window(&mut self, ctx: &Context) {
+    fn startup_window(ctx: &Context, window: &mut StartupWindow) -> Option<Event> {
         egui::Window::new("Startup")
-            .collapsible(false)
             .default_size([840f32, 640f32])
-            .show(ctx, |ui| {
-                self.startup_window.update(ui);
-            });
-    }
-
-    fn emulator_window(&mut self, ctx: &Context) {
-        egui::CentralPanel::default().show(ctx, |ui| {
-            let event = self.emulator_window.as_mut().unwrap().update(ui);
-
-            if let Some(event) = event {
-                event.execute(ctx, self);
-            }
-        });
-    }
-
-    fn create_emulator_window(&mut self) -> Option<Event> {
-        let path = self.startup_window.startup_info.filepath.as_ref().unwrap();
-        let config = self.startup_window.startup_info.config;
-
-        let emulator_window = EmulatorWindow::new(path, config);
-
-        match emulator_window {
-            Ok(emulator_window) => {
-                self.emulator_window = Some(emulator_window);
-                None
-            }
-            Err(error) => Some(Event::ReportError(error)),
-        }
-    }
-
-    fn error_report_window(&mut self, ctx: &Context) {
-        egui::Window::new("Error executing Chip 8 Emulator")
-            .default_size([830f32, 830f32])
             .collapsible(false)
-            .show(ctx, |ui| {
-                let event = self.error_report_window.as_mut().unwrap().update(ui);
+            .show(ctx, |ui| window.update(ui))
+            .unwrap()
+            .inner
+            .unwrap()
+    }
 
-                if let Some(event) = event {
-                    event.execute(ctx, self);
-                }
-            });
+    fn emulator_window(ctx: &Context, window: &mut EmulatorWindow) -> Option<Event> {
+        egui::CentralPanel::default()
+            .show(ctx, |ui| window.update(ui))
+            .inner
+    }
+
+    fn error_report_window(ctx: &Context, window: &mut ErrorReportWindow) -> Option<Event> {
+        egui::Window::new("Error executing Chip 8 Emulator")
+            .collapsible(false)
+            .default_size([830f32, 830f32])
+            .show(ctx, |ui| window.update(ui))
+            .unwrap()
+            .inner
+            .unwrap()
     }
 }
 
 impl eframe::App for EmulatorApp {
     fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
-        if self.error_report_window.is_some() {
-            self.error_report_window(ctx);
-        } else if self.emulator_window.is_some() {
-            self.emulator_window(ctx);
-        } else if self.startup_window.start_emulation {
-            if self.startup_window.startup_info.filepath.is_some() {
-                if let Some(event) = self.create_emulator_window() {
-                    event.execute(ctx, self);
-                }
-            } else {
-                self.startup_window.start_emulation = false;
-                self.startup_window(ctx);
-            }
-        } else {
-            self.startup_window(ctx);
+        let event = match &mut self.state {
+            AppState::Emulating(window) => Self::emulator_window(ctx, window),
+            AppState::Initializing(window) => Self::startup_window(ctx, window),
+            AppState::ErrorReporting(window) => Self::error_report_window(ctx, window),
+        };
+
+        if let Some(event) = event {
+            event.execute(ctx, self);
         }
+    }
+}
+
+pub enum AppState {
+    Initializing(StartupWindow),
+    Emulating(EmulatorWindow),
+    ErrorReporting(ErrorReportWindow),
+}
+
+impl Default for AppState {
+    fn default() -> Self {
+        Self::Initializing(StartupWindow::default())
     }
 }
