@@ -48,10 +48,12 @@ impl EmulatorWindow {
             let pixel_height = window_size.y / 32f32;
 
             for (row_index, row) in self.emulator.display.iter().enumerate() {
+                let pixel_y = row_index as f32 * pixel_height;
+
                 for (pixel_index, pixel) in row.iter().enumerate() {
                     let pixel_pos = Pos2::new(
                         pixel_index as f32 * pixel_width,
-                        row_index as f32 * pixel_height,
+                        pixel_y,
                     );
 
                     let rect = egui::Rect::from_two_pos(
