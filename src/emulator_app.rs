@@ -2,7 +2,6 @@ use crate::chip_8::emulator_window::EmulatorWindow;
 use crate::error_report_window::ErrorReportWindow;
 use crate::events::Event;
 use crate::startup::StartupWindow;
-use crate::utils;
 use eframe::egui::{Context, FontId};
 use eframe::{egui, Frame};
 
@@ -33,7 +32,10 @@ impl EmulatorApp {
         eframe::NativeOptions {
             viewport: egui::ViewportBuilder::default()
                 .with_inner_size([1280f32, 640f32])
-                .with_icon(utils::icon_data()),
+                .with_icon(
+                    eframe::icon_data::from_png_bytes(include_bytes!("../assets/icon.png"))
+                        .expect("Failed to load icon."),
+                ),
             ..Default::default()
         }
     }

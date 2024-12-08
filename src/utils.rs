@@ -1,11 +1,4 @@
-use eframe::egui::{FontId, IconData, Response, RichText, Ui};
-
-/// Returns the icon data for the applications icon
-pub fn icon_data() -> IconData {
-    eframe::icon_data::from_png_bytes(
-        include_bytes!("../assets/icon.png")
-    ).expect("Failed to load icon.")
-}
+use eframe::egui::{FontId, Response, RichText, Ui};
 
 // Reason for this to exist, is that Style::override_font_id currently isn't respected
 // in stuff like Buttons, ComboBoxes, etc.
