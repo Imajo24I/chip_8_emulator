@@ -3,7 +3,7 @@ use crate::chip_8::emulator::Emulator;
 use crate::events::Event;
 use anyhow::Error;
 use eframe::egui;
-use eframe::egui::{Pos2, Rect, Ui, Vec2};
+use eframe::egui::{Pos2, Ui, Vec2};
 use std::path::Path;
 use std::time::{Duration, Instant};
 
