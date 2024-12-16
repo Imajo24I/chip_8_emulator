@@ -1,4 +1,4 @@
-use crate::chip_8::emulator_window::EmulatorWindow;
+use crate::chip_8::emulator_window::{EmulatorWindow, MENU_BAR_OFFSET};
 use crate::error_report_window::ErrorReportWindow;
 use crate::events::Event;
 use crate::startup::StartupWindow;
@@ -31,7 +31,7 @@ impl EmulatorApp {
     fn options() -> eframe::NativeOptions {
         eframe::NativeOptions {
             viewport: egui::ViewportBuilder::default()
-                .with_inner_size([1280f32, 640f32])
+                .with_inner_size([1280f32, 640f32 + MENU_BAR_OFFSET])
                 .with_icon(
                     eframe::icon_data::from_png_bytes(include_bytes!("../assets/icon.png"))
                         .expect("Failed to load icon."),

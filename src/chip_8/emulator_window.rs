@@ -3,9 +3,11 @@ use crate::chip_8::emulator::Emulator;
 use crate::events::Event;
 use anyhow::Error;
 use eframe::egui;
-use eframe::egui::{Pos2, Ui, Vec2};
+use eframe::egui::{Button, Pos2, Rect, Ui, Vec2};
 use std::path::Path;
 use std::time::{Duration, Instant};
+
+pub const MENU_BAR_OFFSET: f32 = 30f32;
 
 pub struct EmulatorWindow {
     emulator: Emulator,
@@ -27,21 +29,26 @@ impl EmulatorWindow {
 
         self.wait_for_next_frame();
 
-        ui.input(|input_state| {
-            self.emulator.keypad.update_keys(input_state);
-        });
+        if !self.config.emulation_paused {
+            ui.input(|input_state| {
+                self.emulator.keypad.update_keys(input_state);
+            });
 
-        self.emulator.tick_timers();
+            self.emulator.tick_timers();
 
-        for _ in 0..self.config.cycles_per_frame {
-            if let Err(event) = self.emulator.run_cycle() {
-                return Some(event);
+            for _ in 0..self.config.cycles_per_frame {
+                if let Err(event) = self.emulator.run_cycle() {
+                    return Some(event);
+                }
             }
         }
 
         let inner_rect = ui.ctx().input(|i| i.viewport().inner_rect);
         if let Some(inner_rect) = inner_rect {
-            self.draw_display(inner_rect.size(), ui);
+            let window_size = inner_rect.size();
+
+            self.draw_display(window_size, ui);
+            return self.draw_menu_bar(window_size, ui);
         }
 
         None
@@ -52,12 +59,12 @@ impl EmulatorWindow {
         let pixel_height = window_size.y / 32f32;
 
         for (row_index, row) in self.emulator.display.iter().enumerate() {
-            let pixel_y = row_index as f32 * pixel_height;
+            let pixel_y = row_index as f32 * pixel_height - MENU_BAR_OFFSET;
 
             for (pixel_index, pixel) in row.iter().enumerate() {
                 let pixel_pos = Pos2::new(pixel_index as f32 * pixel_width, pixel_y);
 
-                let rect = egui::Rect::from_two_pos(
+                let rect = Rect::from_two_pos(
                     pixel_pos,
                     pixel_pos + egui::vec2(pixel_width + 1f32, pixel_height + 1f32),
                 );
@@ -71,6 +78,51 @@ impl EmulatorWindow {
                 ui.painter().rect_filled(rect, 0f32, rect_color);
             }
         }
+    }
+
+    fn draw_menu_bar(&mut self, window_size: Vec2, ui: &mut Ui) -> Option<Event> {
+        let bar_height = window_size.y - MENU_BAR_OFFSET + 5f32;
+        let bar_top_height = window_size.y - 5f32;
+        let window_center = window_size.x / 2f32;
+
+        if ui
+            .put(
+                Rect::from_two_pos(
+                    Pos2::new(window_center - 50f32, bar_height),
+                    Pos2::new(window_center + 50f32, bar_top_height),
+                ),
+                Button::new("Open Menu"),
+            )
+            .clicked()
+        {}
+
+        if ui
+            .put(
+                Rect::from_two_pos(
+                    Pos2::new(window_center - 200f32, bar_height),
+                    Pos2::new(window_center - 100f32, bar_top_height),
+                ),
+                Button::new("Resume/Pause"),
+            )
+            .clicked()
+        {
+            self.config.emulation_paused = !self.config.emulation_paused;
+        }
+
+        if ui
+            .put(
+                Rect::from_two_pos(
+                    Pos2::new(window_center + 100f32, bar_height),
+                    Pos2::new(window_center + 200f32, bar_top_height),
+                ),
+                Button::new("Exit Emulation"),
+            )
+            .clicked()
+        {
+            return Some(Event::Exit);
+        }
+
+        None
     }
 
     fn wait_for_next_frame(&mut self) {
