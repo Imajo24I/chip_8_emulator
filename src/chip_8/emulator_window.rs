@@ -3,7 +3,7 @@ use crate::chip_8::emulator::Emulator;
 use crate::events::Event;
 use anyhow::Error;
 use eframe::egui;
-use eframe::egui::{Button, Pos2, Rect, Ui, Vec2};
+use eframe::egui::{Button, Label, Pos2, Rect, Ui, Vec2};
 use std::path::Path;
 use std::time::{Duration, Instant};
 
@@ -121,6 +121,33 @@ impl EmulatorWindow {
         {
             return Some(Event::Exit);
         }
+
+        ui.put(
+            Rect::from_two_pos(
+                Pos2::new(100f32, bar_height - 2f32),
+                Pos2::new(300f32, bar_top_height),
+            ),
+            Label::new(if self.config.emulation_paused {
+                "Emulation Paused"
+            } else {
+                "Emulation Running"
+            }),
+        );
+
+        let mut frame_time = ui.ctx().input(|input| input.stable_dt * 1000f32);
+        frame_time = if frame_time > 16f32 {
+            16.67f32
+        } else {
+            frame_time
+        };
+
+        ui.put(
+            Rect::from_two_pos(
+                Pos2::new(window_size.x - 400f32, bar_height - 2f32),
+                Pos2::new(window_size.x - 100f32, bar_top_height),
+            ),
+            Label::new(format!("Frame Time: {:.2}ms", frame_time)),
+        );
 
         None
     }
