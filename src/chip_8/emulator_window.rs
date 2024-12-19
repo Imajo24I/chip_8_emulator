@@ -13,6 +13,7 @@ pub struct EmulatorWindow {
     emulator: Emulator,
     config: Config,
     next_frame: Instant,
+    sleep_time: Duration
 }
 
 impl EmulatorWindow {
@@ -21,6 +22,7 @@ impl EmulatorWindow {
             emulator: Emulator::new(filepath, config)?,
             config,
             next_frame: Instant::now(),
+            sleep_time: Duration::from_secs(0)
         })
     }
 
@@ -134,12 +136,8 @@ impl EmulatorWindow {
             }),
         );
 
-        let mut frame_time = ui.ctx().input(|input| input.stable_dt * 1000f32);
-        frame_time = if frame_time > 16f32 {
-            16.67f32
-        } else {
-            frame_time
-        };
+        let frame_time = ui.ctx().input(|input| input.stable_dt * 1000f32)
+            - self.sleep_time.as_millis() as f32;
 
         ui.put(
             Rect::from_two_pos(
@@ -153,8 +151,10 @@ impl EmulatorWindow {
     }
 
     fn wait_for_next_frame(&mut self) {
-        let now = Instant::now();
         self.next_frame += Duration::from_secs_f32(1f32 / 60f32);
-        std::thread::sleep(self.next_frame - now);
+
+        let sleep_time = self.next_frame - Instant::now();
+        self.sleep_time = sleep_time;
+        std::thread::sleep(sleep_time);
     }
 }
