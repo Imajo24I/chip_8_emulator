@@ -3,7 +3,7 @@ use crate::chip_8::emulator::Emulator;
 use crate::events::Event;
 use anyhow::Error;
 use eframe::egui;
-use eframe::egui::{Button, Label, Pos2, Rect, Ui, Vec2};
+use eframe::egui::{Button, Label, Pos2, Rect, RichText, Ui, Vec2};
 use std::path::Path;
 use std::time::{Duration, Instant};
 
@@ -93,7 +93,7 @@ impl EmulatorWindow {
                     Pos2::new(window_center - 50f32, bar_height),
                     Pos2::new(window_center + 50f32, bar_top_height),
                 ),
-                Button::new("Open Menu"),
+                Button::new(RichText::new("Open Menu")),
             )
             .clicked()
         {}

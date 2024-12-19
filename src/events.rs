@@ -1,10 +1,10 @@
-use std::path::PathBuf;
-use eframe::egui::{Context, ViewportCommand};
-use crate::emulator_app::{AppState, EmulatorApp};
-use anyhow::Error;
 use crate::chip_8::config::Config;
 use crate::chip_8::emulator_window::EmulatorWindow;
+use crate::emulator_app::{AppState, EmulatorApp, FONT_SIZE};
 use crate::error_report_window::ErrorReportWindow;
+use anyhow::Error;
+use eframe::egui::{Context, FontId, ViewportCommand};
+use std::path::PathBuf;
 
 pub enum Event {
     StartEmulation(PathBuf, Config),
@@ -20,16 +20,25 @@ impl Event {
 
                 match emulator_window {
                     Ok(emulator_window) => {
+                        ctx.style_mut(|style| {
+                            style.override_font_id = None;
+                        });
                         emulator.state = AppState::Emulating(emulator_window);
                     }
 
                     Err(error) => {
+                        ctx.style_mut(|style| {
+                            style.override_font_id = Some(FontId::proportional(FONT_SIZE));
+                        });
                         emulator.state = AppState::ErrorReporting(ErrorReportWindow::new(error));
                     }
                 }
             }
 
             Self::ReportError(error) => {
+                ctx.style_mut(|style| {
+                    style.override_font_id = Some(FontId::proportional(FONT_SIZE));
+                });
                 emulator.state = AppState::ErrorReporting(ErrorReportWindow::new(error))
             }
 

@@ -1,7 +1,6 @@
 use crate::chip_8::config::Config;
 use crate::emulator_app::FONT_SIZE;
 use crate::events::Event;
-use crate::utils;
 use eframe::egui::{Align, Context, RichText, TextEdit, Ui};
 use std::path::PathBuf;
 
@@ -20,7 +19,7 @@ impl StartupWindow {
     }
 
     fn file_dialog(&mut self, ui: &mut Ui) {
-        if utils::button("Select File...", ui).clicked() {
+        if ui.button("Select File...").clicked() {
             if let Some(path) = rfd::FileDialog::new().pick_file() {
                 self.startup_info.filepath = Some(path);
             }
@@ -39,7 +38,7 @@ impl StartupWindow {
             ui.end_row();
             ui.add_space(20f32);
 
-            if utils::button("Start Emulation", ui).clicked()
+            if ui.button("Start Emulation").clicked()
                 && self.startup_info.filepath.is_some()
             {
                 return Some(Event::StartEmulation(

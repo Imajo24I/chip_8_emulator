@@ -1,5 +1,4 @@
 use crate::events::Event;
-use crate::utils::button;
 use anyhow::Error;
 use eframe::egui::Ui;
 
@@ -32,7 +31,7 @@ impl ErrorReportWindow {
             ui.separator();
             ui.add_space(10f32);
 
-            clicked = button("Exit Program", ui).clicked();
+            clicked = ui.button("Exit Program").clicked();
         });
 
         if clicked {
