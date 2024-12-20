@@ -11,7 +11,6 @@ pub const MENU_BAR_OFFSET: f32 = 30f32;
 
 pub struct EmulatorWindow {
     emulator: Emulator,
-    config: Config,
     next_frame: Instant,
     sleep_time: Duration
 }
@@ -20,7 +19,6 @@ impl EmulatorWindow {
     pub fn new(filepath: &Path, config: Config) -> Result<Self, Error> {
         Ok(Self {
             emulator: Emulator::new(filepath, config)?,
-            config,
             next_frame: Instant::now(),
             sleep_time: Duration::from_secs(0)
         })
@@ -31,14 +29,14 @@ impl EmulatorWindow {
 
         self.wait_for_next_frame();
 
-        if !self.config.emulation_paused {
+        if !self.emulator.config.emulation_paused {
             ui.input(|input_state| {
                 self.emulator.keypad.update_keys(input_state);
             });
 
             self.emulator.tick_timers();
 
-            for _ in 0..self.config.cycles_per_frame {
+            for _ in 0..self.emulator.config.cycles_per_frame {
                 if let Err(event) = self.emulator.run_cycle() {
                     return Some(event);
                 }
@@ -108,7 +106,7 @@ impl EmulatorWindow {
             )
             .clicked()
         {
-            self.config.emulation_paused = !self.config.emulation_paused;
+            self.emulator.config.emulation_paused = !self.emulator.config.emulation_paused;
         }
 
         if ui
@@ -129,7 +127,7 @@ impl EmulatorWindow {
                 Pos2::new(100f32, bar_height - 2f32),
                 Pos2::new(300f32, bar_top_height),
             ),
-            Label::new(if self.config.emulation_paused {
+            Label::new(if self.emulator.config.emulation_paused {
                 "Emulation Paused"
             } else {
                 "Emulation Running"

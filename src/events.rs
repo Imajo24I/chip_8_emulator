@@ -20,25 +20,19 @@ impl Event {
 
                 match emulator_window {
                     Ok(emulator_window) => {
-                        ctx.style_mut(|style| {
-                            style.override_font_id = None;
-                        });
+                        set_default_font(ctx);
                         emulator.state = AppState::Emulating(emulator_window);
                     }
 
                     Err(error) => {
-                        ctx.style_mut(|style| {
-                            style.override_font_id = Some(FontId::proportional(FONT_SIZE));
-                        });
+                        set_custom_font(ctx);
                         emulator.state = AppState::ErrorReporting(ErrorReportWindow::new(error));
                     }
                 }
             }
 
             Self::ReportError(error) => {
-                ctx.style_mut(|style| {
-                    style.override_font_id = Some(FontId::proportional(FONT_SIZE));
-                });
+                set_custom_font(ctx);
                 emulator.state = AppState::ErrorReporting(ErrorReportWindow::new(error))
             }
 
@@ -47,4 +41,16 @@ impl Event {
             }
         }
     }
+}
+
+fn set_default_font(ctx: &Context) {
+    ctx.style_mut(|style| {
+        style.override_font_id = None;
+    });
+}
+
+fn set_custom_font(ctx: &Context) {
+    ctx.style_mut(|style| {
+        style.override_font_id = Some(FontId::proportional(FONT_SIZE));
+    });
 }
