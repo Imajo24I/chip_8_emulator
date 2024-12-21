@@ -1,7 +1,7 @@
-use crate::chip_8::emulator_window::{EmulatorWindow, MENU_BAR_OFFSET};
-use crate::error_report_window::ErrorReportWindow;
 use crate::events::Event;
-use crate::startup::StartupWindow;
+use crate::screens::emulator_screen::{EmulatorScreen, MENU_BAR_OFFSET};
+use crate::screens::error_report_screen::ErrorReportScreen;
+use crate::screens::startup_screen::StartupScreen;
 use eframe::egui::{Context, FontId};
 use eframe::{egui, Frame};
 
@@ -40,27 +40,27 @@ impl EmulatorApp {
         }
     }
 
-    fn startup_window(ctx: &Context, window: &mut StartupWindow) -> Option<Event> {
+    fn draw_startup_screen(ctx: &Context, screen: &mut StartupScreen) -> Option<Event> {
         egui::Window::new("Startup")
             .default_size([840f32, 640f32])
             .collapsible(false)
-            .show(ctx, |ui| window.update(ui))
+            .show(ctx, |ui| screen.update(ui))
             .unwrap()
             .inner
             .unwrap()
     }
 
-    fn emulator_window(ctx: &Context, window: &mut EmulatorWindow) -> Option<Event> {
+    fn draw_emulator_screen(ctx: &Context, screen: &mut EmulatorScreen) -> Option<Event> {
         egui::CentralPanel::default()
-            .show(ctx, |ui| window.update(ui))
+            .show(ctx, |ui| screen.update(ui))
             .inner
     }
 
-    fn error_report_window(ctx: &Context, window: &mut ErrorReportWindow) -> Option<Event> {
+    fn draw_error_report_screen(ctx: &Context, screen: &mut ErrorReportScreen) -> Option<Event> {
         egui::Window::new("Error executing Chip 8 Emulator")
             .collapsible(false)
             .default_size([830f32, 830f32])
-            .show(ctx, |ui| window.update(ui))
+            .show(ctx, |ui| screen.update(ui))
             .unwrap()
             .inner
             .unwrap()
@@ -70,9 +70,9 @@ impl EmulatorApp {
 impl eframe::App for EmulatorApp {
     fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
         let event = match &mut self.state {
-            AppState::Emulating(window) => Self::emulator_window(ctx, window),
-            AppState::Initializing(window) => Self::startup_window(ctx, window),
-            AppState::ErrorReporting(window) => Self::error_report_window(ctx, window),
+            AppState::Emulating(screen) => Self::draw_emulator_screen(ctx, screen),
+            AppState::Initializing(screen) => Self::draw_startup_screen(ctx, screen),
+            AppState::ErrorReporting(screen) => Self::draw_error_report_screen(ctx, screen),
         };
 
         if let Some(event) = event {
@@ -82,13 +82,13 @@ impl eframe::App for EmulatorApp {
 }
 
 pub enum AppState {
-    Initializing(StartupWindow),
-    Emulating(EmulatorWindow),
-    ErrorReporting(ErrorReportWindow),
+    Initializing(StartupScreen),
+    Emulating(EmulatorScreen),
+    ErrorReporting(ErrorReportScreen),
 }
 
 impl Default for AppState {
     fn default() -> Self {
-        Self::Initializing(StartupWindow::default())
+        Self::Initializing(StartupScreen::default())
     }
 }

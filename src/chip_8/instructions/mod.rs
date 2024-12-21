@@ -1,12 +1,12 @@
-mod op_8000;
 mod op_0000;
-mod op_f000;
+mod op_8000;
 mod op_dxyn;
 mod op_e000;
+mod op_f000;
 
-use anyhow::{anyhow, Result};
 use crate::chip_8::emulator::Emulator;
 use crate::chip_8::instructions::op_f000::op_f000;
+use anyhow::{anyhow, Result};
 
 pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<()> {
     match opcode & 0xF000 {
@@ -26,7 +26,8 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<()> {
         0x3000 => {
             // 3XNN - Skip next instruction if VX == NN
             if get_v_reg_value(((opcode & 0x0F00) >> 8) as usize, opcode, emulator)?
-                == (opcode & 0x00FF) as u8 {
+                == (opcode & 0x00FF) as u8
+            {
                 emulator.pc += 2;
             }
         }
@@ -34,7 +35,8 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<()> {
         0x4000 => {
             // 4XNN - Skip next instruction if VX != NN
             if get_v_reg_value(((opcode & 0x0F00) >> 8) as usize, opcode, emulator)?
-                != (opcode & 0x00FF) as u8 {
+                != (opcode & 0x00FF) as u8
+            {
                 emulator.pc += 2;
             }
         }
@@ -42,7 +44,8 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<()> {
         0x5000 => {
             // 5XY0 - Skip next instruction of VX == VY
             if get_v_reg_value(((opcode & 0x0F00) >> 8) as usize, opcode, emulator)?
-                == get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)? {
+                == get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)?
+            {
                 emulator.pc += 2;
             }
         }
@@ -74,7 +77,8 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<()> {
         0x9000 => {
             // 9XY0 - Skip next instruction of VX != VY
             if get_v_reg_value(((opcode & 0x0F00) >> 8) as usize, opcode, emulator)?
-                != get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)? {
+                != get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)?
+            {
                 emulator.pc += 2;
             }
         }
@@ -110,7 +114,11 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<()> {
 }
 
 fn unknown_instruction_err(emulator: &mut Emulator, opcode: u16) -> Result<()> {
-    Err(anyhow!("Unknown instruction: {:#06x}\nInstruction is located at memory location {}", opcode, emulator.pc - 2))
+    Err(anyhow!(
+        "Unknown instruction: {:#06x}\nInstruction is located at memory location {}",
+        opcode,
+        emulator.pc - 2
+    ))
 }
 
 fn get_v_reg_value(vx: usize, opcode: u16, emulator: &mut Emulator) -> Result<u8> {

@@ -91,7 +91,6 @@ impl Beeper {
 
     /// Play the audio
     pub fn play(&mut self) {
-
         #[cfg(not(target_arch = "wasm32"))]
         let _ = match self.sender {
             Some(ref sender) => sender.send(Message::Play),
@@ -180,25 +179,23 @@ impl Beeper {
 
     fn stream_audio(receiver: Receiver<Message>, stream: Result<Stream, BuildStreamError>) {
         match stream {
-            Ok(stream) => {
-                loop {
-                    match receiver.recv() {
-                        Ok(Message::Play) => {
-                            let _ = stream.play();
-                        }
-                        Ok(Message::Pause) => {
-                            let _ = stream.pause();
-                        }
-                        Ok(Message::Stop) => {
-                            let _ = stream.pause();
-                            return;
-                        }
-                        Err(e) => {
-                            eprintln!("Receive error: {}", e);
-                        }
+            Ok(stream) => loop {
+                match receiver.recv() {
+                    Ok(Message::Play) => {
+                        let _ = stream.play();
+                    }
+                    Ok(Message::Pause) => {
+                        let _ = stream.pause();
+                    }
+                    Ok(Message::Stop) => {
+                        let _ = stream.pause();
+                        return;
+                    }
+                    Err(e) => {
+                        eprintln!("Receive error: {}", e);
                     }
                 }
-            }
+            },
             Err(e) => {
                 eprintln!("BuildStreamError {:?}", e);
             }

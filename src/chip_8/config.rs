@@ -10,7 +10,7 @@ impl Default for Config {
         Self {
             cycles_per_frame: 10,
             use_german_keyboard_layout: true,
-            emulation_paused: false
+            emulation_paused: false,
         }
     }
 }

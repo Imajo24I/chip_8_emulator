@@ -2,11 +2,11 @@ use crate::events::Event;
 use anyhow::Error;
 use eframe::egui::Ui;
 
-pub struct ErrorReportWindow {
+pub struct ErrorReportScreen {
     error: Error,
 }
 
-impl ErrorReportWindow {
+impl ErrorReportScreen {
     pub fn new(error: Error) -> Self {
         Self { error }
     }

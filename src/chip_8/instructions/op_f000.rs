@@ -110,11 +110,7 @@ pub fn op_f000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
     Ok(())
 }
 
-fn i_reg_out_of_bounds_err(
-    i_reg_shift: usize,
-    opcode: u16,
-    emulator: &mut Emulator,
-) -> Result<()> {
+fn i_reg_out_of_bounds_err(i_reg_shift: usize, opcode: u16, emulator: &mut Emulator) -> Result<()> {
     Err(anyhow!(
         "I register with value of {} is out of bounds - Instruction {:#06x} is located at memory location {}", emulator.i_register + i_reg_shift, opcode, emulator.pc - 2
     ))

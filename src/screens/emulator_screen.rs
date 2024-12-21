@@ -1,26 +1,30 @@
 use crate::chip_8::config::Config;
 use crate::chip_8::emulator::Emulator;
+use crate::emulator_app::FONT_SIZE;
 use crate::events::Event;
+use crate::screens::emulator_settings::draw_settings;
 use anyhow::Error;
 use eframe::egui;
-use eframe::egui::{Button, Label, Pos2, Rect, RichText, Ui, Vec2};
+use eframe::egui::{Button, FontId, Label, Pos2, Rect, RichText, Ui, Vec2, Window};
 use std::path::Path;
 use std::time::{Duration, Instant};
 
 pub const MENU_BAR_OFFSET: f32 = 30f32;
 
-pub struct EmulatorWindow {
+pub struct EmulatorScreen {
     emulator: Emulator,
     next_frame: Instant,
-    sleep_time: Duration
+    sleep_time: Duration,
+    settings_opened: bool,
 }
 
-impl EmulatorWindow {
+impl EmulatorScreen {
     pub fn new(filepath: &Path, config: Config) -> Result<Self, Error> {
         Ok(Self {
             emulator: Emulator::new(filepath, config)?,
             next_frame: Instant::now(),
-            sleep_time: Duration::from_secs(0)
+            sleep_time: Duration::from_secs(0),
+            settings_opened: false,
         })
     }
 
@@ -91,10 +95,13 @@ impl EmulatorWindow {
                     Pos2::new(window_center - 50f32, bar_height),
                     Pos2::new(window_center + 50f32, bar_top_height),
                 ),
-                Button::new(RichText::new("Open Menu")),
+                Button::new(RichText::new("Open Settings")),
             )
             .clicked()
-        {}
+        {
+            self.emulator.config.emulation_paused = true;
+            self.settings_opened = true;
+        }
 
         if ui
             .put(
@@ -134,8 +141,8 @@ impl EmulatorWindow {
             }),
         );
 
-        let frame_time = ui.ctx().input(|input| input.stable_dt * 1000f32)
-            - self.sleep_time.as_millis() as f32;
+        let frame_time =
+            ui.ctx().input(|input| input.stable_dt * 1000f32) - self.sleep_time.as_millis() as f32;
 
         ui.put(
             Rect::from_two_pos(
@@ -144,6 +151,26 @@ impl EmulatorWindow {
             ),
             Label::new(format!("Frame Time: {:.2}ms", frame_time)),
         );
+
+        if self.settings_opened {
+            Window::new("Settings")
+                .default_size([840f32, 640f32])
+                .collapsible(false)
+                .show(ui.ctx(), |ui| {
+                    ui.vertical_centered(|ui| {
+                        ui.style_mut().override_font_id = Some(FontId::proportional(FONT_SIZE));
+
+                        draw_settings(ui, &mut self.emulator.config);
+
+                        ui.end_row();
+                        ui.add_space(20f32);
+
+                        let close_settings = ui.button("Close Settings").clicked();
+                        self.settings_opened = !close_settings;
+                        self.emulator.config.emulation_paused = !close_settings;
+                    });
+                });
+        }
 
         None
     }

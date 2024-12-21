@@ -1,7 +1,7 @@
 use crate::chip_8::config::Config;
-use crate::chip_8::emulator_window::EmulatorWindow;
+use crate::screens::emulator_screen::EmulatorScreen;
 use crate::emulator_app::{AppState, EmulatorApp, FONT_SIZE};
-use crate::error_report_window::ErrorReportWindow;
+use crate::screens::error_report_screen::ErrorReportScreen;
 use anyhow::Error;
 use eframe::egui::{Context, FontId, ViewportCommand};
 use std::path::PathBuf;
@@ -16,24 +16,24 @@ impl Event {
     pub fn execute(self, ctx: &Context, emulator: &mut EmulatorApp) {
         match self {
             Self::StartEmulation(filepath, config) => {
-                let emulator_window = EmulatorWindow::new(&filepath, config);
+                let emulator_screen = EmulatorScreen::new(&filepath, config);
 
-                match emulator_window {
-                    Ok(emulator_window) => {
+                match emulator_screen {
+                    Ok(emulator_screen) => {
                         set_default_font(ctx);
-                        emulator.state = AppState::Emulating(emulator_window);
+                        emulator.state = AppState::Emulating(emulator_screen);
                     }
 
                     Err(error) => {
                         set_custom_font(ctx);
-                        emulator.state = AppState::ErrorReporting(ErrorReportWindow::new(error));
+                        emulator.state = AppState::ErrorReporting(ErrorReportScreen::new(error));
                     }
                 }
             }
 
             Self::ReportError(error) => {
                 set_custom_font(ctx);
-                emulator.state = AppState::ErrorReporting(ErrorReportWindow::new(error))
+                emulator.state = AppState::ErrorReporting(ErrorReportScreen::new(error))
             }
 
             Self::Exit => {

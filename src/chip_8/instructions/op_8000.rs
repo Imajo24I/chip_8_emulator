@@ -18,9 +18,8 @@ pub fn op_8000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             let vx = ((opcode & 0x0F00) >> 8) as usize;
             validate_v_reg_index(vx, opcode, emulator)?;
 
-            emulator.v_registers[vx] =
-                get_v_reg_value(vx, opcode, emulator)? |
-                    get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)?;
+            emulator.v_registers[vx] = get_v_reg_value(vx, opcode, emulator)?
+                | get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)?;
         }
 
         0x0002 => {
@@ -28,9 +27,8 @@ pub fn op_8000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             let vx = ((opcode & 0x0F00) >> 8) as usize;
             validate_v_reg_index(vx, opcode, emulator)?;
 
-            emulator.v_registers[vx] =
-                get_v_reg_value(vx, opcode, emulator)? &
-                    get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)?;
+            emulator.v_registers[vx] = get_v_reg_value(vx, opcode, emulator)?
+                & get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)?;
         }
 
         0x0003 => {
@@ -38,9 +36,8 @@ pub fn op_8000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             let vx = ((opcode & 0x0F00) >> 8) as usize;
             validate_v_reg_index(vx, opcode, emulator)?;
 
-            emulator.v_registers[vx] =
-                get_v_reg_value(vx, opcode, emulator)? ^
-                    get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)?;
+            emulator.v_registers[vx] = get_v_reg_value(vx, opcode, emulator)?
+                ^ get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)?;
         }
 
         0x0004 => {
@@ -48,8 +45,8 @@ pub fn op_8000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             let vx = ((opcode & 0x0F00) >> 8) as usize;
             validate_v_reg_index(vx, opcode, emulator)?;
 
-            let sum = get_v_reg_value(vx, opcode, emulator)? as u16 +
-                get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)? as u16;
+            let sum = get_v_reg_value(vx, opcode, emulator)? as u16
+                + get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)? as u16;
 
             if sum > 255 {
                 emulator.v_registers[vx] = (sum - 256) as u8;
@@ -65,8 +62,8 @@ pub fn op_8000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             let vx = ((opcode & 0x0F00) >> 8) as usize;
             validate_v_reg_index(vx, opcode, emulator)?;
 
-            let diff = get_v_reg_value(vx, opcode, emulator)? as i16 -
-                get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)? as i16;
+            let diff = get_v_reg_value(vx, opcode, emulator)? as i16
+                - get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)? as i16;
 
             if diff < 0 {
                 emulator.v_registers[vx] = (diff + 256) as u8;
@@ -94,8 +91,8 @@ pub fn op_8000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             let vx = ((opcode & 0x0F00) >> 8) as usize;
             validate_v_reg_index(vx, opcode, emulator)?;
 
-            let diff = get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)? as i16 -
-                get_v_reg_value(vx, opcode, emulator)? as i16;
+            let diff = get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)? as i16
+                - get_v_reg_value(vx, opcode, emulator)? as i16;
 
             if diff < 0 {
                 emulator.v_registers[vx] = (diff - 256) as u8;
@@ -118,7 +115,7 @@ pub fn op_8000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             emulator.v_registers[0xF] = shifted_out_bit;
         }
 
-        _ => unknown_instruction_err(emulator, opcode)?
+        _ => unknown_instruction_err(emulator, opcode)?,
     }
 
     Ok(())
