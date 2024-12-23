@@ -42,7 +42,7 @@ impl EmulatorApp {
 
     fn draw_startup_screen(ctx: &Context, screen: &mut StartupScreen) -> Option<Event> {
         egui::Window::new("Startup")
-            .default_size([840f32, 640f32])
+            .default_size([440f32, 320f32])
             .collapsible(false)
             .show(ctx, |ui| screen.update(ui))
             .unwrap()

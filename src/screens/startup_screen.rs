@@ -31,9 +31,6 @@ impl StartupScreen {
         ui.vertical_centered(|ui| {
             self.update_filepath(ui);
 
-            ui.end_row();
-            ui.add_space(20f32);
-
             draw_settings(ui, &mut self.config);
 
             ui.end_row();
@@ -59,10 +56,8 @@ impl StartupScreen {
 
         ui.label("Selected File:");
 
-        ui.end_row();
-
         if let Some(filepath) = &self.filepath {
-            ui.label(filepath.to_str().unwrap());
+            ui.label(filepath.file_name().unwrap().to_string_lossy());
         } else {
             ui.label("No file selected");
         }
