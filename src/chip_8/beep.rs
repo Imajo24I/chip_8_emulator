@@ -56,7 +56,7 @@ pub struct Beeper {
 
 impl Clone for Beeper {
     fn clone(&self) -> Self {
-        let mut beeper = Self::default();
+        let mut beeper = Self::new();
         beeper.settings = self.settings;
         beeper
     }
