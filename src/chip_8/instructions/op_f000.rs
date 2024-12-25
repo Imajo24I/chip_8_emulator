@@ -1,5 +1,5 @@
 use crate::chip_8::emulator::Emulator;
-use crate::chip_8::instructions::{get_v_reg_value, unknown_instruction_err, validate_v_reg_index};
+use crate::chip_8::instructions::unknown_instruction_err;
 use anyhow::{anyhow, Result};
 
 pub fn op_f000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
@@ -7,15 +7,13 @@ pub fn op_f000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
         0x0007 => {
             // FX07 - Set VX to value of delay timer
             let vx = ((opcode & 0x0F00) >> 8) as usize;
-            validate_v_reg_index(vx, opcode, emulator)?;
-
             emulator.v_registers[vx] = emulator.delay_timer;
         }
 
         0x0015 => {
             // FX15 - Set delay timer to value of VX
             emulator.delay_timer =
-                get_v_reg_value(((opcode & 0x0F00) >> 8) as usize, opcode, emulator)?;
+                emulator.v_registers[((opcode & 0x0F00) >> 8) as usize];
         }
 
         0x0018 => {
@@ -23,7 +21,7 @@ pub fn op_f000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             let currently_playing = emulator.sound_timer > 0;
 
             emulator.sound_timer =
-                get_v_reg_value(((opcode & 0x0F00) >> 8) as usize, opcode, emulator)?;
+                emulator.v_registers[((opcode & 0x0F00) >> 8) as usize];
 
             if currently_playing && emulator.sound_timer == 0 {
                 emulator.beeper.pause();
@@ -34,7 +32,7 @@ pub fn op_f000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
 
         0x001E => {
             // FX1E - Add value of VX to I
-            let x = get_v_reg_value(((opcode & 0x0F00) >> 8) as usize, opcode, emulator)?;
+            let x = emulator.v_registers[((opcode & 0x0F00) >> 8) as usize];
 
             if (emulator.i_register + x as usize) > 0x0FFF {
                 emulator.v_registers[0xF] = 1;
@@ -48,7 +46,6 @@ pub fn op_f000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
         0x000A => {
             // FX0A - Wait for keypress and store it in VX
             let vx = ((opcode & 0x0F00) >> 8) as usize;
-            validate_v_reg_index(vx, opcode, emulator)?;
 
             if let Some(key) = emulator.keypad.get_released_key() {
                 emulator.v_registers[vx] = key;
@@ -59,13 +56,13 @@ pub fn op_f000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
 
         0x0029 => {
             // FX29 - Set I to location of sprite for hex digit value of VX
-            let x = get_v_reg_value(((opcode & 0x0F00) >> 8) as usize, opcode, emulator)?;
+            let x = emulator.v_registers[((opcode & 0x0F00) >> 8) as usize];
             emulator.i_register = x as usize * 5;
         }
 
         0x0033 => {
             // FX33 - Store the binary-coded decimal representation of VX at address I
-            let x = get_v_reg_value(((opcode & 0x0F00) >> 8) as usize, opcode, emulator)?;
+            let x = emulator.v_registers[((opcode & 0x0F00) >> 8) as usize];
 
             if emulator.i_register + 2 > 0x0FFF {
                 i_reg_out_of_bounds_err(2, opcode, emulator)?;
@@ -79,7 +76,6 @@ pub fn op_f000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
         0x0055 => {
             // FX55 - Store registers V0 to VX in memory starting at address I
             let vx = ((opcode & 0x0F00) >> 8) as usize;
-            validate_v_reg_index(vx, opcode, emulator)?;
 
             if emulator.i_register + vx > 0x0FFF {
                 i_reg_out_of_bounds_err(vx, opcode, emulator)?;
@@ -95,7 +91,6 @@ pub fn op_f000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
         0x0065 => {
             // FX65 - Read registers V0 to VX from memory starting at address I
             let vx = ((opcode & 0x0F00) >> 8) as usize;
-            validate_v_reg_index(vx, opcode, emulator)?;
 
             if emulator.i_register + vx > 0x0FFF {
                 i_reg_out_of_bounds_err(vx, opcode, emulator)?;
