@@ -154,7 +154,7 @@ impl EmulatorScreen {
 
         if self.settings_opened {
             Window::new("Settings")
-                .default_size([840f32, 640f32])
+                .default_size([440f32, 320f32])
                 .collapsible(false)
                 .show(ui.ctx(), |ui| {
                     ui.vertical_centered(|ui| {
