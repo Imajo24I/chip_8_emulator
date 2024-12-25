@@ -17,6 +17,8 @@ pub fn op_dxyn(emulator: &mut Emulator, opcode: u16) -> Result<()> {
                 let x_coord = x + bit;
                 let y_coord = y + row;
 
+                let (x_coord, y_coord) = wrap_sprites_quirk(x_coord, y_coord, emulator);
+
                 if x_coord < 64 && y_coord < 32 {
                     flip_pixel(x_coord, y_coord, emulator);
                 }
@@ -49,4 +51,12 @@ fn get_x_y_height(emulator: &mut Emulator, opcode: u16) -> Result<(usize, usize,
     let height = (opcode & 0x000F) as usize;
 
     Ok((x, y, height))
+}
+
+fn wrap_sprites_quirk(x_coord: usize, y_coord: usize, emulator: &mut Emulator) -> (usize, usize) {
+    if emulator.config.quirks.wrap_sprites {
+        (x_coord % 64, y_coord % 32)
+    } else {
+        (x_coord, y_coord)
+    }
 }

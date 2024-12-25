@@ -88,6 +88,8 @@ pub fn op_f000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             for vy in 0..=vx {
                 emulator.memory[emulator.i_register + vy] = emulator.v_registers[vy];
             }
+
+            increment_i_quirk(emulator);
         }
 
         0x0065 => {
@@ -102,6 +104,8 @@ pub fn op_f000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             for vy in 0..=vx {
                 emulator.v_registers[vy] = emulator.memory[emulator.i_register + vy];
             }
+
+            increment_i_quirk(emulator);
         }
 
         _ => unknown_instruction_err(emulator, opcode)?,
@@ -114,4 +118,10 @@ fn i_reg_out_of_bounds_err(i_reg_shift: usize, opcode: u16, emulator: &mut Emula
     Err(anyhow!(
         "I register with value of {} is out of bounds - Instruction {:#06x} is located at memory location {}", emulator.i_register + i_reg_shift, opcode, emulator.pc - 2
     ))
+}
+
+fn increment_i_quirk(emulator: &mut Emulator) {
+    if emulator.config.quirks.increment_i_reg {
+        emulator.i_register += 1;
+    }
 }

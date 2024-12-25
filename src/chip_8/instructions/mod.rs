@@ -89,8 +89,15 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<()> {
         }
 
         0xB000 => {
-            // BNNN - Jump to NNN + V0
-            emulator.pc = ((opcode & 0x0FFF) + emulator.v_registers[0] as u16) as usize;
+            let reg_value = if !emulator.config.quirks.vx_offset_jump {
+                // BNNN - Jump to NNN + V0
+                emulator.v_registers[0]
+            } else {
+                // BXNN - Jump to NNN + VX
+                get_v_reg_value(((opcode & 0x0F00) >> 8) as usize, opcode, emulator)?
+            } ;
+
+            emulator.pc = ((opcode & 0x0FFF) + reg_value as u16) as usize;
         }
 
         0xC000 => {
@@ -126,6 +133,7 @@ fn get_v_reg_value(vx: usize, opcode: u16, emulator: &mut Emulator) -> Result<u8
     Ok(emulator.v_registers[vx])
 }
 
+// TODO: is this even needed, since 4 bits are max 16?
 fn validate_v_reg_index(vx: usize, opcode: u16, emulator: &mut Emulator) -> Result<()> {
     if vx > 15 {
         Err(

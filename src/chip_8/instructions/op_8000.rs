@@ -18,6 +18,10 @@ pub fn op_8000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             let vx = ((opcode & 0x0F00) >> 8) as usize;
             validate_v_reg_index(vx, opcode, emulator)?;
 
+            if emulator.config.quirks.vf_reset {
+                emulator.v_registers[0xF] = 0;
+            }
+
             emulator.v_registers[vx] = get_v_reg_value(vx, opcode, emulator)?
                 | get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)?;
         }
@@ -27,6 +31,10 @@ pub fn op_8000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             let vx = ((opcode & 0x0F00) >> 8) as usize;
             validate_v_reg_index(vx, opcode, emulator)?;
 
+            if emulator.config.quirks.vf_reset {
+                emulator.v_registers[0xF] = 0;
+            }
+
             emulator.v_registers[vx] = get_v_reg_value(vx, opcode, emulator)?
                 & get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)?;
         }
@@ -35,6 +43,10 @@ pub fn op_8000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             // 8XY3 - Set VX to the binary XOR value of VX and VY
             let vx = ((opcode & 0x0F00) >> 8) as usize;
             validate_v_reg_index(vx, opcode, emulator)?;
+
+            if emulator.config.quirks.vf_reset {
+                emulator.v_registers[0xF] = 0;
+            }
 
             emulator.v_registers[vx] = get_v_reg_value(vx, opcode, emulator)?
                 ^ get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)?;
@@ -76,13 +88,14 @@ pub fn op_8000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
 
         0x0006 => {
             // 8XY6 - Set VX to VY shifted by 1 to the right. Set VF to the shifted out bit.
+            // If the shift_vx_directly quirk is active, shift VX directly, without setting VX to VY
             let vx = ((opcode & 0x0F00) >> 8) as usize;
             validate_v_reg_index(vx, opcode, emulator)?;
 
-            let y = get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)?;
-            let shifted_out_bit = y & 1;
+            let value = shift_vx_quirk(vx, opcode, emulator)?;
+            let shifted_out_bit = value & 1;
 
-            emulator.v_registers[vx] = y >> 1;
+            emulator.v_registers[vx] = value >> 1;
             emulator.v_registers[0xF] = shifted_out_bit;
         }
 
@@ -105,13 +118,14 @@ pub fn op_8000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
 
         0x000E => {
             // 8XYE - Set VX to VY shifted by 1 to the left. Set VF to the shifted out bit.
+            // If the shift_vx_directly quirk is active, shift VX directly, without setting VX to VY
             let vx = ((opcode & 0x0F00) >> 8) as usize;
             validate_v_reg_index(vx, opcode, emulator)?;
 
-            let y = get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)?;
-            let shifted_out_bit = y >> 7;
+            let value = shift_vx_quirk(vx, opcode, emulator)?;
+            let shifted_out_bit = value >> 7;
 
-            emulator.v_registers[vx] = y << 1;
+            emulator.v_registers[vx] = value << 1;
             emulator.v_registers[0xF] = shifted_out_bit;
         }
 
@@ -119,4 +133,12 @@ pub fn op_8000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
     }
 
     Ok(())
+}
+
+fn shift_vx_quirk(vx: usize, opcode: u16, emulator: &mut Emulator) -> Result<u8> {
+    if !emulator.config.quirks.shift_vx_directly {
+        get_v_reg_value(((opcode & 0x00F0) >> 4) as usize, opcode, emulator)
+    } else {
+        Ok(emulator.v_registers[vx])
+    }
 }
