@@ -54,6 +54,14 @@ pub struct Beeper {
     pub settings: BeeperSettings,
 }
 
+impl Clone for Beeper {
+    fn clone(&self) -> Self {
+        let mut beeper = Self::default();
+        beeper.settings = self.settings;
+        beeper
+    }
+}
+
 impl std::fmt::Debug for Beeper {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "Beeper {{ sender: {:?} }}", self.sender)

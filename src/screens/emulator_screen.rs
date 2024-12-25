@@ -1,12 +1,9 @@
-use crate::chip_8::config::Config;
 use crate::chip_8::emulator::Emulator;
 use crate::emulator_app::FONT_SIZE;
 use crate::events::Event;
 use crate::screens::emulator_settings::draw_settings;
-use anyhow::Error;
 use eframe::egui;
 use eframe::egui::{Button, FontId, Label, Pos2, Rect, RichText, Ui, Vec2, Window};
-use std::path::Path;
 use std::time::{Duration, Instant};
 
 pub const MENU_BAR_OFFSET: f32 = 30f32;
@@ -19,13 +16,13 @@ pub struct EmulatorScreen {
 }
 
 impl EmulatorScreen {
-    pub fn new(filepath: &Path, config: Config) -> Result<Self, Error> {
-        Ok(Self {
-            emulator: Emulator::new(filepath, config)?,
+    pub fn new(emulator: Emulator) -> Self {
+        Self {
+            emulator,
             next_frame: Instant::now(),
             sleep_time: Duration::from_secs(0),
             settings_opened: false,
-        })
+        }
     }
 
     pub fn update(&mut self, ui: &mut Ui) -> Option<Event> {

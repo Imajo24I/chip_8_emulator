@@ -5,6 +5,8 @@ use std::array::from_fn;
 use std::cmp::PartialEq;
 use std::collections::HashMap;
 
+//fixme: Cannot configure Keyboard Layout after Keypad creation, making the setting in emulator_settings effectless
+#[derive(Clone)]
 pub struct Keypad {
     pub keys: [Key; 16],
 }
@@ -57,6 +59,7 @@ impl Keypad {
     }
 }
 
+#[derive(Clone)]
 pub struct Key {
     pub state: KeyState,
     pub egui_key: egui::Key,
@@ -103,7 +106,7 @@ impl Key {
     }
 }
 
-#[derive(PartialEq)]
+#[derive(PartialEq, Clone)]
 pub enum KeyState {
     Unpressed,
     Pressed,

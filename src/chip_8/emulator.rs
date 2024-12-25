@@ -4,7 +4,7 @@ use crate::events::Event;
 
 use crate::chip_8::beep::Beeper;
 use crate::chip_8::keypad::Keypad;
-use anyhow::{anyhow, Error};
+use anyhow::{Result, anyhow};
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
@@ -32,6 +32,7 @@ const MEMORY_SIZE: usize = 4096;
 // Instructions start at 0x200, since 0x000 - 0x1FF are reserved for interpreter
 const INSTRUCTIONS_START: usize = 0x200;
 
+#[derive(Clone)]
 pub struct Emulator {
     pub config: Config,
 
@@ -69,9 +70,11 @@ pub struct Emulator {
     pub sound_timer: u8,
 }
 
-impl Emulator {
-    pub fn new(filepath: &Path, config: Config) -> Result<Self, Error> {
-        Ok(Self {
+impl Default for Emulator {
+    fn default() -> Self {
+        let config = Config::default();
+
+        Self {
             config,
             beeper: Beeper::new(),
             display: [[false; 64]; 32],
@@ -82,12 +85,13 @@ impl Emulator {
             v_registers: [0; 16],
             delay_timer: 0,
             sound_timer: 0,
-            memory: Self::memory_from_file(filepath)?,
-        })
+            memory: [0; MEMORY_SIZE],
+        }
     }
+}
 
-    fn memory_from_file(filepath: &Path) -> Result<[u8; MEMORY_SIZE], Error> {
-        let mut memory = [0; MEMORY_SIZE];
+impl Emulator {
+    pub fn initialize_memory(&mut self, filepath: &Path) -> Result<()> {
         let file = File::open(filepath);
 
         match file {
@@ -110,9 +114,9 @@ impl Emulator {
                     ));
                 }
 
-                // Add instructions and font to memory
-                memory[INSTRUCTIONS_START..INSTRUCTIONS_START + data.len()].copy_from_slice(&data);
-                memory[0..FONT_SET.len()].copy_from_slice(&FONT_SET);
+                // Insert program and font into memory
+                self.memory[INSTRUCTIONS_START..INSTRUCTIONS_START + data.len()].copy_from_slice(&data);
+                self.memory[0..FONT_SET.len()].copy_from_slice(&FONT_SET);
             }
 
             Err(error) => {
@@ -123,7 +127,7 @@ impl Emulator {
             }
         }
 
-        Ok(memory)
+        Ok(())
     }
 
     pub fn run_cycle(&mut self) -> Result<(), Event> {

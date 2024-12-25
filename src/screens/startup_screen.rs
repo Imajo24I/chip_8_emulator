@@ -1,4 +1,4 @@
-use crate::chip_8::config::Config;
+use crate::chip_8::emulator::Emulator;
 use crate::events::Event;
 use crate::screens::emulator_settings::draw_settings;
 use eframe::egui::{Context, Ui};
@@ -7,7 +7,7 @@ use std::path::PathBuf;
 #[derive(Default)]
 pub struct StartupScreen {
     pub filepath: Option<PathBuf>,
-    pub config: Config,
+    pub emulator: Emulator,
 }
 
 impl StartupScreen {
@@ -31,16 +31,19 @@ impl StartupScreen {
         ui.vertical_centered(|ui| {
             self.update_filepath(ui);
 
-            draw_settings(ui, &mut self.config);
+            draw_settings(ui, &mut self.emulator.config);
 
             ui.end_row();
             ui.add_space(20f32);
 
             if ui.button("Start Emulation").clicked() && self.filepath.is_some() {
-                return Some(Event::StartEmulation(
-                    self.filepath.clone().unwrap(),
-                    self.config,
-                ));
+                let result = self.emulator.initialize_memory(self.filepath.as_ref().unwrap());
+
+                return if let Err(error) = result {
+                    Some(Event::ReportError(error))
+                } else {
+                    Some(Event::StartEmulation(self.emulator.clone()))
+                }
             }
 
             ui.end_row();
