@@ -31,7 +31,7 @@ impl StartupScreen {
         ui.vertical_centered(|ui| {
             self.update_filepath(ui);
 
-            draw_settings(ui, &mut self.emulator.config);
+            draw_settings(ui, &mut self.emulator);
 
             ui.end_row();
             ui.add_space(20f32);

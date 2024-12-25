@@ -157,7 +157,7 @@ impl EmulatorScreen {
                     ui.vertical_centered(|ui| {
                         ui.style_mut().override_font_id = Some(FontId::proportional(FONT_SIZE));
 
-                        draw_settings(ui, &mut self.emulator.config);
+                        draw_settings(ui, &mut self.emulator);
 
                         ui.end_row();
                         ui.add_space(20f32);

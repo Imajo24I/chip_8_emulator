@@ -1,7 +1,9 @@
-use crate::chip_8::config::Config;
+use crate::chip_8::emulator::Emulator;
 use eframe::egui::{Align, TextEdit, Ui};
 
-pub fn draw_settings(ui: &mut Ui, config: &mut Config) {
+pub fn draw_settings(ui: &mut Ui, emulator: &mut Emulator) {
+    let config = &mut emulator.config;
+
     ui.collapsing("Emulation Speed", |ui| {
         ui.label("Cycles per Frame:");
         ui.add_space(5f32);
@@ -45,9 +47,11 @@ pub fn draw_settings(ui: &mut Ui, config: &mut Config) {
     ui.add_space(10f32);
 
     ui.collapsing("Other Settings", |ui| {
-        ui.checkbox(
+        if ui.checkbox(
             &mut config.use_german_keyboard_layout,
             "Use german keyboard layout",
-        );
+        ).clicked() {
+            emulator.keypad.update_layout(config.use_german_keyboard_layout);
+        }
     });
 }

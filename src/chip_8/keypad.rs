@@ -5,7 +5,6 @@ use std::array::from_fn;
 use std::cmp::PartialEq;
 use std::collections::HashMap;
 
-//fixme: Cannot configure Keyboard Layout after Keypad creation, making the setting in emulator_settings effectless
 #[derive(Clone)]
 pub struct Keypad {
     pub keys: [Key; 16],
@@ -28,6 +27,10 @@ impl Keypad {
                 KeyState::Unpressed
             }
         }
+    }
+
+    pub fn update_layout(&mut self, use_german_keyboard_layout: bool) {
+        self.keys[0xA] = Key::from_hex(0xA, use_german_keyboard_layout);
     }
 
     pub fn is_key_pressed(&self, key: usize) -> bool {
