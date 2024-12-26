@@ -7,8 +7,7 @@ pub fn op_8000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
         0x0000 => {
             // 8XY0 - Set VX to value of VY
             let vx = ((opcode & 0x0F00) >> 8) as usize;
-            emulator.v_registers[vx] =
-                emulator.v_registers[((opcode & 0x00F0) >> 4) as usize];
+            emulator.v_registers[vx] = emulator.v_registers[((opcode & 0x00F0) >> 4) as usize];
         }
 
         0x0001 => {
@@ -19,8 +18,8 @@ pub fn op_8000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
                 emulator.v_registers[0xF] = 0;
             }
 
-            emulator.v_registers[vx] = emulator.v_registers[vx]
-                | emulator.v_registers[((opcode & 0x00F0) >> 4) as usize]
+            emulator.v_registers[vx] =
+                emulator.v_registers[vx] | emulator.v_registers[((opcode & 0x00F0) >> 4) as usize]
         }
 
         0x0002 => {
@@ -31,8 +30,8 @@ pub fn op_8000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
                 emulator.v_registers[0xF] = 0;
             }
 
-            emulator.v_registers[0xF] = emulator.v_registers[vx]
-                & emulator.v_registers[((opcode & 0x00F0) >> 4) as usize];
+            emulator.v_registers[0xF] =
+                emulator.v_registers[vx] & emulator.v_registers[((opcode & 0x00F0) >> 4) as usize];
         }
 
         0x0003 => {
@@ -43,8 +42,8 @@ pub fn op_8000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
                 emulator.v_registers[0xF] = 0;
             }
 
-            emulator.v_registers[vx] = emulator.v_registers[vx]
-                & emulator.v_registers[((opcode & 0x00F0) >> 4) as usize];
+            emulator.v_registers[vx] =
+                emulator.v_registers[vx] & emulator.v_registers[((opcode & 0x00F0) >> 4) as usize];
         }
 
         0x0004 => {

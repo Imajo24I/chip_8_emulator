@@ -12,16 +12,14 @@ pub fn op_f000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
 
         0x0015 => {
             // FX15 - Set delay timer to value of VX
-            emulator.delay_timer =
-                emulator.v_registers[((opcode & 0x0F00) >> 8) as usize];
+            emulator.delay_timer = emulator.v_registers[((opcode & 0x0F00) >> 8) as usize];
         }
 
         0x0018 => {
             // FX18 - Set sound timer to value of VX
             let currently_playing = emulator.sound_timer > 0;
 
-            emulator.sound_timer =
-                emulator.v_registers[((opcode & 0x0F00) >> 8) as usize];
+            emulator.sound_timer = emulator.v_registers[((opcode & 0x0F00) >> 8) as usize];
 
             if currently_playing && emulator.sound_timer == 0 {
                 emulator.beeper.pause();

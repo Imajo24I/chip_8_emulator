@@ -2,9 +2,9 @@ use crate::chip_8::config::Config;
 use crate::chip_8::instructions;
 use crate::events::Event;
 
-use crate::chip_8::beep::Beeper;
+use crate::chip_8::beep::{Beeper, BeeperSettings};
 use crate::chip_8::keypad::Keypad;
-use anyhow::{Result, anyhow};
+use anyhow::{anyhow, Result};
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
@@ -76,7 +76,7 @@ impl Default for Emulator {
 
         Self {
             config,
-            beeper: Beeper::new(),
+            beeper: Beeper::new(BeeperSettings::default()),
             display: [[false; 64]; 32],
             keypad: Keypad::new(config.use_german_keyboard_layout),
             pc: INSTRUCTIONS_START,
@@ -115,7 +115,8 @@ impl Emulator {
                 }
 
                 // Insert program and font into memory
-                self.memory[INSTRUCTIONS_START..INSTRUCTIONS_START + data.len()].copy_from_slice(&data);
+                self.memory[INSTRUCTIONS_START..INSTRUCTIONS_START + data.len()]
+                    .copy_from_slice(&data);
                 self.memory[0..FONT_SET.len()].copy_from_slice(&FONT_SET);
             }
 

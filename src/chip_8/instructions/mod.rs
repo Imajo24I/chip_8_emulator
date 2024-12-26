@@ -25,18 +25,14 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<()> {
 
         0x3000 => {
             // 3XNN - Skip next instruction if VX == NN
-            if emulator.v_registers[((opcode & 0x0F00) >> 8) as usize]
-                == (opcode & 0x00FF) as u8
-            {
+            if emulator.v_registers[((opcode & 0x0F00) >> 8) as usize] == (opcode & 0x00FF) as u8 {
                 emulator.pc += 2;
             }
         }
 
         0x4000 => {
             // 4XNN - Skip next instruction if VX != NN
-            if emulator.v_registers[((opcode & 0x0F00) >> 8) as usize]
-                != (opcode & 0x00FF) as u8
-            {
+            if emulator.v_registers[((opcode & 0x0F00) >> 8) as usize] != (opcode & 0x00FF) as u8 {
                 emulator.pc += 2;
             }
         }
@@ -92,7 +88,7 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             } else {
                 // BXNN - Jump to NNN + VX
                 emulator.v_registers[((opcode & 0x0F00) >> 8) as usize]
-            } ;
+            };
 
             emulator.pc = ((opcode & 0x0FFF) + reg_value as u16) as usize;
         }

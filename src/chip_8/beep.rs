@@ -1,4 +1,4 @@
-// Mostly taken from https://github.com/iliags/chip8/blob/main/crates/c8_audio/src/beeper.rs
+// Original code taken from https://github.com/iliags/chip8/blob/main/crates/c8_audio/src/beeper.rs
 #![allow(dead_code)]
 
 use cpal::{
@@ -26,7 +26,7 @@ impl Default for BeeperSettings {
         BeeperSettings {
             pitch: 440.0,
             octave: 2.0,
-            volume: 0.05,
+            volume: 0.5,
         }
     }
 }
@@ -52,11 +52,13 @@ pub struct Beeper {
 
     /// Beeper settings
     pub settings: BeeperSettings,
+
+    pub is_playing: bool,
 }
 
 impl Clone for Beeper {
     fn clone(&self) -> Self {
-        let mut beeper = Self::new();
+        let mut beeper = Self::new(self.settings);
         beeper.settings = self.settings;
         beeper
     }
@@ -69,24 +71,20 @@ impl std::fmt::Debug for Beeper {
 }
 
 impl Beeper {
-    /// Create a new beeper instance
-    pub fn new() -> Self {
-        #[cfg(target_arch = "wasm32")]
-        {
-            Beeper::default()
-        }
-
+    /// Create a beeper instance
+    pub fn new(beeper_settings: BeeperSettings) -> Self {
         #[cfg(not(target_arch = "wasm32"))]
         {
             use std::sync::mpsc;
             use std::thread;
 
             let mut beeper = Beeper::default();
+            beeper.settings = beeper_settings;
 
             let (sender, receiver): (Sender<Message>, Receiver<Message>) = mpsc::channel();
 
             thread::spawn(move || {
-                let device = Self::create_stream_device();
+                let device = Self::create_stream_device(beeper.settings);
 
                 Self::stream_audio(receiver, device);
             });
@@ -99,62 +97,40 @@ impl Beeper {
 
     /// Play the audio
     pub fn play(&mut self) {
+        self.is_playing = true;
+
         #[cfg(not(target_arch = "wasm32"))]
         let _ = match self.sender {
             Some(ref sender) => sender.send(Message::Play),
             None => Ok(()),
         };
-
-        #[cfg(target_arch = "wasm32")]
-        match self.stream {
-            Some(_) => {
-                // Note: Calling play repeatedly on the stream causes popping on WASM
-                //let _ = stream.play();
-            }
-            None => {
-                self.stream = Some(Self::create_stream_device().unwrap());
-                let _ = self.stream.as_ref().unwrap().play();
-            }
-        }
     }
 
     //noinspection DuplicatedCode
     /// Pause the audio
     pub fn pause(&mut self) {
+        self.is_playing = false;
+
         #[cfg(not(target_arch = "wasm32"))]
         let _ = match self.sender {
             Some(ref sender) => sender.send(Message::Pause),
             None => Ok(()),
         };
-
-        #[cfg(target_arch = "wasm32")]
-        match self.stream.take() {
-            Some(ref stream) => {
-                let _ = stream.pause();
-            }
-            None => {}
-        }
     }
 
     //noinspection DuplicatedCode
     /// Stop the audio
     pub fn stop(&mut self) {
+        self.is_playing = false;
+
         #[cfg(not(target_arch = "wasm32"))]
         let _ = match self.sender {
             Some(ref sender) => sender.send(Message::Stop),
             None => Ok(()),
         };
-
-        #[cfg(target_arch = "wasm32")]
-        match self.stream.take() {
-            Some(ref stream) => {
-                let _ = stream.pause();
-            }
-            None => {}
-        }
     }
 
-    fn create_stream_device() -> Result<Stream, BuildStreamError> {
+    fn create_stream_device(settings: BeeperSettings) -> Result<Stream, BuildStreamError> {
         let host = cpal::default_host();
 
         let device = host
@@ -164,8 +140,6 @@ impl Beeper {
         let config = device
             .default_output_config()
             .expect("no default output config");
-
-        let settings = BeeperSettings::default();
 
         match config.sample_format() {
             cpal::SampleFormat::F32 => {
@@ -273,7 +247,7 @@ mod tests {
     #[ignore]
     #[cfg(not(target_arch = "wasm32"))]
     fn test_beeper() {
-        let mut beeper = Beeper::new();
+        let mut beeper = Beeper::new(BeeperSettings::default());
 
         beeper.play();
         std::thread::sleep(std::time::Duration::from_secs(1));
