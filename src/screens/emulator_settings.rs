@@ -58,20 +58,6 @@ fn draw_emulation_quirks(ui: &mut Ui, quirks: &mut Quirks) {
 fn draw_other_settings(ui: &mut Ui, emulator: &mut Emulator) {
     ui.collapsing("Other Settings", |ui| {
         if ui
-            .checkbox(
-                &mut emulator.config.use_german_keyboard_layout,
-                "Use german keyboard layout",
-            )
-            .clicked()
-        {
-            emulator
-                .keypad
-                .update_layout(emulator.config.use_german_keyboard_layout);
-        }
-
-        ui.add_space(5.0);
-
-        if ui
             .add(
                 Slider::new(&mut emulator.beeper.settings.volume, 0f32..=1f32)
                     .text("Beeper Volume"),
@@ -84,6 +70,20 @@ fn draw_other_settings(ui: &mut Ui, emulator: &mut Emulator) {
             if is_playing {
                 emulator.beeper.play();
             }
+        }
+
+        ui.add_space(5.0);
+
+        if ui
+            .checkbox(
+                &mut emulator.config.use_german_keyboard_layout,
+                "Use german keyboard layout",
+            )
+            .clicked()
+        {
+            emulator
+                .keypad
+                .update_layout(emulator.config.use_german_keyboard_layout);
         }
     });
 }
