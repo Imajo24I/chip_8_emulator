@@ -43,7 +43,7 @@ pub fn op_8000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             }
 
             emulator.v_registers[vx] =
-                emulator.v_registers[vx] & emulator.v_registers[((opcode & 0x00F0) >> 4) as usize];
+                emulator.v_registers[vx] ^ emulator.v_registers[((opcode & 0x00F0) >> 4) as usize];
         }
 
         0x0004 => {
