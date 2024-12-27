@@ -31,7 +31,7 @@ pub fn op_dxyn(emulator: &mut Emulator, opcode: u16) -> Result<()> {
 fn flip_pixel(x_coord: usize, y_coord: usize, emulator: &mut Emulator) {
     let pixel = &mut emulator.display[y_coord][x_coord];
 
-    if pixel {
+    if *pixel {
         emulator.v_registers[0xF] = 1;
         *pixel = false;
     } else {
