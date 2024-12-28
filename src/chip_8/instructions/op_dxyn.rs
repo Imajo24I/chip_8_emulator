@@ -3,9 +3,7 @@ use anyhow::Result;
 
 pub fn op_dxyn(emulator: &mut Emulator, opcode: u16) -> Result<()> {
     // DXYN - Draw sprite at coordinate VX, VY with N bytes of sprite data
-
-    let (x, y, height) = get_x_y_height(emulator, opcode)?;
-
+    let (starting_x, starting_y, height) = get_x_y_height(emulator, opcode)?;
     emulator.v_registers[0xF] = 0;
 
     for row in 0..height {
@@ -13,13 +11,14 @@ pub fn op_dxyn(emulator: &mut Emulator, opcode: u16) -> Result<()> {
 
         for bit in 0..8 {
             if (sprite_data & (0x80 >> bit)) != 0 {
-                let x_coord = x + bit;
-                let y_coord = y + row;
+                let (x, y) = if emulator.config.quirks.wrap_sprites {
+                    ((starting_x + bit) % 64, (starting_y + row) % 32)
+                } else {
+                    (starting_x + bit, starting_y + row)
+                };
 
-                let (x_coord, y_coord) = wrap_sprites_quirk(x_coord, y_coord, emulator);
-
-                if x_coord < 64 && y_coord < 32 {
-                    flip_pixel(x_coord, y_coord, emulator);
+                if x < 64 && y < 32 {
+                    flip_pixel(x, y, emulator);
                 }
             }
         }
@@ -45,12 +44,4 @@ fn get_x_y_height(emulator: &mut Emulator, opcode: u16) -> Result<(usize, usize,
     let height = (opcode & 0x000F) as usize;
 
     Ok((x, y, height))
-}
-
-fn wrap_sprites_quirk(x_coord: usize, y_coord: usize, emulator: &mut Emulator) -> (usize, usize) {
-    if emulator.config.quirks.wrap_sprites {
-        (x_coord % 64, y_coord % 32)
-    } else {
-        (x_coord, y_coord)
-    }
 }
