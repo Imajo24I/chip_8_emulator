@@ -83,7 +83,7 @@ pub fn op_f000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
                 emulator.memory[emulator.i_register + vy] = emulator.v_registers[vy];
             }
 
-            increment_i_quirk(emulator);
+            increment_i_quirk(emulator, vx);
         }
 
         0x0065 => {
@@ -98,7 +98,7 @@ pub fn op_f000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
                 emulator.v_registers[vy] = emulator.memory[emulator.i_register + vy];
             }
 
-            increment_i_quirk(emulator);
+            increment_i_quirk(emulator, vx);
         }
 
         _ => unknown_instruction_err(emulator, opcode)?,
@@ -113,8 +113,10 @@ fn i_reg_out_of_bounds_err(i_reg_shift: usize, opcode: u16, emulator: &mut Emula
     ))
 }
 
-fn increment_i_quirk(emulator: &mut Emulator) {
+fn increment_i_quirk(emulator: &mut Emulator, vx: usize) {
     if emulator.config.quirks.increment_i_reg {
-        emulator.i_register += 1;
+        // Increment I register
+        // & 0xFFFF is used to ensure that the i register stays in the 16 bit range
+        emulator.i_register = (emulator.i_register + 1 + vx) & 0xFFFF;
     }
 }
