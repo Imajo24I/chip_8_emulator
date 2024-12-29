@@ -3,7 +3,7 @@ use crate::emulator_app::FONT_SIZE;
 use crate::events::Event;
 use crate::screens::emulator_settings::draw_settings;
 use eframe::egui;
-use eframe::egui::{Button, FontId, Label, Pos2, Rect, RichText, Ui, Vec2, Window};
+use eframe::egui::{Button, FontId, InputState, Label, Pos2, Rect, RichText, Ui, Vec2, Window};
 use std::time::{Duration, Instant};
 
 pub const MENU_BAR_OFFSET: f32 = 30f32;
@@ -44,7 +44,11 @@ impl EmulatorScreen {
             }
         }
 
-        let inner_rect = ui.ctx().input(|i| i.viewport().inner_rect);
+        let inner_rect = ui.ctx().input(|input_state| {
+            self.handle_input(input_state);
+            return input_state.viewport().inner_rect;
+        });
+
         if let Some(inner_rect) = inner_rect {
             let window_size = inner_rect.size();
 
@@ -53,6 +57,18 @@ impl EmulatorScreen {
         }
 
         None
+    }
+
+    /// Check for input
+    /// - On Escape: Open/Close Settings
+    /// - On Space: Pause/Resume
+    fn handle_input(&mut self, input_state: &InputState) {
+        if input_state.key_pressed(egui::Key::Escape) {
+            self.settings_opened = !self.settings_opened;
+            self.emulator.config.emulation_paused = self.settings_opened;
+        } else if input_state.key_pressed(egui::Key::Space) {
+            self.emulator.config.emulation_paused = !self.emulator.config.emulation_paused;
+        }
     }
 
     fn draw_display(&mut self, window_size: Vec2, ui: &mut Ui) {
