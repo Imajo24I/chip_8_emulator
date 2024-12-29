@@ -6,7 +6,7 @@ pub fn op_0000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
     match opcode & 0x00FF {
         0x00E0 => {
             // 00E0 - Clear display
-            emulator.display.fill_with(|| [false; 64]);
+            emulator.display.clear();
         }
 
         0x00EE => {

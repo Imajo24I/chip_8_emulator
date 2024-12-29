@@ -8,6 +8,7 @@ use anyhow::{anyhow, Result};
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
+use crate::chip_8::display::Display;
 
 const FONT_SET: [u8; 80] = [
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -38,7 +39,7 @@ pub struct Emulator {
 
     pub beeper: Beeper,
 
-    pub display: [[bool; 64]; 32],
+    pub display: Display,
 
     pub keypad: Keypad,
 
@@ -77,7 +78,7 @@ impl Default for Emulator {
         Self {
             config,
             beeper: Beeper::new(BeeperSettings::default()),
-            display: [[false; 64]; 32],
+            display: Display::default(),
             keypad: Keypad::new(config.use_german_keyboard_layout),
             pc: INSTRUCTIONS_START,
             i_reg: 0,
