@@ -71,6 +71,7 @@ impl EmulatorScreen {
         }
     }
 
+    /// Draw the 64x32 program display
     fn draw_display(&mut self, window_size: Vec2, ui: &mut Ui) {
         let pixel_width = window_size.x / 64f32;
         let pixel_height = (window_size.y - MENU_BAR_OFFSET) / 32f32;
@@ -97,6 +98,7 @@ impl EmulatorScreen {
         }
     }
 
+    /// Draw the bottom menu bar
     fn draw_menu_bar(&mut self, window_size: Vec2, ui: &mut Ui) -> Option<Event> {
         let bar_height = window_size.y - MENU_BAR_OFFSET + 5f32;
         let bar_top_height = window_size.y - 5f32;
@@ -188,6 +190,7 @@ impl EmulatorScreen {
         None
     }
 
+    /// Sleep until the next frame begins, in order to limit the frame rate to 60 FPS
     fn wait_for_next_frame(&mut self) {
         self.next_frame += Duration::from_secs_f32(1f32 / 60f32);
 
