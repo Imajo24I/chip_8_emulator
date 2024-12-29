@@ -52,14 +52,14 @@ pub struct Emulator {
 
     // Index Register
     // Used to point at locations in memory
-    pub i_register: usize,
+    pub i_reg: usize,
 
     // Stack
     // Used to call and return from subroutines (functions)
     pub stack: Vec<usize>,
 
     // General-purpose variable registers
-    pub v_registers: [u8; 16],
+    pub v_regs: [u8; 16],
 
     // Delay Timer
     // Decrements 60 times per second
@@ -80,9 +80,9 @@ impl Default for Emulator {
             display: [[false; 64]; 32],
             keypad: Keypad::new(config.use_german_keyboard_layout),
             pc: INSTRUCTIONS_START,
-            i_register: 0,
+            i_reg: 0,
             stack: Vec::new(),
-            v_registers: [0; 16],
+            v_regs: [0; 16],
             delay_timer: 0,
             sound_timer: 0,
             memory: [0; MEMORY_SIZE],
