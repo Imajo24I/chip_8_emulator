@@ -10,7 +10,7 @@ use std::io::Read;
 use std::path::Path;
 use crate::chip_8::font::{LARGE_FONT, SMALL_FONT};
 
-const MEMORY_SIZE: usize = 4096;
+pub const MEMORY_SIZE: usize = 4096;
 // Instructions start at 0x200, since 0x000 - 0x1FF are reserved for interpreter
 const INSTRUCTIONS_START: usize = 0x200;
 

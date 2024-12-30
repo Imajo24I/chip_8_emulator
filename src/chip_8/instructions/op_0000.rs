@@ -1,5 +1,5 @@
 use crate::chip_8::display::Resolution;
-use crate::chip_8::emulator::Emulator;
+use crate::chip_8::emulator::{Emulator, MEMORY_SIZE};
 use crate::chip_8::instructions::unknown_instruction_err;
 use anyhow::{anyhow, Result};
 
@@ -45,6 +45,14 @@ pub fn op_0000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
                     // SuperChip Instruction
                     // 00FC - Scroll display left by 4 pixels
                     emulator.display.scroll_left();
+                }
+
+                0x000D => {
+                    // SuperChip Instruction
+                    // 00FD - Exit the program
+
+                    // Emulator will automatically quit when reaching end of memory
+                    emulator.pc = MEMORY_SIZE;
                 }
 
                 0x000E => {
