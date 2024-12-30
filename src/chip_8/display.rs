@@ -1,3 +1,5 @@
+use std::cmp::PartialEq;
+
 #[derive(Clone)]
 pub struct Display {
     pub pixels: Vec<Vec<bool>>,
@@ -7,6 +9,17 @@ pub struct Display {
 impl Display {
     pub fn clear(&mut self) {
         self.pixels = vec![vec![false; self.resolution.width()]; self.resolution.height()];
+    }
+
+    /// Set the active resolution
+    /// Also clears the display if the resolution has changed
+    pub fn set_resolution(&mut self, resolution: Resolution) {
+        if resolution == self.resolution {
+            return;
+        }
+
+        self.resolution = resolution;
+        self.pixels = vec![vec![false; resolution.width()]; resolution.height()];
     }
 }
 
@@ -21,12 +34,12 @@ impl Default for Display {
     }
 }
 
-/// Super Chip 8 has 2 different resolutions:
+/// SuperChip supports 2 different resolutions:
 /// - Lores: 64x32 pixels
 /// - Hires: 128x64 pixels
 ///
-/// The active resolution can be switched using instructions
-#[derive(Clone)]
+/// The active resolution can be switched using 00FE and 00FF instructions
+#[derive(Clone, PartialEq)]
 pub enum Resolution {
     Lores,
     Hires,
