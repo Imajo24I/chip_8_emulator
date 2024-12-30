@@ -1,33 +1,14 @@
 use crate::chip_8::config::Config;
 use crate::chip_8::instructions;
 use crate::events::Event;
-
 use crate::chip_8::beep::{Beeper, BeeperSettings};
+use crate::chip_8::display::Display;
 use crate::chip_8::keypad::Keypad;
 use anyhow::{anyhow, Result};
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
-use crate::chip_8::display::Display;
-
-const FONT_SET: [u8; 80] = [
-    0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
-    0x20, 0x60, 0x20, 0x20, 0x70, // 1
-    0xF0, 0x10, 0xF0, 0x80, 0xF0, // 2
-    0xF0, 0x10, 0xF0, 0x10, 0xF0, // 3
-    0x90, 0x90, 0xF0, 0x10, 0x10, // 4
-    0xF0, 0x80, 0xF0, 0x10, 0xF0, // 5
-    0xF0, 0x80, 0xF0, 0x90, 0xF0, // 6
-    0xF0, 0x10, 0x20, 0x40, 0x40, // 7
-    0xF0, 0x90, 0xF0, 0x90, 0xF0, // 8
-    0xF0, 0x90, 0xF0, 0x10, 0xF0, // 9
-    0xF0, 0x90, 0xF0, 0x90, 0x90, // A
-    0xE0, 0x90, 0xE0, 0x90, 0xE0, // B
-    0xF0, 0x80, 0x80, 0x80, 0xF0, // C
-    0xE0, 0x90, 0x90, 0x90, 0xE0, // D
-    0xF0, 0x80, 0xF0, 0x80, 0xF0, // E
-    0xF0, 0x80, 0xF0, 0x80, 0x80, // F
-];
+use crate::chip_8::font::{LARGE_FONT, SMALL_FONT};
 
 const MEMORY_SIZE: usize = 4096;
 // Instructions start at 0x200, since 0x000 - 0x1FF are reserved for interpreter
@@ -115,10 +96,16 @@ impl Emulator {
                     ));
                 }
 
-                // Insert program and font into memory
+                // Insert program into memory
                 self.memory[INSTRUCTIONS_START..INSTRUCTIONS_START + data.len()]
                     .copy_from_slice(&data);
-                self.memory[0..FONT_SET.len()].copy_from_slice(&FONT_SET);
+
+                // Insert fonts into memory
+                let small_font_len = SMALL_FONT.len();
+                let large_font_len = LARGE_FONT.len();
+
+                self.memory[0..small_font_len].copy_from_slice(&SMALL_FONT);
+                self.memory[small_font_len..small_font_len + large_font_len].copy_from_slice(&LARGE_FONT);
             }
 
             Err(error) => {
