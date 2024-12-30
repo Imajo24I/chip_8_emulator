@@ -4,7 +4,7 @@ use crate::chip_8::emulator::Emulator;
 use anyhow::Result;
 
 pub fn op_d000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
-    let resolution = &emulator.display.resolution;
+    let resolution = emulator.display.resolution.clone();
     let display_width = resolution.width();
     let display_height = resolution.height();
 
@@ -26,7 +26,7 @@ pub fn op_d000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
                     if (sprite_data & (0x8000 >> bit)) != 0 {
                         let (x, y) = calculate_coord(
                             &emulator.config.quirks,
-                            resolution,
+                            &resolution,
                             (starting_x, starting_y),
                             (bit, row),
                         );
@@ -53,7 +53,7 @@ pub fn op_d000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
                     if (sprite_data & (0x80 >> bit)) != 0 {
                         let (x, y) = calculate_coord(
                             &emulator.config.quirks,
-                            resolution,
+                            &resolution,
                             (starting_x, starting_y),
                             (bit, row),
                         );
