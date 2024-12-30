@@ -2,11 +2,15 @@ use std::cmp::PartialEq;
 
 #[derive(Clone)]
 pub struct Display {
+    /// 2D array of booleans, which represent the pixels
     pub pixels: Vec<Vec<bool>>,
+
+    /// Currently active resolution
     pub resolution: Resolution
 }
 
 impl Display {
+    // Set all pixels to false
     pub fn clear(&mut self) {
         self.pixels = vec![vec![false; self.resolution.width()]; self.resolution.height()];
     }
@@ -41,28 +45,28 @@ impl Default for Display {
 /// The active resolution can be switched using 00FE and 00FF instructions
 #[derive(Clone, PartialEq)]
 pub enum Resolution {
-    Lores,
-    Hires,
+    Low,
+    High,
 }
 
 impl Resolution {
     pub fn width(&self) -> usize {
         match self {
-            Resolution::Lores => 64,
-            Resolution::Hires => 128,
+            Resolution::Low => 64,
+            Resolution::High => 128,
         }
     }
 
     pub fn height(&self) -> usize {
         match self {
-            Resolution::Lores => 32,
-            Resolution::Hires => 64,
+            Resolution::Low => 32,
+            Resolution::High => 64,
         }
     }
 }
 
 impl Default for Resolution {
     fn default() -> Self {
-        Self::Lores
+        Self::Low
     }
 }

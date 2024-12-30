@@ -23,13 +23,13 @@ pub fn op_0000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
         0x00FE => {
             // SuperChip Instruction
             // 00FE - Set resolution to 64x32
-            emulator.display.set_resolution(Resolution::Lores);
+            emulator.display.set_resolution(Resolution::Low);
         }
 
         0x00FF => {
             // SuperChip Instruction
             // 00FF - Set resolution to 128x64
-            emulator.display.set_resolution(Resolution::Hires);
+            emulator.display.set_resolution(Resolution::High);
         }
 
         _ => {
