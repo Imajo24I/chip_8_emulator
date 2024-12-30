@@ -108,6 +108,26 @@ pub fn op_f000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             increment_i_quirk(emulator, vx);
         }
 
+        0x0075 => {
+            // SuperChip Instruction
+            // FX75 - Store V0 - VX into flag registers
+            let vx = ((opcode & 0x0F00) >> 8) as usize;
+
+            for reg in 0..vx {
+                emulator.f_regs[reg] = emulator.v_regs[reg];
+            }
+        }
+
+        0x0085 => {
+            // SuperChip Instruction
+            // FX85 - Load V0 - VX from flag registers
+            let vx = ((opcode & 0x0F00) >> 8) as usize;
+
+            for reg in 0..vx {
+                emulator.v_regs[reg] = emulator.f_regs[reg];
+            }
+        }
+
         _ => unknown_instruction_err(emulator, opcode)?,
     }
 

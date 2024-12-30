@@ -43,6 +43,11 @@ pub struct Emulator {
     // General-purpose variable registers
     pub v_regs: [u8; 16],
 
+    // Flag Registers
+    // Persistent across program runs
+    // TODO: Make them actually persistent
+    pub f_regs: [u8; 16],
+
     // Delay Timer
     // Decrements 60 times per second
     pub delay_timer: u8,
@@ -65,6 +70,7 @@ impl Default for Emulator {
             i_reg: 0,
             stack: Vec::new(),
             v_regs: [0; 16],
+            f_regs: [0; 16],
             delay_timer: 0,
             sound_timer: 0,
             memory: [0; MEMORY_SIZE],
