@@ -39,8 +39,8 @@ impl Default for Display {
 }
 
 /// SuperChip supports 2 different resolutions:
-/// - Lores: 64x32 pixels
-/// - Hires: 128x64 pixels
+/// - 64x32 pixels
+/// - 128x64 pixels
 ///
 /// The active resolution can be switched using 00FE and 00FF instructions
 #[derive(Clone, PartialEq)]
