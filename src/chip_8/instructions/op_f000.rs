@@ -53,9 +53,16 @@ pub fn op_f000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
         }
 
         0x0029 => {
-            // FX29 - Set I to location of sprite for hex digit value of VX
+            // FX29 - Set I to location of small sprite for hex digit value of VX
             let x = emulator.v_regs[((opcode & 0x0F00) >> 8) as usize];
             emulator.i_reg = x as usize * 5;
+        }
+
+        0x0030 => {
+            // SuperChip Instruction
+            // FX30 - Set I to location of large sprite for hex value of VX
+            let x = emulator.v_regs[((opcode & 0x0F00) >> 8) as usize];
+            emulator.i_reg = 80 + (x as usize * 10);
         }
 
         0x0033 => {
@@ -101,6 +108,26 @@ pub fn op_f000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             increment_i_quirk(emulator, vx);
         }
 
+        0x0075 => {
+            // SuperChip Instruction
+            // FX75 - Store V0 - VX into flag registers
+            let vx = ((opcode & 0x0F00) >> 8) as usize;
+
+            for reg in 0..vx {
+                emulator.f_regs[reg] = emulator.v_regs[reg];
+            }
+        }
+
+        0x0085 => {
+            // SuperChip Instruction
+            // FX85 - Load V0 - VX from flag registers
+            let vx = ((opcode & 0x0F00) >> 8) as usize;
+
+            for reg in 0..vx {
+                emulator.v_regs[reg] = emulator.f_regs[reg];
+            }
+        }
+
         _ => unknown_instruction_err(emulator, opcode)?,
     }
 
@@ -116,7 +143,7 @@ fn i_reg_out_of_bounds_err(i_reg_shift: usize, opcode: u16, emulator: &mut Emula
 fn increment_i_quirk(emulator: &mut Emulator, vx: usize) {
     if emulator.config.quirks.increment_i_reg {
         // Increment I register
-        // & 0xFFFF is used to ensure that the i register stays in the 16 bit range
+        // & 0xFFFF is used to ensure that the I Register stays in the 16 bit range
         emulator.i_reg = (emulator.i_reg + 1 + vx) & 0xFFFF;
     }
 }

@@ -73,10 +73,12 @@ impl EmulatorScreen {
 
     /// Draw the 64x32 program display
     fn draw_display(&mut self, window_size: Vec2, ui: &mut Ui) {
-        let pixel_width = window_size.x / 64f32;
-        let pixel_height = (window_size.y - MENU_BAR_OFFSET) / 32f32;
+        let resolution = &self.emulator.display.resolution;
 
-        for (row_index, row) in self.emulator.display.iter().enumerate() {
+        let pixel_width = window_size.x / resolution.width() as f32;
+        let pixel_height = (window_size.y - MENU_BAR_OFFSET) / resolution.height() as f32;
+
+        for (row_index, row) in self.emulator.display.pixels.iter().enumerate() {
             let pixel_y = row_index as f32 * pixel_height;
 
             for (pixel_index, pixel) in row.iter().enumerate() {

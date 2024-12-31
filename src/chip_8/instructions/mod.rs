@@ -1,6 +1,6 @@
 mod op_0000;
 mod op_8000;
-mod op_dxyn;
+mod op_d000;
 mod op_e000;
 mod op_f000;
 
@@ -99,7 +99,7 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             emulator.v_regs[vx] = rand::random::<u8>() & (opcode & 0x00FF) as u8;
         }
 
-        0xD000 => op_dxyn::op_dxyn(emulator, opcode)?,
+        0xD000 => op_d000::op_d000(emulator, opcode)?,
 
         0xE000 => op_e000::op_e000(emulator, opcode)?,
 
