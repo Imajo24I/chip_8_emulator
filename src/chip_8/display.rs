@@ -10,7 +10,7 @@ pub struct Display {
 }
 
 impl Display {
-    /// Scroll the display to the right by 4. The 4 columns on the left will be reset
+    /// Scroll the display to the right by 4. The 4 leftmost columns will be reset
     pub fn scroll_right(&mut self) {
         for row in self.pixels.iter_mut() {
             row.rotate_right(4);
@@ -20,7 +20,7 @@ impl Display {
         }
     }
 
-    /// Scroll the display to the left by 4. The 4 columns on the right will be reset
+    /// Scroll the display to the left by 4. The 4 rightmost columns will be reset
     pub fn scroll_left(&mut self) {
         for row in self.pixels.iter_mut() {
             row.rotate_left(4);
