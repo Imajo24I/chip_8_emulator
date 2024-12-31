@@ -6,7 +6,7 @@ pub struct Display {
     pub pixels: Vec<Vec<bool>>,
 
     /// Currently active resolution
-    pub resolution: Resolution
+    pub resolution: Resolution,
 }
 
 impl Display {
@@ -14,8 +14,8 @@ impl Display {
     pub fn scroll_right(&mut self) {
         for row in self.pixels.iter_mut() {
             row.rotate_right(4);
-            for pixel in 0..4 {
-                row[pixel] = false;
+            for pixel in row.iter_mut().take(4) {
+                *pixel = false;
             }
         }
     }

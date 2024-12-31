@@ -19,8 +19,7 @@ pub fn op_8(emulator: &mut Emulator, opcode: u16) -> Result<()> {
                 emulator.v_regs[0xF] = 0;
             }
 
-            emulator.v_regs[vx] =
-                emulator.v_regs[vx] | emulator.v_regs[((opcode & 0x00F0) >> 4) as usize]
+            emulator.v_regs[vx] |= emulator.v_regs[((opcode & 0x00F0) >> 4) as usize]
         }
 
         0x0002 => {
@@ -31,8 +30,7 @@ pub fn op_8(emulator: &mut Emulator, opcode: u16) -> Result<()> {
                 emulator.v_regs[0xF] = 0;
             }
 
-            emulator.v_regs[vx] =
-                emulator.v_regs[vx] & emulator.v_regs[((opcode & 0x00F0) >> 4) as usize];
+            emulator.v_regs[vx] &= emulator.v_regs[((opcode & 0x00F0) >> 4) as usize];
         }
 
         0x0003 => {
@@ -43,8 +41,7 @@ pub fn op_8(emulator: &mut Emulator, opcode: u16) -> Result<()> {
                 emulator.v_regs[0xF] = 0;
             }
 
-            emulator.v_regs[vx] =
-                emulator.v_regs[vx] ^ emulator.v_regs[((opcode & 0x00F0) >> 4) as usize];
+            emulator.v_regs[vx] ^= emulator.v_regs[((opcode & 0x00F0) >> 4) as usize];
         }
 
         0x0004 => {

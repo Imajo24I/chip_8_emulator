@@ -55,7 +55,7 @@ impl EmulatorScreen {
 
         let inner_rect = ui.ctx().input(|input_state| {
             self.handle_input(input_state);
-            return input_state.viewport().inner_rect;
+            input_state.viewport().inner_rect
         });
 
         if let Some(inner_rect) = inner_rect {
@@ -104,7 +104,7 @@ impl EmulatorScreen {
 
         let color_image = egui::ColorImage::from_rgba_unmultiplied(
             [resolution.width(), resolution.height()],
-            &*image_data,
+            &image_data,
         );
         let texture_handle = ui
             .ctx()
