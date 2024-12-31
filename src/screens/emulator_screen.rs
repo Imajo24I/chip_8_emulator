@@ -3,10 +3,19 @@ use crate::emulator_app::FONT_SIZE;
 use crate::events::Event;
 use crate::screens::emulator_settings::draw_settings;
 use eframe::egui;
-use eframe::egui::{Button, FontId, InputState, Label, Pos2, Rect, RichText, Ui, Vec2, Window};
+use eframe::egui::{
+    Button, Color32, FontId, Image, InputState, Label, Pos2, Rect, RichText, TextureOptions, Ui,
+    Vec2, Window,
+};
 use std::time::{Duration, Instant};
 
 pub const MENU_BAR_OFFSET: f32 = 30f32;
+pub const TEXTURE_OPTIONS: TextureOptions = TextureOptions {
+    magnification: egui::TextureFilter::Nearest,
+    minification: egui::TextureFilter::Nearest,
+    wrap_mode: egui::TextureWrapMode::ClampToEdge,
+    mipmap_mode: None,
+};
 
 pub struct EmulatorScreen {
     emulator: Emulator,
@@ -71,33 +80,43 @@ impl EmulatorScreen {
         }
     }
 
-    /// Draw the 64x32 program display
+    /// Draw the program display
+    ///
+    /// Creates a `ColorImage` from the display pixels and loads it into a texture handle.
+    /// Then uses the texture handle to paint an image of the display on the screen.
     fn draw_display(&mut self, window_size: Vec2, ui: &mut Ui) {
         let resolution = &self.emulator.display.resolution;
 
-        let pixel_width = window_size.x / resolution.width() as f32;
-        let pixel_height = (window_size.y - MENU_BAR_OFFSET) / resolution.height() as f32;
+        let mut image_data: Vec<u8> =
+            Vec::with_capacity(resolution.width() * resolution.height() * 4);
 
-        for (row_index, row) in self.emulator.display.pixels.iter().enumerate() {
-            let pixel_y = row_index as f32 * pixel_height;
-
-            for (pixel_index, pixel) in row.iter().enumerate() {
-                let pixel_pos = Pos2::new(pixel_index as f32 * pixel_width, pixel_y);
-
-                let rect = Rect::from_two_pos(
-                    pixel_pos,
-                    pixel_pos + egui::vec2(pixel_width + 1f32, pixel_height + 1f32),
-                );
-
-                let rect_color = if *pixel {
-                    egui::Color32::WHITE
+        for row in &self.emulator.display.pixels {
+            for pixel in row {
+                let color = if *pixel {
+                    Color32::WHITE
                 } else {
-                    egui::Color32::BLACK
+                    Color32::BLACK
                 };
 
-                ui.painter().rect_filled(rect, 0f32, rect_color);
+                image_data.extend_from_slice(&[color.r(), color.g(), color.b(), color.a()]);
             }
         }
+
+        let color_image = egui::ColorImage::from_rgba_unmultiplied(
+            [resolution.width(), resolution.height()],
+            &*image_data,
+        );
+        let texture_handle = ui
+            .ctx()
+            .load_texture("display_texture", color_image, TEXTURE_OPTIONS);
+
+        Image::from(&texture_handle).paint_at(
+            ui,
+            Rect::from_two_pos(
+                Pos2::ZERO,
+                Pos2::new(window_size.x, window_size.y - MENU_BAR_OFFSET),
+            ),
+        );
     }
 
     /// Draw the bottom menu bar
