@@ -3,7 +3,8 @@ use crate::chip_8::emulator::{Emulator, MEMORY_SIZE};
 use crate::chip_8::instructions::unknown_instruction_err;
 use anyhow::{anyhow, Result};
 
-pub fn op_0000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
+/// Execute instructions which start with 0
+pub fn op_0(emulator: &mut Emulator, opcode: u16) -> Result<()> {
     match opcode & 0x00F0 {
         0x00C0 => {
             // SuperChip Instruction

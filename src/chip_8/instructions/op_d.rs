@@ -3,7 +3,8 @@ use crate::chip_8::display::Resolution;
 use crate::chip_8::emulator::Emulator;
 use anyhow::Result;
 
-pub fn op_d000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
+/// Execute instructions which start with D
+pub fn op_d(emulator: &mut Emulator, opcode: u16) -> Result<()> {
     let resolution = emulator.display.resolution.clone();
     let display_width = resolution.width();
     let display_height = resolution.height();

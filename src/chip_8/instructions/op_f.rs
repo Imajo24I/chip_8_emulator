@@ -2,7 +2,8 @@ use crate::chip_8::emulator::Emulator;
 use crate::chip_8::instructions::unknown_instruction_err;
 use anyhow::{anyhow, Result};
 
-pub fn op_f000(emulator: &mut Emulator, opcode: u16) -> Result<()> {
+/// Execute instructions which start with F
+pub fn op_f(emulator: &mut Emulator, opcode: u16) -> Result<()> {
     match opcode & 0x00FF {
         0x0007 => {
             // FX07 - Set VX to value of delay timer
