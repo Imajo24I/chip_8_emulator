@@ -30,6 +30,14 @@ impl Display {
         }
     }
 
+    /// Scroll the display up by `amount`. The bottom `amount` rows will be reset
+    pub fn scroll_up(&mut self, amount: usize) {
+        self.pixels.rotate_left(amount);
+        for row in self.pixels.len() - amount..self.pixels.len() {
+            self.pixels[row] = vec![false; self.resolution.width()];
+        }
+    }
+
     /// Scroll the display down by `amount`. The top `amount` rows will be reset
     pub fn scroll_down(&mut self, amount: usize) {
         self.pixels.rotate_right(amount);

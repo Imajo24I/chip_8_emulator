@@ -13,6 +13,13 @@ pub fn op_0(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             emulator.display.scroll_down(amount);
         }
 
+        0x00D0 => {
+            // XO-Chip Instruction
+            // 00DN - Scroll display up by N pixels
+            let amount = (opcode & 0x000F) as usize;
+            emulator.display.scroll_up(amount);
+        }
+
         0x00E0 => {
             match opcode & 0x000F {
                 0x0000 => {
