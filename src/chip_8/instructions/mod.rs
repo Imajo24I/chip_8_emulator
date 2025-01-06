@@ -1,4 +1,5 @@
 mod op_0;
+mod op_5;
 mod op_8;
 mod op_d;
 mod op_e;
@@ -37,14 +38,7 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             }
         }
 
-        0x5000 => {
-            // 5XY0 - Skip next instruction of VX == VY
-            if emulator.v_regs[((opcode & 0x0F00) >> 8) as usize]
-                == emulator.v_regs[((opcode & 0x00F0) >> 4) as usize]
-            {
-                emulator.pc += 2;
-            }
-        }
+        0x5000 => op_5::op_5(emulator, opcode)?,
 
         0x6000 => {
             // 6XNN - Set VX to NN
