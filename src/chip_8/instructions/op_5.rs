@@ -10,7 +10,7 @@ pub fn op_5(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             if emulator.v_regs[((opcode & 0x0F00) >> 8) as usize]
                 == emulator.v_regs[((opcode & 0x00F0) >> 4) as usize]
             {
-                emulator.pc += 2;
+                emulator.skip_instruction();
             }
         }
 

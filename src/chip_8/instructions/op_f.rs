@@ -5,6 +5,16 @@ use anyhow::{anyhow, Result};
 /// Execute instructions which start with F
 pub fn op_f(emulator: &mut Emulator, opcode: u16) -> Result<()> {
     match opcode & 0x00FF {
+        0x0000 => {
+            // XO-Chip Instruction
+            // F000 - Set I to the next 2 bytes of memory at PC
+            emulator.i_reg = ((emulator.memory[emulator.pc] as u16) << 8
+                | emulator.memory[emulator.pc + 1] as u16) as usize;
+
+            // Skip next 2 bytes, since they are used by this instruction
+            emulator.pc += 2;
+        }
+
         0x0007 => {
             // FX07 - Set VX to value of delay timer
             let vx = ((opcode & 0x0F00) >> 8) as usize;

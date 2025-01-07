@@ -156,4 +156,15 @@ impl Emulator {
             }
         }
     }
+
+    /// Skip the next instruction
+    /// If the next instruction is F000, this will skip 4 bytes instead of 2
+    pub fn skip_instruction(&mut self) {
+        let opcode = (self.memory[self.pc] as u16) << 8 | (self.memory[self.pc + 1] as u16);
+        if opcode == 0xF000 {
+            self.pc += 4;
+        } else {
+            self.pc += 2;
+        }
+    }
 }
