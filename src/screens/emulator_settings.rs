@@ -1,22 +1,24 @@
 use crate::chip_8::beep::Beeper;
-use crate::chip_8::config::{Config, Quirks};
+use crate::chip_8::config::Quirks;
 use crate::chip_8::emulator::Emulator;
 use eframe::egui::{Align, Slider, TextEdit, Ui};
 
 pub fn draw_settings(ui: &mut Ui, emulator: &mut Emulator) {
-    let config = &mut emulator.config;
-
-    draw_emulation_speed(ui, config);
+    draw_emulation_settings(ui, emulator);
     ui.add_space(10f32);
 
-    draw_emulation_quirks(ui, &mut config.quirks);
+    draw_emulation_quirks(ui, &mut emulator.config.quirks);
     ui.add_space(10f32);
 
     draw_other_settings(ui, emulator);
 }
 
-fn draw_emulation_speed(ui: &mut Ui, config: &mut Config) {
-    ui.collapsing("Emulation Speed", |ui| {
+fn draw_emulation_settings(ui: &mut Ui, emulator: &mut Emulator) {
+    let config = &mut emulator.config;
+
+    ui.collapsing("Emulation Settings", |ui| {
+        // TODO: Rename this and usages to instructions instead of cycles
+        // TODO: Use Built-In Slider instead?
         ui.label("Cycles per Frame:");
         ui.add_space(5f32);
 
@@ -41,6 +43,13 @@ fn draw_emulation_speed(ui: &mut Ui, config: &mut Config) {
             } else {
                 value
             };
+        }
+
+        ui.add_space(5f32);
+
+        if ui.button(format!("Memory Size: {}", config.memory_size)).clicked() {
+            config.memory_size = if config.memory_size == 4096 { 65536 } else { 4096 };
+            emulator.memory.resize(config.memory_size, 0);
         }
     });
 }

@@ -4,6 +4,7 @@ pub struct Config {
     pub use_german_keyboard_layout: bool,
     pub emulation_paused: bool,
     pub quirks: Quirks,
+    pub memory_size: usize,
 }
 
 impl Default for Config {
@@ -13,6 +14,7 @@ impl Default for Config {
             use_german_keyboard_layout: true,
             emulation_paused: false,
             quirks: Quirks::default(),
+            memory_size: 4096,
         }
     }
 }

@@ -10,7 +10,6 @@ use std::io::Read;
 use std::path::Path;
 use crate::chip_8::font::{LARGE_FONT, SMALL_FONT};
 
-pub const MEMORY_SIZE: usize = 4096;
 // Instructions start at 0x200, since 0x000 - 0x1FF are reserved for interpreter
 const INSTRUCTIONS_START: usize = 0x200;
 
@@ -26,7 +25,7 @@ pub struct Emulator {
 
     // Memory
     // 4096 bytes of memory
-    pub memory: [u8; MEMORY_SIZE],
+    pub memory: Vec<u8>,
 
     // Program Counter
     // Used to store location of the next instruction
@@ -73,7 +72,7 @@ impl Default for Emulator {
             f_regs: [0; 16],
             delay_timer: 0,
             sound_timer: 0,
-            memory: [0; MEMORY_SIZE],
+            memory: vec![0; config.memory_size],
         }
     }
 }
@@ -94,11 +93,11 @@ impl Emulator {
                     )));
                 }
 
-                if data.len() > MEMORY_SIZE - INSTRUCTIONS_START {
+                if data.len() > self.config.memory_size - INSTRUCTIONS_START {
                     return Err(anyhow!(
                         "File with size of {} bytes exceeds maximum data size of {} bytes.",
                         data.len(),
-                        MEMORY_SIZE - INSTRUCTIONS_START
+                        self.config.memory_size - INSTRUCTIONS_START
                     ));
                 }
 
@@ -127,7 +126,7 @@ impl Emulator {
 
     pub fn run_cycle(&mut self) -> Result<(), Event> {
         // Exit if no more instructions left
-        if self.pc >= MEMORY_SIZE {
+        if self.pc >= self.config.memory_size {
             self.beeper.stop();
             return Err(Event::Exit);
         }

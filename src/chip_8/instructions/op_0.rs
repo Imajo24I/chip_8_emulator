@@ -1,5 +1,5 @@
 use crate::chip_8::display::Resolution;
-use crate::chip_8::emulator::{Emulator, MEMORY_SIZE};
+use crate::chip_8::emulator::Emulator;
 use crate::chip_8::instructions::unknown_instruction_err;
 use anyhow::{anyhow, Result};
 
@@ -60,7 +60,7 @@ pub fn op_0(emulator: &mut Emulator, opcode: u16) -> Result<()> {
                     // 00FD - Exit the program
 
                     // Emulator will automatically quit when reaching end of memory
-                    emulator.pc = MEMORY_SIZE;
+                    emulator.pc = emulator.config.memory_size;
                 }
 
                 0x000E => {
