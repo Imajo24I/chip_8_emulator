@@ -15,6 +15,12 @@ pub fn op_f(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             emulator.pc += 2;
         }
 
+        0x0001 => {
+            // XO-Chip Instruction
+            // FN01 - Select active planes
+            emulator.display.active_planes = ((opcode & 0x0F00) >> 8) as u8;
+        }
+
         0x0007 => {
             // FX07 - Set VX to value of delay timer
             let vx = ((opcode & 0x0F00) >> 8) as usize;

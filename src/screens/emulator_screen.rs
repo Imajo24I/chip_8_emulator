@@ -85,17 +85,19 @@ impl EmulatorScreen {
     /// Creates a `ColorImage` from the display pixels and loads it into a texture handle.
     /// Then uses the texture handle to paint an image of the display on the screen.
     fn draw_display(&mut self, window_size: Vec2, ui: &mut Ui) {
-        let resolution = &self.emulator.display.resolution;
+        let width = self.emulator.display.resolution.width();
+        let height = self.emulator.display.resolution.height();
 
         let mut image_data: Vec<u8> =
-            Vec::with_capacity(resolution.width() * resolution.height() * 4);
+            Vec::with_capacity(width * height * 4);
 
-        for row in &self.emulator.display.pixels {
+        for row in self.emulator.display.zip_planes() {
             for pixel in row {
-                let color = if *pixel {
-                    Color32::WHITE
-                } else {
-                    Color32::BLACK
+                let color = match pixel {
+                    (false, false) => Color32::BLACK,
+                    (true, false) => Color32::WHITE,
+                    (false, true) => Color32::LIGHT_GREEN,
+                    (true, true) => Color32::DARK_GREEN,
                 };
 
                 image_data.extend_from_slice(&[color.r(), color.g(), color.b(), color.a()]);
@@ -103,7 +105,7 @@ impl EmulatorScreen {
         }
 
         let color_image = egui::ColorImage::from_rgba_unmultiplied(
-            [resolution.width(), resolution.height()],
+            [width, height],
             &image_data,
         );
         let texture_handle = ui

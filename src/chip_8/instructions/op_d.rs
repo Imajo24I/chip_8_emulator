@@ -9,61 +9,78 @@ pub fn op_d(emulator: &mut Emulator, opcode: u16) -> Result<()> {
     let display_width = resolution.width();
     let display_height = resolution.height();
 
+    let (starting_x, starting_y, height) = get_starting_x_y_height(emulator, opcode)?;
+    let mut i = emulator.i_reg;
+
+    emulator.v_regs[0xF] = 0;
+
     match opcode & 0x000F {
         0x0000 => {
             // SuperChip Instruction
             // DXY0 - Draw 16x16 sprite
 
-            // Discard height since it is always 16
-            let (starting_x, starting_y, _) = get_starting_x_y_height(emulator, opcode)?;
+            for layer in 0..2 {
+                // Check if current layer is selected
+                if emulator.display.active_planes & (layer as u8 + 1) == 0 {
+                    continue;
+                }
 
-            for row in 0..16 {
-                // Combine two bytes into one u16
-                let sprite_data = ((emulator.memory[emulator.i_reg + row * 2] as u16) << 8)
-                    | (emulator.memory[emulator.i_reg + row * 2 + 1] as u16);
+                for row in 0..16 {
+                    // Combine two bytes into one u16
+                    let sprite_data = ((emulator.memory[i + row * 2] as u16) << 8)
+                        | (emulator.memory[i + row * 2 + 1] as u16);
 
-                for bit in 0..16 {
-                    // Check if bit isn't 0
-                    if (sprite_data & (0x8000 >> bit)) != 0 {
-                        let (x, y) = calculate_coord(
-                            &emulator.config.quirks,
-                            &resolution,
-                            (starting_x, starting_y),
-                            (bit, row),
-                        );
+                    for bit in 0..16 {
+                        // Check if bit isn't 0
+                        if (sprite_data & (0x8000 >> bit)) != 0 {
+                            let (x, y) = calculate_coord(
+                                &emulator.config.quirks,
+                                &resolution,
+                                (starting_x, starting_y),
+                                (bit, row),
+                            );
 
-                        if x < display_width && y < display_height {
-                            flip_pixel(x, y, emulator);
+                            if x < display_width && y < display_height {
+                                flip_pixel(layer, x, y, emulator);
+                            }
                         }
                     }
                 }
+
+                i += 32;
             }
         }
 
         _ => {
             // DXYN - Draw sprite at coordinate VX, VY with N bytes of sprite data
 
-            let (starting_x, starting_y, height) = get_starting_x_y_height(emulator, opcode)?;
-            emulator.v_regs[0xF] = 0;
+            for layer in 0..2 {
+                // Check if current layer is selected
+                if emulator.display.active_planes & (layer as u8 + 1) == 0 {
+                    continue;
+                }
 
-            for row in 0..height {
-                let sprite_data = emulator.memory[emulator.i_reg + row];
+                for row in 0..height {
+                    let sprite_data = emulator.memory[i + row];
 
-                for bit in 0..8 {
-                    // Check if bit isn't 0
-                    if (sprite_data & (0x80 >> bit)) != 0 {
-                        let (x, y) = calculate_coord(
-                            &emulator.config.quirks,
-                            &resolution,
-                            (starting_x, starting_y),
-                            (bit, row),
-                        );
+                    for bit in 0..8 {
+                        // Check if bit isn't 0
+                        if (sprite_data & (0x80 >> bit)) != 0 {
+                            let (x, y) = calculate_coord(
+                                &emulator.config.quirks,
+                                &resolution,
+                                (starting_x, starting_y),
+                                (bit, row),
+                            );
 
-                        if x < display_width && y < display_height {
-                            flip_pixel(x, y, emulator);
+                            if x < display_width && y < display_height {
+                                flip_pixel(layer, x, y, emulator);
+                            }
                         }
                     }
                 }
+
+                i += height;
             }
         }
     }
@@ -71,8 +88,8 @@ pub fn op_d(emulator: &mut Emulator, opcode: u16) -> Result<()> {
     Ok(())
 }
 
-fn flip_pixel(x_coord: usize, y_coord: usize, emulator: &mut Emulator) {
-    let pixel = &mut emulator.display.pixels[y_coord][x_coord];
+fn flip_pixel(layer: usize, x_coord: usize, y_coord: usize, emulator: &mut Emulator) {
+    let pixel = &mut emulator.display.planes[layer].pixels[y_coord][x_coord];
 
     if *pixel {
         emulator.v_regs[0xF] = 1;
