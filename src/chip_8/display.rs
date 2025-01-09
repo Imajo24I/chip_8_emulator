@@ -14,6 +14,12 @@ pub struct Display {
 impl Display {
     /// For every active plane, run a given closure with the plane as a parameter
     pub fn for_active_plane<F: FnMut(&mut Plane)>(&mut self, mut closure: F) {
+        for plane in 0..2 {
+            if self.active_planes & (plane as u8 + 1) != 0 {
+                closure(&mut self.planes[plane]);
+            }
+        }
+
         if self.active_planes & 0b01 == 0b01 {
             closure(&mut self.planes[0]);
         }

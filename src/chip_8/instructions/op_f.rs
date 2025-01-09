@@ -8,8 +8,8 @@ pub fn op_f(emulator: &mut Emulator, opcode: u16) -> Result<()> {
         0x0000 => {
             // XO-Chip Instruction
             // F000 - Set I to the next 2 bytes of memory at PC
-            emulator.i_reg = ((emulator.memory[emulator.pc] as u16) << 8
-                | emulator.memory[emulator.pc + 1] as u16) as usize;
+            emulator.i_reg = (emulator.memory[emulator.pc] as usize) << 8
+                | emulator.memory[emulator.pc + 1] as usize;
 
             // Skip next 2 bytes, since they are used by this instruction
             emulator.pc += 2;
