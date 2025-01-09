@@ -98,7 +98,7 @@ pub fn op_f(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             // FX33 - Store the binary-coded decimal representation of VX at address I
             let x = emulator.v_regs[((opcode & 0x0F00) >> 8) as usize];
 
-            if emulator.i_reg + 2 > 0x0FFF {
+            if emulator.i_reg + 2 > emulator.config.memory_size {
                 i_reg_out_of_bounds_err(2, opcode, emulator)?;
             }
 
@@ -111,7 +111,7 @@ pub fn op_f(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             // FX55 - Store registers V0 to VX in memory starting at address I
             let vx = ((opcode & 0x0F00) >> 8) as usize;
 
-            if emulator.i_reg + vx > 0x0FFF {
+            if emulator.i_reg + vx > emulator.config.memory_size {
                 i_reg_out_of_bounds_err(vx, opcode, emulator)?;
             }
 
@@ -126,7 +126,7 @@ pub fn op_f(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             // FX65 - Read registers V0 to VX from memory starting at address I
             let vx = ((opcode & 0x0F00) >> 8) as usize;
 
-            if emulator.i_reg + vx > 0x0FFF {
+            if emulator.i_reg + vx > emulator.config.memory_size {
                 i_reg_out_of_bounds_err(vx, opcode, emulator)?;
             }
 
