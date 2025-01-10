@@ -19,14 +19,6 @@ impl Display {
                 closure(&mut self.planes[plane]);
             }
         }
-
-        if self.active_planes & 0b01 == 0b01 {
-            closure(&mut self.planes[0]);
-        }
-
-        if self.active_planes & 0b10 == 0b10 {
-            closure(&mut self.planes[1]);
-        }
     }
 
     /// Set the active resolution
