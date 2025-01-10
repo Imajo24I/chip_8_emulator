@@ -48,8 +48,8 @@ impl Display {
             .pixels
             .clone()
             .into_iter()
-            .zip(self.planes[1].pixels.clone().into_iter())
-            .map(|(plane1, plane2)| plane1.into_iter().zip(plane2.into_iter()).collect())
+            .zip(self.planes[1].pixels.clone())
+            .map(|(plane1, plane2)| plane1.into_iter().zip(plane2).collect())
             .collect()
     }
 }

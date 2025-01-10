@@ -67,7 +67,7 @@ pub fn op_f(emulator: &mut Emulator, opcode: u16) -> Result<()> {
                 emulator.v_regs[0xF] = 0;
             }
 
-            emulator.i_reg = emulator.i_reg + x as usize;
+            emulator.i_reg += x as usize;
         }
 
         0x000A => {
