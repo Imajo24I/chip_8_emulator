@@ -52,11 +52,7 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             let nn = opcode & 0x00FF;
             let sum = emulator.v_regs[vx] as u16 + nn;
 
-            if sum > 255 {
-                emulator.v_regs[vx] = (sum - 256) as u8;
-            } else {
-                emulator.v_regs[vx] = sum as u8;
-            }
+            emulator.v_regs[vx] = (sum % 256) as u8;
         }
 
         0x8000 => op_8::op_8(emulator, opcode)?,
