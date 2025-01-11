@@ -1,7 +1,7 @@
 use crate::chip_8::beep::Beeper;
 use crate::chip_8::config::Quirks;
 use crate::chip_8::emulator::Emulator;
-use eframe::egui::{Align, Slider, TextEdit, Ui};
+use eframe::egui::{Slider, SliderClamping, Ui};
 
 pub fn draw_settings(ui: &mut Ui, emulator: &mut Emulator) {
     draw_emulation_settings(ui, emulator);
@@ -17,37 +17,23 @@ fn draw_emulation_settings(ui: &mut Ui, emulator: &mut Emulator) {
     let config = &mut emulator.config;
 
     ui.collapsing("Emulation Settings", |ui| {
-        // TODO: Use Built-In Slider instead?
-        ui.label("Instructions per Frame:");
-        ui.add_space(5f32);
+        ui.add(
+            Slider::new(&mut config.instructions_per_frame, 0..=1000)
+                .clamping(SliderClamping::Never)
+                .text("Instructions per Frame"),
+        );
 
-        let instructions_per_frame = &mut config.instructions_per_frame;
-        let mut text = instructions_per_frame.to_string();
+        ui.add_space(5f32);
 
         if ui
-            .add_sized(
-                [100f32, 20f32],
-                TextEdit::singleline(&mut text).horizontal_align(Align::Center),
-            )
-            .changed()
+            .button(format!("Memory Size: {}", config.memory_size))
+            .clicked()
         {
-            let mut value = text.parse::<u32>().unwrap_or(*instructions_per_frame);
-
-            if text.is_empty() {
-                value = 0;
-            }
-
-            *instructions_per_frame = if value > 9999 {
-                *instructions_per_frame
+            config.memory_size = if config.memory_size == 4096 {
+                65536
             } else {
-                value
+                4096
             };
-        }
-
-        ui.add_space(5f32);
-
-        if ui.button(format!("Memory Size: {}", config.memory_size)).clicked() {
-            config.memory_size = if config.memory_size == 4096 { 65536 } else { 4096 };
             emulator.memory.resize(config.memory_size, 0);
         }
     });
