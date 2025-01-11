@@ -5,6 +5,34 @@ use anyhow::{anyhow, Result};
 /// Execute instructions which start with F
 pub fn op_f(emulator: &mut Emulator, opcode: u16) -> Result<()> {
     match opcode & 0x00FF {
+        0x0000 => {
+            // XO-Chip Instruction
+            // F000 - Set I to the next 2 bytes of memory at PC
+            emulator.i_reg = (emulator.memory[emulator.pc] as usize) << 8
+                | emulator.memory[emulator.pc + 1] as usize;
+
+            // Skip next 2 bytes, since they are used by this instruction
+            emulator.pc += 2;
+        }
+
+        0x0001 => {
+            // XO-Chip Instruction
+            // FN01 - Select active planes
+            emulator.display.active_planes = ((opcode & 0x0F00) >> 8) as u8;
+        }
+
+        0x0002 => {
+            // XO-Chip Instruction
+            // F002 - Store 16 bytes of memory starting at I into audio pattern buffer
+            // TODO: Implement this
+        }
+
+        0x003A => {
+            // XO-Chip Instruction
+            // FX3A - Set audio pattern playback rate to 4000*2^((VX-64)/48)
+            // TODO: Implement this
+        }
+
         0x0007 => {
             // FX07 - Set VX to value of delay timer
             let vx = ((opcode & 0x0F00) >> 8) as usize;
@@ -31,15 +59,8 @@ pub fn op_f(emulator: &mut Emulator, opcode: u16) -> Result<()> {
 
         0x001E => {
             // FX1E - Add value of VX to I
-            let x = emulator.v_regs[((opcode & 0x0F00) >> 8) as usize];
-
-            if (emulator.i_reg + x as usize) > 0x0FFF {
-                emulator.v_regs[0xF] = 1;
-            } else {
-                emulator.v_regs[0xF] = 0;
-            }
-
-            emulator.i_reg = (emulator.i_reg + x as usize) & 0xFFF;
+            emulator.i_reg =
+                emulator.i_reg + emulator.v_regs[((opcode & 0x0F00) >> 8) as usize] as usize;
         }
 
         0x000A => {
@@ -70,7 +91,7 @@ pub fn op_f(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             // FX33 - Store the binary-coded decimal representation of VX at address I
             let x = emulator.v_regs[((opcode & 0x0F00) >> 8) as usize];
 
-            if emulator.i_reg + 2 > 0x0FFF {
+            if emulator.i_reg + 2 > emulator.config.memory_size {
                 i_reg_out_of_bounds_err(2, opcode, emulator)?;
             }
 
@@ -83,7 +104,7 @@ pub fn op_f(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             // FX55 - Store registers V0 to VX in memory starting at address I
             let vx = ((opcode & 0x0F00) >> 8) as usize;
 
-            if emulator.i_reg + vx > 0x0FFF {
+            if emulator.i_reg + vx > emulator.config.memory_size {
                 i_reg_out_of_bounds_err(vx, opcode, emulator)?;
             }
 
@@ -98,7 +119,7 @@ pub fn op_f(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             // FX65 - Read registers V0 to VX from memory starting at address I
             let vx = ((opcode & 0x0F00) >> 8) as usize;
 
-            if emulator.i_reg + vx > 0x0FFF {
+            if emulator.i_reg + vx > emulator.config.memory_size {
                 i_reg_out_of_bounds_err(vx, opcode, emulator)?;
             }
 

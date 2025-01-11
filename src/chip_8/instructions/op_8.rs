@@ -52,7 +52,7 @@ pub fn op_8(emulator: &mut Emulator, opcode: u16) -> Result<()> {
                 + emulator.v_regs[((opcode & 0x00F0) >> 4) as usize] as u16;
 
             if sum > 255 {
-                emulator.v_regs[vx] = (sum - 256) as u8;
+                emulator.v_regs[vx] = (sum % 256) as u8;
                 emulator.v_regs[0xF] = 1;
             } else {
                 emulator.v_regs[vx] = sum as u8;

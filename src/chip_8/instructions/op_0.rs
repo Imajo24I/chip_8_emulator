@@ -1,5 +1,5 @@
 use crate::chip_8::display::Resolution;
-use crate::chip_8::emulator::{Emulator, MEMORY_SIZE};
+use crate::chip_8::emulator::Emulator;
 use crate::chip_8::instructions::unknown_instruction_err;
 use anyhow::{anyhow, Result};
 
@@ -10,14 +10,21 @@ pub fn op_0(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             // SuperChip Instruction
             // 00CN - Scroll display down by N pixels
             let amount = (opcode & 0x000F) as usize;
-            emulator.display.scroll_down(amount);
+            emulator.display.for_active_plane(|plane| plane.scroll_down(amount));
+        }
+
+        0x00D0 => {
+            // XO-Chip Instruction
+            // 00DN - Scroll display up by N pixels
+            let amount = (opcode & 0x000F) as usize;
+            emulator.display.for_active_plane(|plane| plane.scroll_up(amount));
         }
 
         0x00E0 => {
             match opcode & 0x000F {
                 0x0000 => {
                     // 00E0 - Clear display
-                    emulator.display.clear();
+                    emulator.display.for_active_plane(|plane| plane.clear());
                 }
 
                 0x000E => {
@@ -39,13 +46,13 @@ pub fn op_0(emulator: &mut Emulator, opcode: u16) -> Result<()> {
                 0x000B => {
                     // SuperChip Instruction
                     // 00FB - Scroll display right by 4 pixels
-                    emulator.display.scroll_right();
+                    emulator.display.for_active_plane(|plane| plane.scroll_right());
                 }
 
                 0x0000C => {
                     // SuperChip Instruction
                     // 00FC - Scroll display left by 4 pixels
-                    emulator.display.scroll_left();
+                    emulator.display.for_active_plane(|plane| plane.scroll_left());
                 }
 
                 0x000D => {
@@ -53,7 +60,7 @@ pub fn op_0(emulator: &mut Emulator, opcode: u16) -> Result<()> {
                     // 00FD - Exit the program
 
                     // Emulator will automatically quit when reaching end of memory
-                    emulator.pc = MEMORY_SIZE;
+                    emulator.pc = emulator.config.memory_size;
                 }
 
                 0x000E => {

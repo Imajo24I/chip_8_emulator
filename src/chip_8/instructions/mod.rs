@@ -1,6 +1,7 @@
 mod op_0;
+mod op_5;
 mod op_8;
-mod op_d;
+mod op_dxyn;
 mod op_e;
 mod op_f;
 
@@ -26,25 +27,18 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<()> {
         0x3000 => {
             // 3XNN - Skip next instruction if VX == NN
             if emulator.v_regs[((opcode & 0x0F00) >> 8) as usize] == (opcode & 0x00FF) as u8 {
-                emulator.pc += 2;
+                emulator.skip_instruction();
             }
         }
 
         0x4000 => {
             // 4XNN - Skip next instruction if VX != NN
             if emulator.v_regs[((opcode & 0x0F00) >> 8) as usize] != (opcode & 0x00FF) as u8 {
-                emulator.pc += 2;
+                emulator.skip_instruction();
             }
         }
 
-        0x5000 => {
-            // 5XY0 - Skip next instruction of VX == VY
-            if emulator.v_regs[((opcode & 0x0F00) >> 8) as usize]
-                == emulator.v_regs[((opcode & 0x00F0) >> 4) as usize]
-            {
-                emulator.pc += 2;
-            }
-        }
+        0x5000 => op_5::op_5(emulator, opcode)?,
 
         0x6000 => {
             // 6XNN - Set VX to NN
@@ -58,21 +52,17 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             let nn = opcode & 0x00FF;
             let sum = emulator.v_regs[vx] as u16 + nn;
 
-            if sum > 255 {
-                emulator.v_regs[vx] = (sum - 256) as u8;
-            } else {
-                emulator.v_regs[vx] = sum as u8;
-            }
+            emulator.v_regs[vx] = (sum % 256) as u8;
         }
 
         0x8000 => op_8::op_8(emulator, opcode)?,
 
         0x9000 => {
-            // 9XY0 - Skip next instruction of VX != VY
+            // 9XY0 - Skip next instruction if VX != VY
             if emulator.v_regs[((opcode & 0x0F00) >> 8) as usize]
                 != emulator.v_regs[((opcode & 0x00F0) >> 4) as usize]
             {
-                emulator.pc += 2;
+                emulator.skip_instruction();
             }
         }
 
@@ -99,7 +89,7 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             emulator.v_regs[vx] = rand::random::<u8>() & (opcode & 0x00FF) as u8;
         }
 
-        0xD000 => op_d::op_d(emulator, opcode)?,
+        0xD000 => op_dxyn::op_dxyn(emulator, opcode)?,
 
         0xE000 => op_e::op_e(emulator, opcode)?,
 

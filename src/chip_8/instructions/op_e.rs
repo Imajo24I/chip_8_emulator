@@ -12,7 +12,7 @@ pub fn op_e(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             Keypad::is_key_valid(key, opcode, emulator)?;
 
             if emulator.keypad.is_key_pressed(key as usize) {
-                emulator.pc += 2;
+                emulator.skip_instruction();
             }
         }
 
@@ -22,7 +22,7 @@ pub fn op_e(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             Keypad::is_key_valid(key, opcode, emulator)?;
 
             if !emulator.keypad.is_key_pressed(key as usize) {
-                emulator.pc += 2;
+                emulator.skip_instruction();
             }
         }
 
