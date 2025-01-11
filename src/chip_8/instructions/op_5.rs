@@ -4,12 +4,13 @@ use anyhow::Result;
 
 /// Execute instructions which start with 5
 pub fn op_5(emulator: &mut Emulator, opcode: u16) -> Result<()> {
+    let vx = ((opcode & 0x0F00) >> 8) as usize;
+    let vy = ((opcode & 0x00F0) >> 4) as usize;
+
     match opcode & 0x000F {
         0x0000 => {
             // 5XY0 - Skip next instruction of VX == VY
-            if emulator.v_regs[((opcode & 0x0F00) >> 8) as usize]
-                == emulator.v_regs[((opcode & 0x00F0) >> 4) as usize]
-            {
+            if emulator.v_regs[vx] == emulator.v_regs[vy] {
                 emulator.skip_instruction();
             }
         }
@@ -17,8 +18,6 @@ pub fn op_5(emulator: &mut Emulator, opcode: u16) -> Result<()> {
         0x0002 => {
             // XO-Chip Instruction
             // 5XY2 - Save registers VX - VY to memory starting at I
-            let vx = ((opcode & 0x0F00) >> 8) as usize;
-            let vy = ((opcode & 0x00F0) >> 4) as usize;
             let diff = vx.abs_diff(vy);
 
             for i in 0..=diff {
@@ -30,8 +29,6 @@ pub fn op_5(emulator: &mut Emulator, opcode: u16) -> Result<()> {
         0x0003 => {
             // XO-Chip Instruction
             // 5XY3 - Load registers VX - VY from memory starting at I
-            let vx = ((opcode & 0x0F00) >> 8) as usize;
-            let vy = ((opcode & 0x00F0) >> 4) as usize;
             let diff = vx.abs_diff(vy);
 
             for i in 0..=diff {
