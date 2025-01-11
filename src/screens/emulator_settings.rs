@@ -17,13 +17,12 @@ fn draw_emulation_settings(ui: &mut Ui, emulator: &mut Emulator) {
     let config = &mut emulator.config;
 
     ui.collapsing("Emulation Settings", |ui| {
-        // TODO: Rename this and usages to instructions instead of cycles
         // TODO: Use Built-In Slider instead?
-        ui.label("Cycles per Frame:");
+        ui.label("Instructions per Frame:");
         ui.add_space(5f32);
 
-        let cycles_per_frame = &mut config.cycles_per_frame;
-        let mut text = cycles_per_frame.to_string();
+        let instructions_per_frame = &mut config.instructions_per_frame;
+        let mut text = instructions_per_frame.to_string();
 
         if ui
             .add_sized(
@@ -32,14 +31,14 @@ fn draw_emulation_settings(ui: &mut Ui, emulator: &mut Emulator) {
             )
             .changed()
         {
-            let mut value = text.parse::<u32>().unwrap_or(*cycles_per_frame);
+            let mut value = text.parse::<u32>().unwrap_or(*instructions_per_frame);
 
             if text.is_empty() {
                 value = 0;
             }
 
-            *cycles_per_frame = if value > 9999 {
-                *cycles_per_frame
+            *instructions_per_frame = if value > 9999 {
+                *instructions_per_frame
             } else {
                 value
             };

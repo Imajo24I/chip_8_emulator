@@ -124,7 +124,7 @@ impl Emulator {
         Ok(())
     }
 
-    pub fn run_cycle(&mut self) -> Result<(), Event> {
+    pub fn execute_instruction(&mut self) -> Result<(), Event> {
         // Exit if no more instructions left
         if self.pc >= self.config.memory_size {
             self.beeper.stop();

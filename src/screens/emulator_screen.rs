@@ -46,8 +46,8 @@ impl EmulatorScreen {
 
             self.emulator.tick_timers();
 
-            for _ in 0..self.emulator.config.cycles_per_frame {
-                if let Err(event) = self.emulator.run_cycle() {
+            for _ in 0..self.emulator.config.instructions_per_frame {
+                if let Err(event) = self.emulator.execute_instruction() {
                     return Some(event);
                 }
             }
