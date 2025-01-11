@@ -59,15 +59,8 @@ pub fn op_f(emulator: &mut Emulator, opcode: u16) -> Result<()> {
 
         0x001E => {
             // FX1E - Add value of VX to I
-            let x = emulator.v_regs[((opcode & 0x0F00) >> 8) as usize];
-
-            if (emulator.i_reg + x as usize) > 0x0FFF {
-                emulator.v_regs[0xF] = 1;
-            } else {
-                emulator.v_regs[0xF] = 0;
-            }
-
-            emulator.i_reg += x as usize;
+            emulator.i_reg =
+                emulator.i_reg + emulator.v_regs[((opcode & 0x0F00) >> 8) as usize] as usize;
         }
 
         0x000A => {

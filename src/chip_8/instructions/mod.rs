@@ -58,7 +58,7 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<()> {
         0x8000 => op_8::op_8(emulator, opcode)?,
 
         0x9000 => {
-            // 9XY0 - Skip next instruction of VX != VY
+            // 9XY0 - Skip next instruction if VX != VY
             if emulator.v_regs[((opcode & 0x0F00) >> 8) as usize]
                 != emulator.v_regs[((opcode & 0x00F0) >> 4) as usize]
             {
