@@ -4,7 +4,7 @@ use crate::events::Event;
 use crate::screens::emulator_settings::draw_settings;
 use eframe::egui;
 use eframe::egui::{
-    Button, Color32, FontId, Image, InputState, Label, Pos2, Rect, RichText, TextureOptions, Ui,
+    Button, Color32, FontId, Image, Label, Pos2, Rect, RichText, TextureOptions, Ui,
     Vec2, Window,
 };
 use std::time::{Duration, Instant};
@@ -54,7 +54,6 @@ impl EmulatorScreen {
         }
 
         let inner_rect = ui.ctx().input(|input_state| {
-            self.handle_input(input_state);
             input_state.viewport().inner_rect
         });
 
@@ -66,18 +65,6 @@ impl EmulatorScreen {
         }
 
         None
-    }
-
-    /// Check for input
-    /// - On Escape: Open/Close Settings
-    /// - On Space: Pause/Resume
-    fn handle_input(&mut self, input_state: &InputState) {
-        if input_state.key_pressed(egui::Key::Escape) {
-            self.settings_opened = !self.settings_opened;
-            self.emulator.config.emulation_paused = self.settings_opened;
-        } else if input_state.key_pressed(egui::Key::Space) {
-            self.emulator.config.emulation_paused = !self.emulator.config.emulation_paused;
-        }
     }
 
     /// Draw the program display
