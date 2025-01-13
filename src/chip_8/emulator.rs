@@ -64,7 +64,7 @@ impl Default for Emulator {
             config,
             beeper: Beeper::new(BeeperSettings::default()),
             display: Display::default(),
-            keypad: Keypad::new(config.use_german_keyboard_layout),
+            keypad: Keypad::new(),
             pc: INSTRUCTIONS_START,
             i_reg: 0,
             stack: Vec::new(),

@@ -701,6 +701,7 @@ dependencies = [
  "anyhow",
  "cpal",
  "eframe",
+ "egui-keybind",
  "rand",
  "rfd",
  "winres",
@@ -999,6 +1000,15 @@ dependencies = [
  "log",
  "nohash-hasher",
  "profiling",
+]
+
+[[package]]
+name = "egui-keybind"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "27ad21ae04e2bfa2821f9ab66f398820252b3a296b32fe8a80b636782701ec73"
+dependencies = [
+ "egui",
 ]
 
 [[package]]

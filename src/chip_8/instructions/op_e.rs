@@ -1,6 +1,5 @@
 use crate::chip_8::emulator::Emulator;
 use crate::chip_8::instructions::unknown_instruction_err;
-use crate::chip_8::keypad::Keypad;
 use anyhow::Result;
 
 /// Execute instructions which start with E

@@ -1,9 +1,9 @@
-use crate::chip_8::emulator::Emulator;
-use anyhow::{anyhow, Result};
 use eframe::egui;
 use std::array::from_fn;
 use std::cmp::PartialEq;
 use std::collections::HashMap;
+
+pub const HEX_KEYS: [u8; 16] = [1, 2, 3, 0xC, 4, 5, 6, 0xD, 7, 8, 9, 0xE, 0xA, 0, 0xB, 0xF];
 
 #[derive(Clone)]
 pub struct Keypad {
@@ -11,10 +11,11 @@ pub struct Keypad {
 }
 
 impl Keypad {
-    pub fn new(use_german_keyboard_layout: bool) -> Self {
-        Self {
-            keys: from_fn(|hex| Key::from_hex(hex as u8, use_german_keyboard_layout)),
-        }
+    pub fn new() -> Self {
+        let mappings = Self::default_key_mappings();
+        let keys: [Key; 16] = from_fn(|i| Key::from_hex(i as u8, &mappings));
+
+        Self { keys }
     }
 
     pub fn update_keys(&mut self, input_state: &egui::InputState) {
@@ -47,14 +48,25 @@ impl Keypad {
         None
     }
 
-    pub fn is_key_valid(key: u8, opcode: u16, emulator: &Emulator) -> Result<()> {
-        if key > 0xF {
-            Err(
-                anyhow!("Invalid instruction parameters - No key named {:#06x} exists - Instruction {:#06x} is located at memory location {}", key, opcode, emulator.pc - 2)
-            )
-        } else {
-            Ok(())
-        }
+    pub fn default_key_mappings() -> HashMap<u8, egui::Key> {
+        HashMap::from([
+            (1, egui::Key::Num1),
+            (2, egui::Key::Num2),
+            (3, egui::Key::Num3),
+            (0xC, egui::Key::Num4),
+            (4, egui::Key::Q),
+            (5, egui::Key::W),
+            (6, egui::Key::E),
+            (0xD, egui::Key::R),
+            (7, egui::Key::A),
+            (8, egui::Key::S),
+            (9, egui::Key::D),
+            (0xE, egui::Key::F),
+            (0xA, egui::Key::Y),
+            (0, egui::Key::X),
+            (0xB, egui::Key::C),
+            (0xF, egui::Key::V),
+        ])
     }
 }
 
@@ -62,45 +74,15 @@ impl Keypad {
 pub struct Key {
     pub state: KeyState,
     pub egui_key: egui::Key,
-    pub hey_key: u8,
+    pub hex_key: u8,
 }
 
 impl Key {
-    fn hex_to_key_hashmap(german_keyboard_layout: bool) -> HashMap<u8, egui::Key> {
-        let a_key = if german_keyboard_layout {
-            (0xA, egui::Key::Y)
-        } else {
-            (0xA, egui::Key::Z)
-        };
-
-        HashMap::from([
-            (1, egui::Key::Num1),
-            (2, egui::Key::Num2),
-            (3, egui::Key::Num3),
-            (0xC, egui::Key::Num4),
-            (0x4, egui::Key::Q),
-            (0x5, egui::Key::W),
-            (0x6, egui::Key::E),
-            (0xD, egui::Key::R),
-            (0x7, egui::Key::A),
-            (0x8, egui::Key::S),
-            (0x9, egui::Key::D),
-            (0xE, egui::Key::F),
-            a_key,
-            (0x0, egui::Key::X),
-            (0xB, egui::Key::C),
-            (0xF, egui::Key::V),
-        ])
-    }
-
-    pub fn from_hex(hex_key: u8, use_german_keyboard: bool) -> Self {
+    pub fn from_hex(hex_key: u8, mapping: &HashMap<u8, egui::Key>) -> Self {
         Self {
             state: Default::default(),
-            egui_key: Self::hex_to_key_hashmap(use_german_keyboard)
-                .get(&hex_key)
-                .cloned()
-                .unwrap(),
-            hey_key: hex_key,
+            egui_key: mapping.get(&hex_key).cloned().unwrap(),
+            hex_key,
         }
     }
 }

@@ -1,13 +1,18 @@
 use crate::chip_8::beep::Beeper;
 use crate::chip_8::config::Quirks;
 use crate::chip_8::emulator::Emulator;
-use eframe::egui::{Slider, SliderClamping, Ui};
+use crate::chip_8::keypad::{Key, HEX_KEYS};
+use eframe::egui::{Id, Slider, SliderClamping, Ui, Widget};
+use egui_keybind::Keybind;
 
 pub fn draw_settings(ui: &mut Ui, emulator: &mut Emulator) {
     draw_emulation_settings(ui, emulator);
     ui.add_space(10f32);
 
     draw_emulation_quirks(ui, &mut emulator.config.quirks);
+    ui.add_space(10f32);
+
+    draw_keybindings(ui, &mut emulator.keypad.keys);
     ui.add_space(10f32);
 
     draw_other_settings(ui, emulator);
@@ -49,6 +54,19 @@ fn draw_emulation_quirks(ui: &mut Ui, quirks: &mut Quirks) {
     });
 }
 
+fn draw_keybindings(ui: &mut Ui, keys: &mut [Key; 16]) {
+    ui.collapsing("Keybindings", |ui| {
+        for row in 0..4 {
+            ui.horizontal(|ui| {
+                for key_index in 0..4 {
+                    let key = &mut keys[HEX_KEYS[row * 4 + key_index] as usize];
+                    Keybind::new(&mut key.egui_key, Id::from(key.hex_key.to_string())).ui(ui);
+                }
+            });
+        }
+    });
+}
+
 fn draw_other_settings(ui: &mut Ui, emulator: &mut Emulator) {
     ui.collapsing("Other Settings", |ui| {
         if ui
@@ -64,20 +82,6 @@ fn draw_other_settings(ui: &mut Ui, emulator: &mut Emulator) {
             if is_playing {
                 emulator.beeper.play();
             }
-        }
-
-        ui.add_space(5.0);
-
-        if ui
-            .checkbox(
-                &mut emulator.config.use_german_keyboard_layout,
-                "Use german keyboard layout",
-            )
-            .clicked()
-        {
-            emulator
-                .keypad
-                .update_layout(emulator.config.use_german_keyboard_layout);
         }
     });
 }
