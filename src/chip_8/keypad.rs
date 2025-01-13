@@ -29,10 +29,6 @@ impl Keypad {
         }
     }
 
-    pub fn update_layout(&mut self, use_german_keyboard_layout: bool) {
-        self.keys[0xA] = Key::from_hex(0xA, use_german_keyboard_layout);
-    }
-
     pub fn is_key_pressed(&self, key: usize) -> bool {
         self.keys[key].state == KeyState::Pressed
     }
