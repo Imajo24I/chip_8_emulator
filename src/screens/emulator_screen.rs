@@ -4,8 +4,7 @@ use crate::events::Event;
 use crate::screens::emulator_settings::draw_settings;
 use eframe::egui;
 use eframe::egui::{
-    Button, Color32, FontId, Image, Label, Pos2, Rect, RichText, TextureOptions, Ui,
-    Vec2, Window,
+    Button, Color32, FontId, Image, Label, Pos2, Rect, RichText, TextureOptions, Ui, Vec2, Window,
 };
 use std::time::{Duration, Instant};
 
@@ -53,9 +52,9 @@ impl EmulatorScreen {
             }
         }
 
-        let inner_rect = ui.ctx().input(|input_state| {
-            input_state.viewport().inner_rect
-        });
+        let inner_rect = ui
+            .ctx()
+            .input(|input_state| input_state.viewport().inner_rect);
 
         if let Some(inner_rect) = inner_rect {
             let window_size = inner_rect.size();
@@ -75,8 +74,7 @@ impl EmulatorScreen {
         let width = self.emulator.display.resolution.width();
         let height = self.emulator.display.resolution.height();
 
-        let mut image_data: Vec<u8> =
-            Vec::with_capacity(width * height * 4);
+        let mut image_data: Vec<u8> = Vec::with_capacity(width * height * 4);
 
         for row in self.emulator.display.zip_planes() {
             for pixel in row {
@@ -91,10 +89,7 @@ impl EmulatorScreen {
             }
         }
 
-        let color_image = egui::ColorImage::from_rgba_unmultiplied(
-            [width, height],
-            &image_data,
-        );
+        let color_image = egui::ColorImage::from_rgba_unmultiplied([width, height], &image_data);
         let texture_handle = ui
             .ctx()
             .load_texture("display_texture", color_image, TEXTURE_OPTIONS);
@@ -175,6 +170,9 @@ impl EmulatorScreen {
                 Pos2::new(window_size.x - 100f32, bar_top_height),
             ),
             Label::new(format!("Frame Time: {:.2}ms", frame_time)),
+        )
+        .on_hover_text(
+            "The frame time is how long a full frame takes, without considering the FPS limiting.",
         );
 
         if self.settings_opened {

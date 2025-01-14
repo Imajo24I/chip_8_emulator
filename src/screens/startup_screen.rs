@@ -59,12 +59,14 @@ impl StartupScreen {
     fn update_filepath(&mut self, ui: &mut Ui) {
         ui.add_space(10f32);
 
-        ui.label("Selected File:");
+        ui.label("Selected File:").on_hover_text(
+            "Select a file by dragging and dropping it here or by using the file dialog below.",
+        );
 
         if let Some(filepath) = &self.filepath {
             ui.label(filepath.file_name().unwrap().to_string_lossy());
         } else {
-            ui.label("No file selected");
+            ui.label("No file selected").on_hover_text("Select a file by dragging and dropping it here or by using the file dialog below.");
         }
 
         ui.end_row();
