@@ -64,7 +64,7 @@ impl Default for Emulator {
             config,
             beeper: Beeper::new(BeeperSettings::default()),
             display: Display::default(),
-            keypad: Keypad::new(),
+            keypad: Keypad::default(),
             pc: INSTRUCTIONS_START,
             i_reg: 0,
             stack: Vec::new(),

@@ -11,13 +11,6 @@ pub struct Keypad {
 }
 
 impl Keypad {
-    pub fn new() -> Self {
-        let mappings = Self::default_key_mappings();
-        let keys: [Key; 16] = from_fn(|i| Key::from_hex(i as u8, &mappings));
-
-        Self { keys }
-    }
-
     pub fn update_keys(&mut self, input_state: &egui::InputState) {
         for key in self.keys.iter_mut() {
             key.state = if input_state.key_down(key.egui_key) {
@@ -67,6 +60,15 @@ impl Keypad {
             (0xB, egui::Key::C),
             (0xF, egui::Key::V),
         ])
+    }
+}
+
+impl Default for Keypad {
+    fn default() -> Self {
+        let mappings = Self::default_key_mappings();
+        let keys: [Key; 16] = from_fn(|i| Key::from_hex(i as u8, &mappings));
+
+        Self { keys }
     }
 }
 
