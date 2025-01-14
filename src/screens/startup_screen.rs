@@ -84,7 +84,7 @@ impl Default for StartupScreen {
     fn default() -> Self {
         let mut filepath = None;
 
-        let mut args = std::env::args().into_iter();
+        let mut args = std::env::args();
         if args.len() > 1 {
             filepath = Some(PathBuf::from(args.nth(1).unwrap()));
         }
