@@ -4,7 +4,6 @@ use crate::screens::emulator_settings::draw_settings;
 use eframe::egui::{Context, Ui};
 use std::path::PathBuf;
 
-#[derive(Default)]
 pub struct StartupScreen {
     pub filepath: Option<PathBuf>,
     pub emulator: Emulator,
@@ -78,5 +77,21 @@ impl StartupScreen {
         ui.add_space(20f32);
 
         self.collect_dropped_files(ui.ctx());
+    }
+}
+
+impl Default for StartupScreen {
+    fn default() -> Self {
+        let mut filepath = None;
+
+        let mut args = std::env::args().into_iter();
+        if args.len() > 1 {
+            filepath = Some(PathBuf::from(args.nth(1).unwrap()));
+        }
+
+        Self {
+            filepath,
+            emulator: Emulator::default(),
+        }
     }
 }
