@@ -2,7 +2,7 @@ use crate::chip_8::beep::Beeper;
 use crate::chip_8::config::Quirks;
 use crate::chip_8::emulator::Emulator;
 use crate::chip_8::keypad::{Key, HEX_KEYS};
-use eframe::egui::{Id, Slider, SliderClamping, Ui, Widget};
+use eframe::egui::{ComboBox, Id, Slider, SliderClamping, Ui, Widget};
 use egui_keybind::Keybind;
 
 pub fn draw_settings(ui: &mut Ui, emulator: &mut Emulator) {
@@ -26,20 +26,25 @@ fn draw_emulation_settings(ui: &mut Ui, emulator: &mut Emulator) {
             Slider::new(&mut config.instructions_per_frame, 0..=1000)
                 .clamping(SliderClamping::Never)
                 .text("Instructions per Frame"),
-        ).on_hover_text("How many Instructions are executed every frame. The target FPS is 60.");
+        )
+        .on_hover_text("How many Instructions are executed every frame. The target FPS is 60.");
 
         ui.add_space(5f32);
 
-        if ui
-            .button(format!("Memory Size: {}", config.memory_size))
-            .on_hover_text("Toggle between 4096 and 65536 bytes of memory. Chip 8 and SuperChip have 4096 bytes of memory, XO-Chip expands this to 65536.")
-            .clicked()
-        {
-            config.memory_size = if config.memory_size == 4096 {
-                65536
-            } else {
-                4096
-            };
+        let memory_size = config.memory_size;
+
+        ComboBox::from_label("Memory Size")
+            .selected_text(config.memory_size.to_string())
+            .show_ui(ui, |ui| {
+                ui.selectable_value(&mut config.memory_size, 4096, "4096 (Chip 8 & SuperChip)");
+                ui.selectable_value(&mut config.memory_size, 65536, "65536 (XO-Chip)");
+            })
+            .response
+            .on_hover_text(
+                "Choose between 4096 (Chip 8 & SuperChip) and 65536 (XO-Chip) bytes of memory.",
+            );
+
+        if memory_size != config.memory_size {
             emulator.memory.resize(config.memory_size, 0);
         }
     });
