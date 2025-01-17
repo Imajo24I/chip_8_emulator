@@ -79,7 +79,7 @@ pub fn op_f(emulator: &mut Emulator, opcode: u16) -> Result<()> {
 
         0x0029 => {
             // FX29 - Set I to location of small sprite for hex digit value of VX
-            let x = emulator.v_regs[((opcode & 0x0F00) >> 8) as usize];
+            let x = emulator.v_regs[((opcode & 0x0F00) >> 8) as usize] & 0xF;
             emulator.i_reg = x as usize * 5;
         }
 
