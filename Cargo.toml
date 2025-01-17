@@ -4,10 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-anyhow = "1.0.94"
+anyhow = "1.0.95"
 rand = "0.8.5"
 eframe = "0.30.0"
-rfd = "0.15.1"
+rfd = "0.15.2"
 cpal = "0.15.3"
 egui-keybind = "0.5.0"
 
