@@ -15,6 +15,6 @@ egui-keybind = "0.5.0"
 winres = "0.1.12"
 
 [package.metadata.winres]
-FileDescription = "A chip 8 emulator written in rust."
+FileDescription = "A Chip 8 Emulator written in rust."
 OriginalFilename = "chip_8_emulator.exe"
 ProductName = "Chip 8 Emulator"
