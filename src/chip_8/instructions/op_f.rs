@@ -1,6 +1,6 @@
 use crate::chip_8::emulator::Emulator;
-use crate::chip_8::instructions::unknown_instruction_err;
-use anyhow::{anyhow, Result};
+use crate::chip_8::instructions::{memory_index_out_of_bounds_err, unknown_instruction_err};
+use anyhow::Result;
 
 /// Execute instructions which start with F
 pub fn op_f(emulator: &mut Emulator, opcode: u16) -> Result<()> {
@@ -8,6 +8,10 @@ pub fn op_f(emulator: &mut Emulator, opcode: u16) -> Result<()> {
         0x0000 => {
             // XO-Chip Instruction
             // F000 - Set I to the next 2 bytes of memory at PC
+            if emulator.pc + 1 >= emulator.config.memory_size {
+                return memory_index_out_of_bounds_err(emulator.pc + 1, emulator, opcode);
+            }
+
             emulator.i_reg = (emulator.memory[emulator.pc] as usize) << 8
                 | emulator.memory[emulator.pc + 1] as usize;
 
@@ -90,8 +94,8 @@ pub fn op_f(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             // FX33 - Store the binary-coded decimal representation of VX at address I
             let x = emulator.v_regs[((opcode & 0x0F00) >> 8) as usize];
 
-            if emulator.i_reg + 2 > emulator.config.memory_size {
-                i_reg_out_of_bounds_err(2, opcode, emulator)?;
+            if emulator.i_reg + 2 >= emulator.config.memory_size {
+                memory_index_out_of_bounds_err(emulator.i_reg + 2, emulator, opcode)?;
             }
 
             emulator.memory[emulator.i_reg] = x / 100;
@@ -104,11 +108,11 @@ pub fn op_f(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             let vx = ((opcode & 0x0F00) >> 8) as usize;
 
             if emulator.i_reg + vx > emulator.config.memory_size {
-                i_reg_out_of_bounds_err(vx, opcode, emulator)?;
+                memory_index_out_of_bounds_err(emulator.i_reg + vx, emulator, opcode)?;
             }
 
-            for vy in 0..=vx {
-                emulator.memory[emulator.i_reg + vy] = emulator.v_regs[vy];
+            for reg in 0..=vx {
+                emulator.memory[emulator.i_reg + reg] = emulator.v_regs[reg];
             }
 
             increment_i_quirk(emulator, vx);
@@ -119,11 +123,11 @@ pub fn op_f(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             let vx = ((opcode & 0x0F00) >> 8) as usize;
 
             if emulator.i_reg + vx > emulator.config.memory_size {
-                i_reg_out_of_bounds_err(vx, opcode, emulator)?;
+                memory_index_out_of_bounds_err(emulator.i_reg + vx, emulator, opcode)?;
             }
 
-            for vy in 0..=vx {
-                emulator.v_regs[vy] = emulator.memory[emulator.i_reg + vy];
+            for reg in 0..=vx {
+                emulator.v_regs[reg] = emulator.memory[emulator.i_reg + reg];
             }
 
             increment_i_quirk(emulator, vx);
@@ -153,12 +157,6 @@ pub fn op_f(emulator: &mut Emulator, opcode: u16) -> Result<()> {
     }
 
     Ok(())
-}
-
-fn i_reg_out_of_bounds_err(i_reg_shift: usize, opcode: u16, emulator: &mut Emulator) -> Result<()> {
-    Err(anyhow!(
-        "I register with value of {} is out of bounds - Instruction {:#06x} is located at memory location {}", emulator.i_reg + i_reg_shift, opcode, emulator.pc - 2
-    ))
 }
 
 fn increment_i_quirk(emulator: &mut Emulator, vx: usize) {

@@ -1,5 +1,5 @@
 use crate::chip_8::emulator::Emulator;
-use crate::chip_8::instructions::unknown_instruction_err;
+use crate::chip_8::instructions::{memory_index_out_of_bounds_err, unknown_instruction_err};
 use anyhow::Result;
 
 /// Execute instructions which start with 5
@@ -20,6 +20,10 @@ pub fn op_5(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             // 5XY2 - Save registers VX - VY to memory starting at I
             let diff = vx.abs_diff(vy);
 
+            if emulator.i_reg + diff >= emulator.config.memory_size {
+                return memory_index_out_of_bounds_err(emulator.i_reg + diff, emulator, opcode);
+            }
+
             for i in 0..=diff {
                 let reg = if vx < vy { vx + i } else { vx - i };
                 emulator.memory[emulator.i_reg + i] = emulator.v_regs[reg];
@@ -30,6 +34,10 @@ pub fn op_5(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             // XO-Chip Instruction
             // 5XY3 - Load registers VX - VY from memory starting at I
             let diff = vx.abs_diff(vy);
+
+            if emulator.i_reg + diff >= emulator.config.memory_size {
+                return memory_index_out_of_bounds_err(emulator.i_reg + diff, emulator, opcode);
+            }
 
             for i in 0..=diff {
                 let reg = if vx < vy { vx + i } else { vx - i };

@@ -75,9 +75,7 @@ pub fn op_0(emulator: &mut Emulator, opcode: u16) -> Result<()> {
                     emulator.display.set_resolution(Resolution::High);
                 }
 
-                _ => {
-                    return unknown_instruction_err(emulator, opcode);
-                }
+                _ => unknown_instruction_err(emulator, opcode)?,
             }
         }
 

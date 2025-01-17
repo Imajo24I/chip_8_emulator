@@ -72,7 +72,7 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<()> {
         }
 
         0xB000 => {
-            let reg_value = if !emulator.config.quirks.vx_offset_jump {
+            let offset = if !emulator.config.quirks.vx_offset_jump {
                 // BNNN - Jump to NNN + V0
                 emulator.v_regs[0]
             } else {
@@ -80,7 +80,7 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<()> {
                 emulator.v_regs[((opcode & 0x0F00) >> 8) as usize]
             };
 
-            emulator.pc = ((opcode & 0x0FFF) + reg_value as u16) as usize;
+            emulator.pc = ((opcode & 0x0FFF) + offset as u16) as usize;
         }
 
         0xC000 => {
@@ -103,8 +103,15 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<()> {
 
 fn unknown_instruction_err(emulator: &mut Emulator, opcode: u16) -> Result<()> {
     Err(anyhow!(
-        "Unknown instruction: {:#06x}\nInstruction is located at memory location {}",
+        "Unknown instruction: {:#06X}\nInstruction is located at memory location {}",
         opcode,
         emulator.pc - 2
+    ))
+}
+
+fn memory_index_out_of_bounds_err(index: usize, emulator: &mut Emulator, opcode: u16) -> Result<()> {
+    Err(anyhow!(
+        "Memory Index {} is out of bounds\nInstruction {:#06X} is located at memory location {}",
+        index, opcode, emulator.pc - 2
     ))
 }
