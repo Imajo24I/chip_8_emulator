@@ -1,4 +1,3 @@
-use crate::chip_8::beep::Beeper;
 use crate::chip_8::config::Quirks;
 use crate::chip_8::emulator::Emulator;
 use crate::chip_8::keypad::{Key, HEX_KEYS};
@@ -84,19 +83,13 @@ fn draw_keybindings(ui: &mut Ui, keys: &mut [Key; 16]) {
 
 fn draw_other_settings(ui: &mut Ui, emulator: &mut Emulator) {
     ui.collapsing("Other Settings", |ui| {
+        let mut volume = emulator.beeper.get_volume();
+
         if ui
-            .add(
-                Slider::new(&mut emulator.beeper.settings.volume, 0f32..=1f32)
-                    .text("Beeper Volume"),
-            )
+            .add(Slider::new(&mut volume, 0f32..=1f32).text("Beeper Volume"))
             .changed()
         {
-            let is_playing = emulator.beeper.is_playing;
-
-            emulator.beeper = Beeper::new(emulator.beeper.settings);
-            if is_playing {
-                emulator.beeper.play();
-            }
+            emulator.beeper.set_volume(volume);
         }
     });
 }

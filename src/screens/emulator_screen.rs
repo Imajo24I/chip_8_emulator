@@ -119,6 +119,7 @@ impl EmulatorScreen {
             )
             .clicked()
         {
+            self.emulator.beeper.pause();
             self.emulator.config.emulation_paused = true;
             self.settings_opened = true;
         }
@@ -133,7 +134,13 @@ impl EmulatorScreen {
             )
             .clicked()
         {
-            self.emulator.config.emulation_paused = !self.emulator.config.emulation_paused;
+            if self.emulator.config.emulation_paused {
+                self.emulator.beeper.play();
+                self.emulator.config.emulation_paused = false;
+            } else {
+                self.emulator.beeper.pause();
+                self.emulator.config.emulation_paused = true;
+            }
         }
 
         if ui
@@ -188,9 +195,11 @@ impl EmulatorScreen {
                         ui.end_row();
                         ui.add_space(20f32);
 
-                        let close_settings = ui.button("Close Settings").clicked();
-                        self.settings_opened = !close_settings;
-                        self.emulator.config.emulation_paused = !close_settings;
+                        if ui.button("Close Settings").clicked() {
+                            self.emulator.beeper.play();
+                            self.emulator.config.emulation_paused = false;
+                            self.settings_opened = false;
+                        }
                     });
                 });
         }

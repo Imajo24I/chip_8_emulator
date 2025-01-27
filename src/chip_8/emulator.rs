@@ -1,14 +1,14 @@
 use crate::chip_8::config::Config;
-use crate::chip_8::instructions;
-use crate::events::Event;
-use crate::chip_8::beep::{Beeper, BeeperSettings};
 use crate::chip_8::display::Display;
+use crate::chip_8::font::{LARGE_FONT, SMALL_FONT};
+use crate::chip_8::instructions;
 use crate::chip_8::keypad::Keypad;
+use crate::chip_8::sound::Beeper;
+use crate::events::Event;
 use anyhow::{anyhow, Result};
 use std::fs::File;
 use std::io::Read;
 use std::path::Path;
-use crate::chip_8::font::{LARGE_FONT, SMALL_FONT};
 
 // Instructions start at 0x200, since 0x000 - 0x1FF are reserved for interpreter
 const INSTRUCTIONS_START: usize = 0x200;
@@ -62,7 +62,7 @@ impl Default for Emulator {
 
         Self {
             config,
-            beeper: Beeper::new(BeeperSettings::default()),
+            beeper: Beeper::default(),
             display: Display::default(),
             keypad: Keypad::default(),
             pc: INSTRUCTIONS_START,
@@ -106,11 +106,11 @@ impl Emulator {
                     .copy_from_slice(&data);
 
                 // Insert fonts into memory
-                let small_font_len = SMALL_FONT.len();
-                let large_font_len = LARGE_FONT.len();
+                let small_len = SMALL_FONT.len();
+                let large_len = LARGE_FONT.len();
 
-                self.memory[0..small_font_len].copy_from_slice(&SMALL_FONT);
-                self.memory[small_font_len..small_font_len + large_font_len].copy_from_slice(&LARGE_FONT);
+                self.memory[0..small_len].copy_from_slice(&SMALL_FONT);
+                self.memory[small_len..small_len + large_len].copy_from_slice(&LARGE_FONT);
             }
 
             Err(error) => {
