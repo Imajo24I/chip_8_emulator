@@ -1,4 +1,4 @@
-use crate::events::Event;
+use crate::emulator_app::Event;
 use anyhow::Error;
 use eframe::egui::Ui;
 

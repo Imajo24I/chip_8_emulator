@@ -4,7 +4,7 @@ use crate::chip_8::font::{LARGE_FONT, SMALL_FONT};
 use crate::chip_8::instructions;
 use crate::chip_8::keypad::Keypad;
 use crate::chip_8::sound::Beeper;
-use crate::events::Event;
+use crate::emulator_app::Event;
 use anyhow::{anyhow, Result};
 use std::fs::File;
 use std::io::Read;

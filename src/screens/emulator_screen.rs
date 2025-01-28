@@ -1,6 +1,6 @@
 use crate::chip_8::emulator::Emulator;
 use crate::emulator_app::FONT_SIZE;
-use crate::events::Event;
+use crate::emulator_app::Event;
 use crate::screens::emulator_settings::draw_settings;
 use eframe::egui;
 use eframe::egui::{
