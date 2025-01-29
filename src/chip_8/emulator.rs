@@ -8,7 +8,7 @@ use crate::emulator_app::Event;
 use anyhow::{anyhow, Result};
 use std::fs::File;
 use std::io::Read;
-use std::path::Path;
+use std::path::PathBuf;
 
 // Instructions start at 0x200, since 0x000 - 0x1FF are reserved for interpreter
 const INSTRUCTIONS_START: usize = 0x200;
@@ -58,7 +58,20 @@ pub struct Emulator {
 
 impl Default for Emulator {
     fn default() -> Self {
-        let config = Config::default();
+        Self::new(Config::default())
+    }
+}
+
+impl Emulator {
+    pub fn new(config: Config) -> Self {
+        let mut memory = vec![0; config.memory_size];
+
+        // Initialize Fonts
+        let small_len = SMALL_FONT.len();
+        let large_len = LARGE_FONT.len();
+
+        memory[0..small_len].copy_from_slice(&SMALL_FONT);
+        memory[small_len..small_len + large_len].copy_from_slice(&LARGE_FONT);
 
         Self {
             config,
@@ -72,14 +85,14 @@ impl Default for Emulator {
             f_regs: [0; 16],
             delay_timer: 0,
             sound_timer: 0,
-            memory: vec![0; config.memory_size],
+            memory,
         }
     }
-}
 
-impl Emulator {
-    pub fn initialize_memory(&mut self, filepath: &Path) -> Result<()> {
-        let file = File::open(filepath);
+    pub fn load_rom(&mut self, filepath: &PathBuf) -> Result<()> {
+        self.config.filepath = Some(filepath.clone());
+
+        let file = File::open(&filepath);
 
         match file {
             Ok(mut file) => {
@@ -101,16 +114,8 @@ impl Emulator {
                     ));
                 }
 
-                // Insert program into memory
                 self.memory[INSTRUCTIONS_START..INSTRUCTIONS_START + data.len()]
                     .copy_from_slice(&data);
-
-                // Insert fonts into memory
-                let small_len = SMALL_FONT.len();
-                let large_len = LARGE_FONT.len();
-
-                self.memory[0..small_len].copy_from_slice(&SMALL_FONT);
-                self.memory[small_len..small_len + large_len].copy_from_slice(&LARGE_FONT);
             }
 
             Err(error) => {
@@ -122,6 +127,16 @@ impl Emulator {
         }
 
         Ok(())
+    }
+
+    pub fn reset(&mut self) {
+        self.beeper.stop();
+        let keypad = self.keypad.clone();
+
+        *self = Emulator::new(self.config.clone());
+
+        // Set keypad to previous, due to keybindings
+        self.keypad = keypad;
     }
 
     pub fn execute_instruction(&mut self) -> Result<(), Event> {

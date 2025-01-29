@@ -36,9 +36,7 @@ impl StartupScreen {
             ui.add_space(20f32);
 
             if ui.button("Start Emulation").clicked() && self.filepath.is_some() {
-                let result = self
-                    .emulator
-                    .initialize_memory(self.filepath.as_ref().unwrap());
+                let result = self.emulator.load_rom(self.filepath.as_ref().unwrap());
 
                 return if let Err(error) = result {
                     Some(Event::ReportError(error))
@@ -65,7 +63,9 @@ impl StartupScreen {
         if let Some(filepath) = &self.filepath {
             ui.label(filepath.file_name().unwrap().to_string_lossy());
         } else {
-            ui.label("No file selected").on_hover_text("Select a file by dragging and dropping it here or by using the file dialog below.");
+            ui.label("No file selected").on_hover_text(
+                "Select a file by dragging and dropping it here or by using the file dialog below.",
+            );
         }
 
         ui.end_row();

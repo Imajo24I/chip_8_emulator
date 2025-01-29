@@ -1,10 +1,18 @@
 use crate::chip_8::config::Quirks;
 use crate::chip_8::emulator::Emulator;
 use crate::chip_8::keypad::{Key, HEX_KEYS};
+use anyhow::Result;
 use eframe::egui::{ComboBox, Id, Slider, SliderClamping, Ui, Widget};
 use egui_keybind::Keybind;
 
-pub fn draw_settings(ui: &mut Ui, emulator: &mut Emulator) {
+pub fn draw_settings(ui: &mut Ui, emulator: &mut Emulator) -> Result<()> {
+    if ui.button("Reload ROM").clicked() {
+        if let Some(filepath) = emulator.config.filepath.clone() {
+            emulator.reset();
+            emulator.load_rom(&filepath)?;
+        }
+    }
+
     draw_emulation_settings(ui, emulator);
     ui.add_space(10f32);
 
@@ -15,6 +23,8 @@ pub fn draw_settings(ui: &mut Ui, emulator: &mut Emulator) {
     ui.add_space(10f32);
 
     draw_other_settings(ui, emulator);
+
+    Ok(())
 }
 
 fn draw_emulation_settings(ui: &mut Ui, emulator: &mut Emulator) {
