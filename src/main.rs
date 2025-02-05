@@ -3,7 +3,7 @@
 
 pub mod chip_8;
 pub mod emulator_app;
-pub mod screens;
+pub mod ui;
 
 use crate::emulator_app::EmulatorApp;
 

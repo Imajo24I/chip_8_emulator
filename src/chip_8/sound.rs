@@ -33,15 +33,15 @@ impl Beeper {
     const DEFAULT_VOLUME: f32 = 0.05;
     const BEEP_FREQ: f32 = 440.0;
 
-    pub fn play(&mut self) {
+    pub fn play(&self) {
         self.tx.send(Command::Play).unwrap();
     }
 
-    pub fn pause(&mut self) {
+    pub fn pause(&self) {
         self.tx.send(Command::Pause).unwrap();
     }
 
-    pub fn stop(&mut self) {
+    pub fn stop(&self) {
         self.tx.send(Command::Stop).unwrap();
     }
 

@@ -1,16 +1,36 @@
 use crate::chip_8::emulator::Emulator;
-use crate::screens::emulator_screen::{EmulatorScreen, MENU_BAR_OFFSET};
-use crate::screens::error_report_screen::ErrorReportScreen;
-use crate::screens::startup_screen::StartupScreen;
+use crate::ui::Screen;
+use crate::ui::MENU_BAR_OFFSET;
 use anyhow::Error;
 use eframe::egui::{Context, FontId, ViewportCommand};
 use eframe::{egui, Frame};
+use std::cell::RefCell;
+use std::cmp::PartialEq;
+use std::rc::Rc;
+use std::time::{Duration, Instant};
 
 pub const FONT_SIZE: f32 = 20f32;
 
-#[derive(Default)]
 pub struct EmulatorApp {
+    pub emulator: Rc<RefCell<Emulator>>,
+    pub screen: Screen,
     pub state: AppState,
+    pub frame_data: Rc<RefCell<FrameData>>,
+}
+
+impl Default for EmulatorApp {
+    fn default() -> Self {
+        let emulator = Rc::new(RefCell::new(Emulator::default()));
+        let frame_data = Rc::new(RefCell::new(FrameData::default()));
+        let screen = Screen::new(emulator.clone(), frame_data.clone());
+
+        Self {
+            emulator,
+            screen,
+            state: AppState::default(),
+            frame_data,
+        }
+    }
 }
 
 impl EmulatorApp {
@@ -26,7 +46,7 @@ impl EmulatorApp {
                 Ok(Box::new(Self::default()))
             }),
         )
-        .unwrap();
+            .unwrap();
     }
 
     fn options() -> eframe::NativeOptions {
@@ -41,62 +61,58 @@ impl EmulatorApp {
         }
     }
 
+    fn emulate(&mut self, ctx: &Context) -> Option<Event> {
+        self.frame_data.borrow_mut().wait_for_next_frame();
+
+        let emulator = &mut *self.emulator.borrow_mut();
+
+        ctx.input(|input| {
+            emulator.keypad.update_keys(input);
+        });
+
+        emulator.tick_timers();
+
+        for _ in 0..emulator.config.instructions_per_frame {
+            if let Err(event) = emulator.execute_instruction() {
+                return Some(event);
+            }
+        }
+
+        None
+    }
+
     fn on_event(&mut self, event: Event, ctx: &Context) {
         match event {
-            Event::StartEmulation(emulator) => {
-                ctx.style_mut(|style| {
-                    style.override_font_id = None;
-                });
+            Event::StartEmulation => {
+                self.state = AppState::Emulating;
+                self.frame_data.borrow_mut().next_frame = Instant::now();
+            },
 
-                let emulator_screen = EmulatorScreen::new(emulator);
-                self.state = AppState::Emulating(emulator_screen);
-            }
-
-            Event::ReportError(error) => {
-                ctx.style_mut(|style| {
-                    style.override_font_id = Some(FontId::proportional(FONT_SIZE));
-                });
-
-                self.state = AppState::ErrorReporting(ErrorReportScreen::new(error))
-            }
-
+            Event::PauseEmulation => self.state = AppState::Paused,
+            Event::OpenSettings => self.state = AppState::Settings,
+            Event::ReportError(error) => self.state = AppState::ErrorReporting(error),
             Event::Exit => ctx.send_viewport_cmd(ViewportCommand::Close),
         }
-    }
-
-    fn draw_startup_screen(ctx: &Context, screen: &mut StartupScreen) -> Option<Event> {
-        egui::Window::new("Startup")
-            .default_size([440f32, 320f32])
-            .collapsible(false)
-            .show(ctx, |ui| screen.update(ui))
-            .unwrap()
-            .inner
-            .unwrap()
-    }
-
-    fn draw_emulator_screen(ctx: &Context, screen: &mut EmulatorScreen) -> Option<Event> {
-        egui::CentralPanel::default()
-            .show(ctx, |ui| screen.update(ui))
-            .inner
-    }
-
-    fn draw_error_report_screen(ctx: &Context, screen: &mut ErrorReportScreen) -> Option<Event> {
-        egui::Window::new("Error executing Chip 8 Emulator")
-            .collapsible(false)
-            .default_size([830f32, 830f32])
-            .show(ctx, |ui| screen.update(ui))
-            .unwrap()
-            .inner
-            .unwrap()
     }
 }
 
 impl eframe::App for EmulatorApp {
     fn update(&mut self, ctx: &Context, _frame: &mut Frame) {
+        ctx.request_repaint();
+
+        let event = self
+            .screen
+            .draw_main_screen(ctx, self.state == AppState::Paused);
+
+        if let Some(event) = event {
+            self.on_event(event, ctx);
+        }
+
         let event = match &mut self.state {
-            AppState::Emulating(screen) => Self::draw_emulator_screen(ctx, screen),
-            AppState::Initializing(screen) => Self::draw_startup_screen(ctx, screen),
-            AppState::ErrorReporting(screen) => Self::draw_error_report_screen(ctx, screen),
+            AppState::Emulating => self.emulate(ctx),
+            AppState::Settings => self.screen.draw_settings(ctx),
+            AppState::ErrorReporting(error) => self.screen.draw_error(ctx, error),
+            AppState::Paused => None,
         };
 
         if let Some(event) = event {
@@ -106,19 +122,53 @@ impl eframe::App for EmulatorApp {
 }
 
 pub enum AppState {
-    Initializing(StartupScreen),
-    Emulating(EmulatorScreen),
-    ErrorReporting(ErrorReportScreen),
+    Emulating,
+    Paused,
+    Settings,
+    ErrorReporting(Error),
 }
 
 impl Default for AppState {
     fn default() -> Self {
-        Self::Initializing(StartupScreen::default())
+        Self::Settings
+    }
+}
+
+impl PartialEq for AppState {
+    fn eq(&self, other: &Self) -> bool {
+        std::mem::discriminant(self) == std::mem::discriminant(other)
     }
 }
 
 pub enum Event {
-    StartEmulation(Emulator),
+    StartEmulation,
+    PauseEmulation,
+    OpenSettings,
     ReportError(Error),
     Exit,
+}
+
+pub struct FrameData {
+    pub next_frame: Instant,
+    pub sleep_time: Duration,
+}
+
+impl Default for FrameData {
+    fn default() -> Self {
+        Self {
+            next_frame: Instant::now(),
+            sleep_time: Duration::from_secs(0),
+        }
+    }
+}
+
+impl FrameData {
+    pub fn wait_for_next_frame(&mut self) {
+        self.next_frame += Duration::from_secs_f32(1f32 / 60f32);
+
+        let sleep_time = self.next_frame - Instant::now();
+        self.sleep_time = sleep_time;
+
+        std::thread::sleep(sleep_time);
+    }
 }

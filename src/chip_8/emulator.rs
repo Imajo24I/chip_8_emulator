@@ -26,6 +26,7 @@ pub struct Emulator {
     // Memory
     // 4096 bytes of memory
     pub memory: Vec<u8>,
+    pub rom_loaded: bool,
 
     // Program Counter
     // Used to store location of the next instruction
@@ -74,6 +75,7 @@ impl Emulator {
         memory[small_len..small_len + large_len].copy_from_slice(&LARGE_FONT);
 
         Self {
+            memory,
             config,
             beeper: Beeper::default(),
             display: Display::default(),
@@ -85,51 +87,64 @@ impl Emulator {
             f_regs: [0; 16],
             delay_timer: 0,
             sound_timer: 0,
-            memory,
+            rom_loaded: false
         }
     }
 
-    pub fn load_rom(&mut self, filepath: &PathBuf) -> Result<()> {
-        self.config.filepath = Some(filepath.clone());
+    pub fn select_rom(&mut self, filepath: PathBuf) {
+        self.config.filepath = Some(filepath);
+    }
 
-        let file = File::open(&filepath);
+    pub fn get_rom(&self) -> &Option<PathBuf> {
+        &self.config.filepath
+    }
 
-        match file {
-            Ok(mut file) => {
-                let mut data = vec![];
-                let result = file.read_to_end(&mut data);
+    pub fn load_rom(&mut self) -> Result<()> {
+        if let Some(filepath) = &self.config.filepath {
+            let file = File::open(filepath);
 
-                if let Err(error) = result {
+            match file {
+                Ok(mut file) => {
+                    let mut data = vec![];
+                    let result = file.read_to_end(&mut data);
+
+                    if let Err(error) = result {
+                        return Err(anyhow!(error).context(format!(
+                            "Error reading file at {}\nPlease ensure it is a valid file.",
+                            filepath.display()
+                        )));
+                    }
+
+                    if data.len() > self.config.memory_size - INSTRUCTIONS_START {
+                        return Err(anyhow!(
+                            "File with size of {} bytes exceeds maximum data size of {} bytes.",
+                            data.len(),
+                            self.config.memory_size - INSTRUCTIONS_START
+                        ));
+                    }
+
+                    self.memory[INSTRUCTIONS_START..INSTRUCTIONS_START + data.len()]
+                        .copy_from_slice(&data);
+                    self.rom_loaded = true;
+                }
+
+                Err(error) => {
                     return Err(anyhow!(error).context(format!(
-                        "Error reading file at {}\nPlease ensure it is a valid file.",
+                        "Error opening file at {}\nPlease ensure the path points to a valid file",
                         filepath.display()
-                    )));
+                    )))
                 }
-
-                if data.len() > self.config.memory_size - INSTRUCTIONS_START {
-                    return Err(anyhow!(
-                        "File with size of {} bytes exceeds maximum data size of {} bytes.",
-                        data.len(),
-                        self.config.memory_size - INSTRUCTIONS_START
-                    ));
-                }
-
-                self.memory[INSTRUCTIONS_START..INSTRUCTIONS_START + data.len()]
-                    .copy_from_slice(&data);
             }
-
-            Err(error) => {
-                return Err(anyhow!(error).context(format!(
-                    "Error opening file at {}\nPlease ensure the path points to a valid file",
-                    filepath.display()
-                )))
-            }
+        } else {
+            return Err(anyhow!("Trying to load ROM without any selected"));
         }
 
         Ok(())
     }
 
     pub fn reset(&mut self) {
+        self.rom_loaded = false;
+
         self.beeper.stop();
         let keypad = self.keypad.clone();
 

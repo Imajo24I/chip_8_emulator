@@ -35,7 +35,7 @@ impl Display {
         });
     }
 
-    pub fn zip_planes(&mut self) -> Vec<Vec<(bool, bool)>> {
+    pub fn zip_planes(&self) -> Vec<Vec<(bool, bool)>> {
         self.planes[0]
             .pixels
             .clone()
