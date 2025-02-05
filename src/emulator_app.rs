@@ -61,7 +61,7 @@ impl EmulatorApp {
         }
     }
 
-    fn emulate(&mut self, ctx: &Context) -> Option<Event> {
+    fn emulate(&self, ctx: &Context) -> Option<Event> {
         self.frame_data.borrow_mut().wait_for_next_frame();
 
         let emulator = &mut *self.emulator.borrow_mut();

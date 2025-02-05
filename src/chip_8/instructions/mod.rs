@@ -101,7 +101,7 @@ pub fn execute_instruction(emulator: &mut Emulator, opcode: u16) -> Result<()> {
     Ok(())
 }
 
-fn unknown_instruction_err(emulator: &mut Emulator, opcode: u16) -> Result<()> {
+fn unknown_instruction_err(emulator: &Emulator, opcode: u16) -> Result<()> {
     Err(anyhow!(
         "Unknown instruction: {:#06X}\nInstruction is located at memory location {}",
         opcode,
@@ -109,7 +109,7 @@ fn unknown_instruction_err(emulator: &mut Emulator, opcode: u16) -> Result<()> {
     ))
 }
 
-fn memory_index_out_of_bounds_err(index: usize, emulator: &mut Emulator, opcode: u16) -> Result<()> {
+fn memory_index_out_of_bounds_err(index: usize, emulator: &Emulator, opcode: u16) -> Result<()> {
     Err(anyhow!(
         "Memory Index {} is out of bounds\nInstruction {:#06X} is located at memory location {}",
         index, opcode, emulator.pc - 2

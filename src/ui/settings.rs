@@ -15,7 +15,7 @@ impl Settings {
         Self { emulator }
     }
 
-    pub fn draw_settings(&mut self, ui: &mut Ui) -> Option<Event> {
+    pub fn draw_settings(&self, ui: &mut Ui) -> Option<Event> {
         ui.vertical_centered(|ui| {
             if let Some(filepath) = &self.emulator.borrow().get_rom() {
                 ui.label(format!(
@@ -76,7 +76,7 @@ impl Settings {
         .inner
     }
 
-    fn collect_dropped_files(&mut self, ctx: &Context) {
+    fn collect_dropped_files(&self, ctx: &Context) {
         ctx.input(|input| {
             if !input.raw.dropped_files.is_empty() {
                 let filepath = input.raw.dropped_files[0].path.clone().unwrap();
@@ -85,7 +85,7 @@ impl Settings {
         })
     }
 
-    fn file_dialog(&mut self, ui: &mut Ui) {
+    fn file_dialog(&self, ui: &mut Ui) {
         if ui.button("Select File...").clicked() {
             if let Some(path) = rfd::FileDialog::new().pick_file() {
                 self.emulator.borrow_mut().select_rom(path);
@@ -93,7 +93,7 @@ impl Settings {
         }
     }
 
-    fn draw_emulation_settings(&mut self, ui: &mut Ui) {
+    fn draw_emulation_settings(&self, ui: &mut Ui) {
         let emulator = &mut *self.emulator.borrow_mut();
         let config = &mut emulator.config;
 
@@ -126,7 +126,7 @@ impl Settings {
         });
     }
 
-    fn draw_emulation_quirks(&mut self, ui: &mut Ui) {
+    fn draw_emulation_quirks(&self, ui: &mut Ui) {
         let quirks = &mut self.emulator.borrow_mut().config.quirks;
 
         ui.collapsing("Emulation Quirks", |ui| {
@@ -142,7 +142,7 @@ impl Settings {
         );
     }
 
-    fn draw_keybindings(&mut self, ui: &mut Ui) {
+    fn draw_keybindings(&self, ui: &mut Ui) {
         let keys = &mut self.emulator.borrow_mut().keypad.keys;
 
         ui.collapsing("Keybindings", |ui| {
@@ -162,7 +162,7 @@ impl Settings {
         .on_hover_text("Configure keybindings for the Chip 8 Keypad here.");
     }
 
-    fn draw_other_settings(&mut self, ui: &mut Ui) {
+    fn draw_other_settings(&self, ui: &mut Ui) {
         let beeper = &mut self.emulator.borrow_mut().beeper;
 
         ui.collapsing("Other Settings", |ui| {

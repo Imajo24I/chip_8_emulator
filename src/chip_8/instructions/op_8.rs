@@ -105,7 +105,7 @@ pub fn op_8(emulator: &mut Emulator, opcode: u16) -> Result<()> {
     Ok(())
 }
 
-fn shift_vx_quirk(vx: usize, vy: usize, emulator: &mut Emulator) -> u8 {
+fn shift_vx_quirk(vx: usize, vy: usize, emulator: &Emulator) -> u8 {
     if !emulator.config.quirks.shift_vx_directly {
         emulator.v_regs[vy]
     } else {

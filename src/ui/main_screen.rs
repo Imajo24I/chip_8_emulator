@@ -19,17 +19,12 @@ impl MainScreen {
         }
     }
 
-    pub fn draw_main_screen(
-        &mut self,
-        ui: &mut Ui,
-        window_size: Vec2,
-        paused: bool,
-    ) -> Option<Event> {
+    pub fn draw_main_screen(&self, ui: &mut Ui, window_size: Vec2, paused: bool) -> Option<Event> {
         self.draw_display(ui, window_size);
         self.draw_menu_bar(ui, window_size, paused)
     }
 
-    fn draw_display(&mut self, ui: &mut Ui, window_size: Vec2) {
+    fn draw_display(&self, ui: &Ui, window_size: Vec2) {
         let emulator = self.emulator.borrow();
 
         let width = emulator.display.resolution.width();
@@ -64,7 +59,7 @@ impl MainScreen {
         );
     }
 
-    fn draw_menu_bar(&mut self, ui: &mut Ui, window_size: Vec2, paused: bool) -> Option<Event> {
+    fn draw_menu_bar(&self, ui: &mut Ui, window_size: Vec2, paused: bool) -> Option<Event> {
         let emulator = self.emulator.borrow();
 
         let bar_height = window_size.y - MENU_BAR_OFFSET + 5f32;
