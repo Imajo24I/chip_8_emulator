@@ -4,6 +4,7 @@ use crate::emulator_app::Event;
 use eframe::egui::{ComboBox, Context, Id, Slider, SliderClamping, Ui, Widget};
 use egui_keybind::Keybind;
 use std::cell::RefCell;
+use std::path::PathBuf;
 use std::rc::Rc;
 
 pub struct Settings {
@@ -80,17 +81,27 @@ impl Settings {
         ctx.input(|input| {
             if !input.raw.dropped_files.is_empty() {
                 let filepath = input.raw.dropped_files[0].path.clone().unwrap();
-                self.emulator.borrow_mut().select_rom(filepath);
+                self.select_rom(filepath);
             }
         })
     }
 
     fn file_dialog(&self, ui: &mut Ui) {
         if ui.button("Select File...").clicked() {
-            if let Some(path) = rfd::FileDialog::new().pick_file() {
-                self.emulator.borrow_mut().select_rom(path);
+            if let Some(filepath) = rfd::FileDialog::new().pick_file() {
+                self.select_rom(filepath);
             }
         }
+    }
+
+    fn select_rom(&self, filepath: PathBuf) {
+        let emulator = &mut *self.emulator.borrow_mut();
+
+        if emulator.rom_loaded {
+            emulator.reset();
+        }
+
+        emulator.select_rom(filepath);
     }
 
     fn draw_emulation_settings(&self, ui: &mut Ui) {
