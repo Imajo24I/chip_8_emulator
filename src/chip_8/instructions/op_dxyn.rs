@@ -27,14 +27,14 @@ pub fn op_dxyn(emulator: &mut Emulator, opcode: u16) -> Result<()> {
 
         for row in 0..sprite_height {
             let sprite_data = if height == 0 {
-                if i + row * 2 + 1 >= emulator.config.memory_size {
+                if i + row * 2 + 1 >= emulator.memory.size {
                     return memory_index_out_of_bounds_err(i + row * 2 + 1, emulator, opcode);
                 }
 
                 ((emulator.memory[i + row * 2] as u16) << 8)
                     | (emulator.memory[i + row * 2 + 1] as u16)
             } else {
-                if i + row >= emulator.config.memory_size {
+                if i + row >= emulator.memory.size {
                     return memory_index_out_of_bounds_err(i + row, emulator, opcode);
                 }
 

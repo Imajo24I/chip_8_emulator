@@ -8,7 +8,7 @@ pub fn op_f(emulator: &mut Emulator, opcode: u16) -> Result<()> {
         0x0000 => {
             // XO-Chip Instruction
             // F000 - Set I to the next 2 bytes of memory at PC
-            if emulator.pc + 1 >= emulator.config.memory_size {
+            if emulator.pc + 1 >= emulator.memory.size {
                 return memory_index_out_of_bounds_err(emulator.pc + 1, emulator, opcode);
             }
 
@@ -94,7 +94,7 @@ pub fn op_f(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             // FX33 - Store the binary-coded decimal representation of VX at address I
             let x = emulator.v_regs[((opcode & 0x0F00) >> 8) as usize];
 
-            if emulator.i_reg + 2 >= emulator.config.memory_size {
+            if emulator.i_reg + 2 >= emulator.memory.size {
                 memory_index_out_of_bounds_err(emulator.i_reg + 2, emulator, opcode)?;
             }
 
@@ -107,7 +107,7 @@ pub fn op_f(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             // FX55 - Store registers V0 to VX in memory starting at address I
             let vx = ((opcode & 0x0F00) >> 8) as usize;
 
-            if emulator.i_reg + vx > emulator.config.memory_size {
+            if emulator.i_reg + vx > emulator.memory.size {
                 memory_index_out_of_bounds_err(emulator.i_reg + vx, emulator, opcode)?;
             }
 
@@ -122,7 +122,7 @@ pub fn op_f(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             // FX65 - Read registers V0 to VX from memory starting at address I
             let vx = ((opcode & 0x0F00) >> 8) as usize;
 
-            if emulator.i_reg + vx > emulator.config.memory_size {
+            if emulator.i_reg + vx > emulator.memory.size {
                 memory_index_out_of_bounds_err(emulator.i_reg + vx, emulator, opcode)?;
             }
 

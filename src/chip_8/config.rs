@@ -5,7 +5,6 @@ pub struct Config {
     pub instructions_per_frame: u32,
     pub filepath: Option<PathBuf>,
     pub quirks: Quirks,
-    pub memory_size: usize,
 }
 
 impl Default for Config {
@@ -14,7 +13,6 @@ impl Default for Config {
             instructions_per_frame: 10,
             filepath: None,
             quirks: Quirks::default(),
-            memory_size: 4096,
         }
     }
 }

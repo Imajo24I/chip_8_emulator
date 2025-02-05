@@ -1,3 +1,54 @@
+use std::ops::{Index, IndexMut};
+use crate::chip_8::emulator::INSTRUCTIONS_START;
+
+#[derive(Clone)]
+pub struct Memory {
+    pub data: Vec<u8>,
+    pub size: usize,
+}
+
+impl Default for Memory {
+    fn default() -> Self {
+        Self {
+            data: vec![0; 4096],
+            size: 4096,
+        }
+    }
+}
+
+impl Index<usize> for Memory {
+    type Output = u8;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.data[index]
+    }
+}
+
+impl IndexMut<usize> for Memory {
+    fn index_mut(&mut self, index: usize) -> &mut Self::Output {
+        &mut self.data[index]
+    }
+}
+
+impl Memory {
+    pub fn load_rom(&mut self, data: &Vec<u8>) {
+        self.data[INSTRUCTIONS_START..INSTRUCTIONS_START + data.len()].copy_from_slice(&data);
+    }
+
+    pub fn load_fonts(&mut self) {
+        let small_len = SMALL_FONT.len();
+        let large_len = LARGE_FONT.len();
+
+        self.data[0..small_len].copy_from_slice(&SMALL_FONT);
+        self.data[small_len..small_len + large_len].copy_from_slice(&LARGE_FONT);
+    }
+
+    pub fn resize(&mut self, size: usize) {
+        self.data.resize(size, 0);
+        self.size = size;
+    }
+}
+
 pub const SMALL_FONT: [u8; 80] = [
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
     0x20, 0x60, 0x20, 0x20, 0x70, // 1

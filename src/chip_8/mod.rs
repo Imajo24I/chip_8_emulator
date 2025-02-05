@@ -4,4 +4,4 @@ pub mod instructions;
 pub mod keypad;
 pub mod display;
 pub mod sound;
-pub mod font;
+pub mod memory;

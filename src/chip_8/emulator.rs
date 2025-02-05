@@ -1,8 +1,8 @@
 use crate::chip_8::config::Config;
 use crate::chip_8::display::Display;
-use crate::chip_8::font::{LARGE_FONT, SMALL_FONT};
 use crate::chip_8::instructions;
 use crate::chip_8::keypad::Keypad;
+use crate::chip_8::memory::Memory;
 use crate::chip_8::sound::Beeper;
 use crate::emulator_app::Event;
 use anyhow::{anyhow, Result};
@@ -11,7 +11,7 @@ use std::io::Read;
 use std::path::PathBuf;
 
 // Instructions start at 0x200, since 0x000 - 0x1FF are reserved for interpreter
-const INSTRUCTIONS_START: usize = 0x200;
+pub const INSTRUCTIONS_START: usize = 0x200;
 
 #[derive(Clone)]
 pub struct Emulator {
@@ -24,8 +24,7 @@ pub struct Emulator {
     pub keypad: Keypad,
 
     // Memory
-    // 4096 bytes of memory
-    pub memory: Vec<u8>,
+    pub memory: Memory,
     pub rom_loaded: bool,
 
     // Program Counter
@@ -65,14 +64,8 @@ impl Default for Emulator {
 
 impl Emulator {
     pub fn new(config: Config) -> Self {
-        let mut memory = vec![0; config.memory_size];
-
-        // Initialize Fonts
-        let small_len = SMALL_FONT.len();
-        let large_len = LARGE_FONT.len();
-
-        memory[0..small_len].copy_from_slice(&SMALL_FONT);
-        memory[small_len..small_len + large_len].copy_from_slice(&LARGE_FONT);
+        let mut memory = Memory::default();
+        memory.load_fonts();
 
         Self {
             memory,
@@ -115,16 +108,15 @@ impl Emulator {
                         )));
                     }
 
-                    if data.len() > self.config.memory_size - INSTRUCTIONS_START {
+                    if data.len() > self.memory.size - INSTRUCTIONS_START {
                         return Err(anyhow!(
                             "File with size of {} bytes exceeds maximum data size of {} bytes.",
                             data.len(),
-                            self.config.memory_size - INSTRUCTIONS_START
+                            self.memory.size - INSTRUCTIONS_START
                         ));
                     }
 
-                    self.memory[INSTRUCTIONS_START..INSTRUCTIONS_START + data.len()]
-                        .copy_from_slice(&data);
+                    self.memory.load_rom(&data);
                     self.rom_loaded = true;
                 }
 
@@ -156,7 +148,7 @@ impl Emulator {
 
     pub fn execute_instruction(&mut self) -> Result<(), Event> {
         // Exit if no more instructions left
-        if self.pc >= self.config.memory_size {
+        if self.pc >= self.memory.size {
             self.beeper.stop();
             return Err(Event::Exit);
         }

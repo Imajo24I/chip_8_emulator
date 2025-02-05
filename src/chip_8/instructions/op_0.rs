@@ -60,7 +60,7 @@ pub fn op_0(emulator: &mut Emulator, opcode: u16) -> Result<()> {
                     // 00FD - Exit the program
 
                     // Emulator will automatically quit when reaching end of memory
-                    emulator.pc = emulator.config.memory_size;
+                    emulator.pc = emulator.memory.size;
                 }
 
                 0x000E => {

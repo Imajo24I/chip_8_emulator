@@ -106,11 +106,12 @@ impl Settings {
 
     fn draw_emulation_settings(&self, ui: &mut Ui) {
         let emulator = &mut *self.emulator.borrow_mut();
-        let config = &mut emulator.config;
 
         ui.collapsing("Emulation Settings", |ui| {
+            let memory = &mut emulator.memory;
+
             ui.add(
-                Slider::new(&mut config.instructions_per_frame, 0..=1000)
+                Slider::new(&mut emulator.config.instructions_per_frame, 0..=1000)
                     .clamping(SliderClamping::Never)
                     .text("Instructions per Frame"),
             )
@@ -118,21 +119,21 @@ impl Settings {
 
             ui.add_space(5f32);
 
-            let memory_size = config.memory_size;
+            let memory_size = memory.size;
 
             ComboBox::from_label("Memory Size")
-                .selected_text(config.memory_size.to_string())
+                .selected_text(memory.size.to_string())
                 .show_ui(ui, |ui| {
-                    ui.selectable_value(&mut config.memory_size, 4096, "4096 (Chip 8 & SuperChip)");
-                    ui.selectable_value(&mut config.memory_size, 65536, "65536 (XO-Chip)");
+                    ui.selectable_value(&mut memory.size, 4096, "4096 (Chip 8 & SuperChip)");
+                    ui.selectable_value(&mut memory.size, 65536, "65536 (XO-Chip)");
                 })
                 .response
                 .on_hover_text(
                     "Choose between 4096 (Chip 8 & SuperChip) and 65536 (XO-Chip) bytes of memory.",
                 );
 
-            if memory_size != config.memory_size {
-                emulator.memory.resize(config.memory_size, 0);
+            if memory_size != memory.size {
+                memory.resize(memory.size);
             }
         });
     }

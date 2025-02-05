@@ -20,7 +20,7 @@ pub fn op_5(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             // 5XY2 - Save registers VX - VY to memory starting at I
             let diff = vx.abs_diff(vy);
 
-            if emulator.i_reg + diff >= emulator.config.memory_size {
+            if emulator.i_reg + diff >= emulator.memory.size {
                 return memory_index_out_of_bounds_err(emulator.i_reg + diff, emulator, opcode);
             }
 
@@ -35,7 +35,7 @@ pub fn op_5(emulator: &mut Emulator, opcode: u16) -> Result<()> {
             // 5XY3 - Load registers VX - VY from memory starting at I
             let diff = vx.abs_diff(vy);
 
-            if emulator.i_reg + diff >= emulator.config.memory_size {
+            if emulator.i_reg + diff >= emulator.memory.size {
                 return memory_index_out_of_bounds_err(emulator.i_reg + diff, emulator, opcode);
             }
 
